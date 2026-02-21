@@ -1,0 +1,10 @@
+<h2>{{ group.name }}</h2>
+<p>{{ group.description }}</p>
+
+<a href="{% url 'groups:update_group' group_id=group.id %}">Edit</a>
+<a href="{% url 'groups:delete_group' group_id=group.id %}">Delete</a>
+
+{% if user.is_authenticated %}
+    <a href="{% url 'groups:join_group' group_id=group.id %}">Join</a>
+    <a href="{% url 'groups:leave_group' group_id=group.id %}">Leave</a>
+{% endif %}

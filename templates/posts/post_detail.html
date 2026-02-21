@@ -445,7 +445,7 @@
             <div class="header-left">
                 <img src="{{ post.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="post-avatar">
                 <div class="post-info">
-                    <h4><a href="#">{{ post.author.username }}</a></h4>
+                    <h4><a href="{% url 'accounts:profile' post.author.id %}">{{ post.author.username }}</a></h4>
                     <div class="post-time">
                         <span>{{ post.created_at|timesince }} trước</span> • 
                         {% if post.privacy == 'public' %}<i class="fas fa-globe-americas"></i>

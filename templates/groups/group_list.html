@@ -1,0 +1,40 @@
+<h2>Groups</h2>
+
+<a href="{% url 'groups:create_group' %}">Create Group</a>
+
+<ul>
+    {% for group in groups %}
+        <li>
+            <a href="{% url 'groups:group_detail' group.pk %}">
+                {{ group.name }}
+            </a>
+
+            {% if user.is_authenticated %}
+                    
+                    {# 🚫 Owner không thấy Join/Leave #}
+                    {% if group.owner != user %}
+
+                        {% if membership %}
+                            
+                            {% if membership.status == "approved" %}
+                                <a href="{% url 'groups:leave_group' group.pk %}">
+                                    Leave
+                                </a>
+                            {% elif membership.status == "pending" %}
+                                <span>Pending</span>
+                            {% endif %}
+
+                        {% else %}
+                            <a href="{% url 'groups:join_group' group.pk %}">
+                                Join
+                            </a>
+                        {% endif %}
+
+                    {% endif %}
+
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>No groups yet.</li>
+    {% endfor %}
+</ul>

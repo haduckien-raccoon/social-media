@@ -5,14 +5,14 @@
 
 {% block extra_css %}
 <style>
-    /* Tinh chỉnh lại .main-content cho phù hợp với trang Profile */
+    /* --- CẤU TRÚC CHUNG --- */
     .main-content {
         flex-direction: column; 
         align-items: center;
         padding-top: 30px;
     }
 
-    .container { width: 100%; max-width: 935px; }
+    .container { width: 100%; max-width: 935px; margin: 0 auto; }
 
     /* --- PROFILE HEADER --- */
     .profile-header {
@@ -37,25 +37,19 @@
 
     .header-info-col { flex: 1; display: flex; flex-direction: column; gap: 20px; }
 
-    /* Row 1: User & Buttons */
     .info-row-1 { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
     .username-text { font-size: 20px; font-weight: 400; cursor: pointer; }
     .username-text:hover { opacity: 0.7; }
 
-    .btn {
-        padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 14px;
-    }
-    .btn-grey { background: var(--btn-grey-bg); color: var(--text-main); }
-    .btn-grey:hover { background: var(--btn-grey-hover); }
-    
-    .btn-blue { background: var(--btn-blue-bg); color: #fff; }
-    .btn-blue:hover { background: var(--btn-blue-hover); }
+    .btn { padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; }
+    .btn-grey { background: #efefef; color: var(--text-main); }
+    .btn-grey:hover { background: #dbdbdb; }
+    .btn-blue { background: #0095f6; color: #fff; }
+    .btn-blue:hover { background: #1877f2; }
 
-    /* Row 2: Stats */
     .info-row-2 { display: flex; gap: 40px; font-size: 16px; }
     .stat strong { font-weight: 600; }
 
-    /* Row 3: Bio */
     .info-row-3 { font-size: 14px; line-height: 1.5; }
     .fullname { font-weight: 600; display: block; }
 
@@ -65,28 +59,74 @@
         border-top: 1px solid transparent;
     }
     .tab {
-        padding: 15px 0; color: var(--text-grey); font-size: 12px; font-weight: 600;
+        padding: 15px 0; color: #8e8e8e; font-size: 12px; font-weight: 600;
         letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 6px;
-        border-top: 1px solid transparent; margin-top: -1px;
+        border-top: 1px solid transparent; margin-top: -1px; text-transform: uppercase;
     }
     .tab.active { color: var(--text-main); border-top: 1px solid var(--text-main); }
 
-    /* --- GALLERY --- */
+    /* --- GALLERY GRID (CẬP NHẬT MỚI) --- */
     .gallery {
         display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding-bottom: 50px;
     }
-    .gallery-item {
+    
+    /* Chuyển gallery-item thành style thẻ a để không bị gạch chân text */
+    a.gallery-item {
+        display: block; /* Quan trọng để thẻ a hiển thị như khối div */
         position: relative; aspect-ratio: 1/1; background: #efefef; cursor: pointer;
+        overflow: hidden; 
+        text-decoration: none; /* Bỏ gạch chân mặc định của thẻ a */
+        color: inherit; /* Giữ màu chữ gốc */
     }
-    .gallery-item img {
+
+    /* 1. Style cho Bài có Ảnh */
+    .gallery-item img.post-image {
         width: 100%; height: 100%; object-fit: cover;
     }
+
+    /* 2. Style cho Bài Status (Text Only) */
+    .text-post-wrapper {
+        width: 100%; height: 100%;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+        padding: 15px; text-align: center; color: #333;
+    }
+    .text-post-content {
+        font-size: 14px; font-weight: 500; line-height: 1.4;
+        display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;
+        overflow: hidden; text-overflow: ellipsis;
+    }
+    .text-icon-bg { font-size: 24px; margin-bottom: 8px; color: #ccc; }
+
+    /* 3. Style cho Bài Share */
+    .shared-post-wrapper {
+        width: 100%; height: 100%; background: #fff;
+        display: flex; flex-direction: column; border: 1px solid #efefef;
+    }
+    .shared-header {
+        padding: 8px; background: #fafafa; border-bottom: 1px solid #eee;
+        font-size: 11px; color: #666; display: flex; align-items: center; gap: 5px; font-weight: 600;
+    }
+    .shared-body {
+        flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #f8f8f8;
+    }
+    .shared-body img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+    .shared-text-preview { padding: 10px; font-size: 12px; color: #555; text-align: center; }
+
+    /* OVERLAY & ICONS */
     .overlay {
         position: absolute; inset: 0; background: rgba(0,0,0,0.3);
         display: flex; justify-content: center; align-items: center; gap: 20px;
         color: #fff; opacity: 0; transition: 0.2s; font-weight: bold; font-size: 16px;
+        z-index: 10;
     }
     .gallery-item:hover .overlay { opacity: 1; }
+
+    /* Icon góc phải trên */
+    .type-indicator {
+        position: absolute; top: 8px; right: 8px; color: #fff; font-size: 16px;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.6); z-index: 5; pointer-events: none;
+    }
 
     /* --- MODAL --- */
     .modal {
@@ -106,17 +146,18 @@
     }
     .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
     .data-row { display: flex; justify-content: space-between; font-size: 14px; }
-    .data-label { color: var(--text-grey); }
+    .data-label { color: #8e8e8e; }
 
     @keyframes zoomIn { from{transform:scale(1.05);opacity:0;} to{transform:scale(1);opacity:1;} }
 
-    /* Responsive overrides */
+    /* Responsive */
     @media (max-width: 768px) {
         .profile-header { flex-direction: column; align-items: center; text-align: center; gap: 20px; }
         .header-img-col { margin-right: 0; flex: 0 0 auto; }
         .info-row-1 { justify-content: center; }
         .info-row-2 { justify-content: center; gap: 20px; }
         .container { padding: 0 10px; }
+        .modal-content { width: 90%; }
     }
 </style>
 {% endblock %}
@@ -152,7 +193,7 @@
 
                 <div class="info-row-2">
                     <div class="stat"><strong>{{ posts_count|default:"0" }}</strong> posts</div>
-                    <div class="stat"><strong>{{ count_friends|default:"0" }}</strong> Friends </div>
+                    <div class="stat"><strong>{{ count_friends|default:"0" }}</strong> friends </div>
                     <div class="stat"><strong>{{ following_count|default:"0" }}</strong> following</div>
                 </div>
 
@@ -176,17 +217,52 @@
 
         <div class="gallery">
             {% for post in posts %}
-                <div class="gallery-item">
-                    <img src="{{ post.image.url }}" alt="Post">
+                <a href="{% url 'posts:post_detail' post.id %}" class="gallery-item">
+                    
+                    {# --- TRƯỜNG HỢP 1: BÀI SHARE (SHARED POST) --- #}
+                    {% comment %} {% if post.shared_post %}
+                        <div class="type-indicator"><i class="fa-solid fa-retweet"></i></div>
+                        
+                        <div class="shared-post-wrapper">
+                            <div class="shared-header">
+                                <i class="fa-solid fa-share" style="margin-right:4px;"></i> 
+                                {{ post.shared_post.user.username }}
+                            </div>
+                            <div class="shared-body">
+                                {% if post.shared_post.image %}
+                                    <img src="{{ post.shared_post.image.url }}" alt="Shared Content">
+                                {% else %}
+                                    <div class="shared-text-preview">
+                                        "{{ post.shared_post.content|truncatewords:8 }}"
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div> {% endcomment %}
+
+                    {# --- TRƯỜNG HỢP 2: BÀI CÓ ẢNH (IMAGE POST) --- #}
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="Post Image" class="post-image">
+
+                    {# --- TRƯỜNG HỢP 3: BÀI STATUS (TEXT ONLY) --- #}
+                    {% else %}
+                        <div class="text-post-wrapper">
+                            <i class="fa-solid fa-quote-left text-icon-bg"></i>
+                            <div class="text-post-content">
+                                {{ post.content|default:""|truncatechars:100 }}
+                            </div>
+                        </div>
+                    {% endif %}
+
                     <div class="overlay">
                         <span><i class="fa-solid fa-heart"></i> {{ post.likes_count }}</span>
                         <span><i class="fa-solid fa-comment"></i> {{ post.comments_count }}</span>
                     </div>
-                </div>
+                </a>
+
             {% empty %}
-                <div class="gallery-item"><img src="https://picsum.photos/400?1" alt="demo"></div>
-                <div class="gallery-item"><img src="https://picsum.photos/400?2" alt="demo"></div>
-                <div class="gallery-item"><img src="https://picsum.photos/400?3" alt="demo"></div>
+                <div class="gallery-item" style="display:flex; justify-content:center; align-items:center; background:#eee; color:#999;">
+                    <span>No posts yet</span>
+                </div>
             {% endfor %}
         </div>
     </div>
@@ -241,30 +317,14 @@
     const trigger = document.getElementById("usernameTrigger");
     const closeBtn = document.querySelector(".close-modal");
 
-    // 1. Mở modal khi click vào Username
     if (trigger) {
-        trigger.onclick = function() {
-            modal.style.display = "block";
-        }
+        trigger.onclick = function() { modal.style.display = "block"; }
     }
-
-    // 2. Đóng modal khi click dấu X
     if (closeBtn) {
-        closeBtn.onclick = function() {
-            modal.style.display = "none";
-        }
+        closeBtn.onclick = function() { modal.style.display = "none"; }
     }
-
-    // 3. Đóng modal khi click ra vùng đen bên ngoài
     window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-    // Function create post (nếu cần dùng)
-    function create() {
-        window.location.href = "/posts/create/";
+        if (event.target == modal) { modal.style.display = "none"; }
     }
 </script>
 {% endblock %}

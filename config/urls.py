@@ -34,6 +34,7 @@ urlpatterns = [
     path('friends/', include('apps.friends.urls')),
     path("posts/", include("apps.posts.urls")),
     path("search/", include("apps.search.urls")),
+    path("groups/", include("apps.groups.urls")),
 ] + [
     re_path(r"^images/(?P<path>.*)$", serve, {"document_root": settings.IMAGES_ROOT}),
     re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),

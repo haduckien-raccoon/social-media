@@ -10,6 +10,7 @@ from django.contrib import messages
 from .models import User, PasswordResetToken, EmailVerificationToken, UserProfile
 from .services import *
 from apps.accounts.services import *
+from apps.posts.services import *
 
 @csrf_exempt
 def register_view(request):
@@ -177,15 +178,23 @@ def profile_view(request, id=None, username=None):
         #lấy tất cả bạn bè của user hoặc chính mình
         if user == current_user:
             friends = get_friends_list(current_user)
+            posts = get_my_posts(current_user)
         else:
             friends = get_friends_list(user)
+            friends_ids = [friend.id for friend in friends]
+            posts = get_user_posts(current_user, user, friends_ids)
+
+        # for post in posts:
+            # print(f"[DEBUG] Post ID: {post.id}, Content: {post.content}, Image: {post.image}, Shared Post: {post.shared_post}")
+
+        # print(f"[DEBUG] Number of posts retrieved: {len(posts)}")
 
         count_friends = len(friends)
         profile = get_object_or_404(UserProfile, user=user)
         #in toàn bộ profile để debug
         if profile.bio is None:
             profile.bio = ""
-        print(f"[DEBUG] Viewing profile: {profile.user.username}, Bio: {profile.bio}")
+        # print(f"[DEBUG] Viewing profile: {profile.user.username}, Bio: {profile.bio}")
 
         # Truyền current_user để template so sánh với user đang xem
         return render(request, "accounts/profile.html", {
@@ -193,7 +202,8 @@ def profile_view(request, id=None, username=None):
             "profile": profile,
             "current_user": current_user,  # user đăng nhập
             "friends": friends,
-            "count_friends": count_friends
+            "count_friends": count_friends,
+            "posts": posts
         })
 
     except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
@@ -256,7 +266,7 @@ def edit_profile_view(request):
             avatar=avatar
         )
 
-        return redirect("edit_profile")
+        return redirect("/accounts/profile/")  # chuyển về trang profile sau khi cập nhật
 
     except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
         return redirect("login")

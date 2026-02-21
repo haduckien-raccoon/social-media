@@ -548,3 +548,34 @@ def get_tagged_users(post):
 def get_comment_count(post):
     """Lấy số lượng bình luận của bài viết"""
     return Comment.objects.filter(post=post, is_deleted=False).count()
+
+def get_my_posts(user):
+    """Lấy tất cả bài viết của user"""
+    posts =  Post.objects.filter(author=user, is_deleted=False).order_by('-created_at')
+    #nếu là post là bài share thì lấy ảnh của bài gốc
+    for post in posts:
+        if hasattr(post, "shared_post") and post.shared_post.exists():
+            original_post = post.shared_post.first().original_post
+            post.image = original_post.images.first().image if original_post.images.exists() else None
+        else:
+            post.image = post.images.first().image if post.images.exists() else None
+    return posts
+
+def get_user_posts(viewer, profile_user, friends_ids):
+    """Lấy bài viết của một user khác dựa trên quyền riêng tư"""
+    posts = Post.objects.filter(
+        author=profile_user,
+        is_deleted=False
+    ).filter(
+        Q(privacy="public") |
+        Q(privacy="friends", author__id__in=friends_ids) |
+        Q(privacy="only_me", author=viewer)
+    ).select_related('author').prefetch_related('images', 'reactions').order_by('-created_at')
+    #nếu là post là bài share thì lấy ảnh của bài gốc
+    for post in posts:
+        if hasattr(post, "shared_post") and post.shared_post.exists():
+            original_post = post.shared_post.first().original_post
+            post.image = original_post.images.first().image if original_post.images.exists() else None
+        else:
+            post.image = post.images.first().image if post.images.exists() else None
+    return posts
