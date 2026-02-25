@@ -1,6 +1,138 @@
-<h2>Group Form</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-</form>
+{% extends 'base.html' %}
+
+{% block title %}Create Group • SUDO{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Card chứa form */
+    .group-create-card {
+        background: var(--bg-white);
+        max-width: 500px;
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        padding: 30px;
+        margin: 40px auto;
+    }
+
+    .group-create-card h2 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-align: center;
+        color: var(--text-main);
+    }
+
+    /* Nhãn thông báo Private */
+    .privacy-badge {
+        text-align: center;
+        color: var(--text-grey);
+        font-size: 14px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        background: var(--bg-body);
+        padding: 8px;
+        border-radius: 8px;
+    }
+
+    /* Style cho các ô input */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 15px;
+        background: #fafafa;
+        outline: none;
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .form-control:focus {
+        border-color: var(--text-grey);
+        background: var(--bg-white);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+    }
+
+    /* Nút tạo nhóm */
+    .submit-btn {
+        width: 100%;
+        padding: 12px;
+        background: var(--btn-blue-bg);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+        background: var(--btn-blue-hover);
+    }
+
+    .error-msg {
+        color: #ed4956;
+        font-size: 13px;
+        margin-top: 6px;
+        display: block;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="group-create-card">
+    <h2>Create a New Group</h2>
+    <div class="privacy-badge">
+        <i class="fa-solid fa-lock" style="color: #ed4956;"></i> 
+        <span>All groups are created as <strong>Private</strong>.</span>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.name.id_for_label }}">Group Name</label>
+            <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" 
+                   class="form-control" placeholder="Enter your group name" 
+                   value="{{ form.name.value|default:'' }}" required>
+            {% if form.name.errors %}
+                <span class="error-msg">{{ form.name.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">Short Description</label>
+            <textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" 
+                      class="form-control" placeholder="What is this group for?">{{ form.description.value|default:'' }}</textarea>
+            {% if form.description.errors %}
+                <span class="error-msg">{{ form.description.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="submit-btn">Create Group</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Quản lý nhóm {{ group.name }} • SUDO{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --bg-body: #f0f2f5;
+        --bg-card: #ffffff;
+        --text-main: #050505;
+        --text-sub: #65676b;
+        --primary: #1877f2;
+        --border: #ced0d4;
+    }
+    
+    .manage-container {
+        display: flex;
+        max-width: 1000px;
+        margin: 20px auto;
+        gap: 20px;
+        min-height: 70vh;
+    }
+
+    /* LEFT SIDEBAR */
+    .manage-sidebar {
+        width: 280px;
+        background: var(--bg-card);
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        padding: 10px;
+        align-self: flex-start;
+    }
+
+    .manage-sidebar h3 {
+        font-size: 20px;
+        font-weight: 700;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-main);
+        transition: 0.2s;
+    }
+
+    .menu-item:hover { background: #f2f2f2; }
+    .menu-item.active { background: #e7f3ff; color: var(--primary); }
+    .menu-item.active i { color: var(--primary); }
+    
+    .badge-count {
+        margin-left: auto;
+        background: #e4e6eb;
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+    .menu-item.active .badge-count { background: var(--primary); color: #fff; }
+
+    /* RIGHT CONTENT */
+    .manage-content {
+        flex: 1;
+        background: var(--bg-card);
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
+
+    .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+    .tab-pane.active { display: block; }
+    
+    .tab-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+
+    /* Forms & Lists */
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; }
+    .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; outline: none; }
+    .form-control:focus { border-color: var(--primary); }
+    
+    .btn-save { background: #368af7; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .btn-save:hover { background: #166fe5; }
+
+    .user-list-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f2f5; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-info img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+    .user-name { font-weight: 600; font-size: 15px; }
+    
+    .action-btns { display: flex; gap: 8px; }
+    .btn-sm { padding: 6px 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; }
+    .btn-approve { background: #4caf50; color: #fff; }
+    .btn-reject { background: #d60000; color: #fff; }
+    .btn-danger-sm { background: #fbe9e9; color: #dc3545; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="manage-container">
+    <div class="manage-sidebar">
+        <h3>Group Manage {{ group.name }}</h3>
+        <div class="menu-item active" onclick="switchTab('settings')">
+            <i class="fa-solid fa-gear"></i> Cài đặt nhóm
+        </div>
+        <div class="menu-item" onclick="switchTab('requests')">
+            <i class="fa-solid fa-user-plus"></i> Join requests
+            {% if pending_count > 0 %}<span class="badge-count">{{ pending_count }}</span>{% endif %}
+        </div>
+        <div class="menu-item" onclick="switchTab('members')">
+            <i class="fa-solid fa-users"></i> Members
+            {% if members_count > 0 %}<span class="badge-count">{{ members_count }}</span>{% endif %}
+        </div>
+        <div class="menu-item" onclick="switchTab('reports')">
+            <i class="fa-solid fa-flag"></i> Reported posts
+            {% if reports_count > 0 %}<span class="badge-count">{{ reports_count }}</span>{% endif %}
+        </div>
+        
+        <a href="{% url 'groups:group_detail' group.id %}" style="text-decoration: none; margin-top: 20px; display: block;">
+            <div class="menu-item" style="color: var(--text-sub);">
+                <i class="fa-solid fa-arrow-left"></i> Back to group
+            </div>
+        </a>
+    </div>
+
+    <div class="manage-content">
+        
+        <div id="tab-settings" class="tab-pane active">
+            <div class="tab-title">Group Settings</div>
+            <form action="{% url 'groups:update_group' group.id %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Group Name</label>
+                    <input type="text" name="name" class="form-control" value="{{ group.name }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" class="form-control" rows="4">{{ group.description }}</textarea>
+                </div>
+                <button type="submit" class="btn-save">Save Changes</button>
+            </form>
+        </div>
+
+        <div id="tab-requests" class="tab-pane">
+            <div class="tab-title">Join requests</div>
+            {% for req in pending_requests %}
+                <div class="user-list-item">
+                    <div class="user-info">
+                        <img src="{{ req.user.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}">
+                        <div class="user-name">{{ req.user.username }}</div>
+                    </div>
+                    <div class="action-btns">
+                        <form action="#" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ req.user.id }}">
+                            <button type="submit" name="action" value="approve" class="btn-sm btn-approve">Approve</button>
+                        </form>
+                        <form action="#" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ req.user.id }}">
+                            <button type="submit" name="action" value="reject" class="btn-sm btn-reject">Reject</button>
+                        </form>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="color: var(--text-sub); text-align: center; padding: 20px;">No pending join requests.</div>
+            {% endfor %}
+        </div>
+
+        <div id="tab-members" class="tab-pane">
+            <div class="tab-title">Members List</div>
+            {% for member in members %}
+                <div class="user-list-item">
+                    <div class="user-info">
+                        <img src="{{ member.user.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}">
+                        <div>
+                            <div class="user-name">{{ member.user.username }}</div>
+                            <div style="font-size: 12px; color: var(--text-sub);">
+                                {% if member.role == 'owner' %}Group Owner
+                                {% elif member.role == 'admin' %}Administrator
+                                {% else %}Member{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-btns">
+                        {# Tránh việc Admin ban Owner hoặc ban chính mình #}
+                        {% if user_role == 'owner' and member.role != 'owner' %}
+                            <button class="btn-sm btn-danger-sm">Ban khỏi nhóm</button>
+                        {% elif user_role == 'admin' and member.role == 'member' %}
+                            <button class="btn-sm btn-danger-sm">Ban khỏi nhóm</button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div id="tab-reports" class="tab-pane">
+            <div class="tab-title">Reported Posts</div>
+            {% for report in reported_posts %}
+                <div class="user-list-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                    <div style="width: 100%; display: flex; justify-content: space-between;">
+                        <div class="user-info">
+                            <img src="{{ report.post.author.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}">
+                            <div class="user-name">{{ report.post.author.username }}</div>
+                        </div>
+                        <div class="action-btns">
+                            <button class="btn-sm btn-reject">Ignore Report</button>
+                            <button class="btn-sm btn-danger-sm">Delete Post</button>
+                        </div>
+                    </div>
+                    <div style="background: #f7f8fa; padding: 10px; border-radius: 6px; width: 100%; font-size: 14px;">
+                        <strong>Content:</strong> {{ report.post.content|truncatechars:100 }}<br>
+                        <strong style="color: #dc3545;">Report reason:</strong> {{ report.reason }}
+                    </div>
+                </div>
+            {% empty %}
+                <div style="color: #0033ff; text-align: center; padding: 20px;">No reported posts.</div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function switchTab(tabId) {
+        // Ẩn tất cả tab nội dung
+        document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
+        // Bỏ active tất cả menu item
+        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+
+        // Hiển thị tab được chọn
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+        // Đánh dấu menu item tương ứng bằng cách tìm event.currentTarget (nếu click trực tiếp)
+        event.currentTarget.classList.add('active');
+    }
+</script>
+{% endblock %}

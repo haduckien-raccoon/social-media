@@ -16,4 +16,6 @@ urlpatterns = [
     path("<int:group_id>/approve/<int:member_id>/", views.approve_member, name="approve_member"),
     path("<int:group_id>/reject/<int:member_id>/", views.reject_member, name="reject_member"),
     path("<int:group_id>/ban/<int:member_id>/", views.ban_member, name="ban_member"),
+    path('<int:group_id>/manage/', views.manage_group, name='manage_group'),
+    path('<int:group_id>/manage/', views.manage_group, name='manage_group'),
 ]

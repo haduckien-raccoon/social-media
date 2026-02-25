@@ -1,0 +1,114 @@
+{% for post in posts %}
+<div class="post-card" id="post-{{ post.id }}">
+    <div class="post-header">
+        <div class="header-left">
+            <a href="{% url 'accounts:profile' post.author.username %}">
+                <img src="{{ post.author.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}" class="p-avatar">
+            </a>
+            <div class="p-info">
+                <h5>
+                    <a href="{% url 'accounts:profile' post.author.username %}">{{ post.author.username }}</a>
+                </h5>
+                <div class="p-time">
+                    {{ post.created_at|timesince }} trước • 
+                    {% if post.is_pinned %}<i class="fa-solid fa-thumbtack text-danger"></i> Đã ghim • {% endif %}
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+        </div>
+        
+        {% if user.is_authenticated and user_role != 'none' and user_role != 'pending' %}
+        <div class="post-options-menu">
+            <button class="btn-options" onclick="toggleDropdown('post-options-{{ post.id }}', event)">
+                <i class="fas fa-ellipsis"></i>
+            </button>
+            <div id="post-options-{{ post.id }}" class="options-dropdown">
+                
+                {# GHIM BÀI VIẾT (Chỉ Owner/Admin) #}
+                {% if user_role == 'owner' or user_role == 'admin' %}
+                    <form action="#" method="POST"> {% csrf_token %}
+                        <button type="submit" class="dropdown-item">
+                            <i class="fa-solid fa-thumbtack"></i> {% if post.is_pinned %}Bỏ ghim bài viết{% else %}Ghim bài viết{% endif %}
+                        </button>
+                    </form>
+                {% endif %}
+
+                {# XÓA BÀI VIẾT (Owner, Admin, Hoặc tác giả bài viết) #}
+                {% if user_role == 'owner' or user_role == 'admin' or request.user == post.author %}
+                    <form action="{% url 'posts:delete_post' post.id %}" method="POST" onsubmit="return confirm('Xóa bài viết này?');"> 
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item danger">
+                            <i class="fa-solid fa-trash"></i> Xóa bài viết
+                        </button>
+                    </form>
+                {% endif %}
+
+                {# BÁO CÁO (Chỉ Member thường thấy nút này, không tính tác giả) #}
+                {% if request.user != post.author %}
+                    <button onclick="alert('Đã mở form báo cáo!')" class="dropdown-item">
+                        <i class="fa-solid fa-flag"></i> Báo cáo bài viết
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="post-content">{{ post.content|linebreaksbr }}</div>
+
+    {% if post.images.all %}
+        {% with total=post.images.count %}
+        <a href="{% url 'posts:post_detail' post.id %}" style="display:block">
+            <div class="img-grid grid-{% if total > 4 %}4{% else %}{{ total }}{% endif %}">
+                {% for img in post.images.all|slice:":4" %}
+                <div class="grid-item">
+                    <img src="{{ img.image.url }}">
+                    {% if forloop.last and total > 4 %}<div class="more-overlay">+{{ total|add:"-3" }}</div>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </a>
+        {% endwith %}
+    {% endif %}
+
+    <div class="p-stats">
+        <div id="count-{{ post.id }}">
+            {% if post.reaction_count > 0 %}
+            <i class="fas fa-thumbs-up text-primary"></i> {{ post.reaction_count }}
+            {% endif %}
+        </div>
+        <div>{{ post.comment_count }} bình luận</div>
+    </div>
+
+    {% if user_role == 'owner' or user_role == 'admin' or user_role == 'member' %}
+    <div class="p-actions">
+        <div class="reaction-wrapper">
+            <div class="reaction-popup">
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'like')">👍</span>
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'love')">❤️</span>
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'haha')">😆</span>
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'wow')">😮</span>
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'sad')">😢</span>
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'angry')">😡</span>
+            </div>
+            <div class="action-btn {% if post.current_user_reaction %}active-{{ post.current_user_reaction }}{% endif %}" 
+                 id="btn-react-{{ post.id }}" 
+                 onclick="submitReact({{ post.id }}, 'like')" style="width: 100%;">
+                {% if post.current_user_reaction == 'like' %} <i class="fas fa-thumbs-up"></i> Thích
+                {% elif post.current_user_reaction == 'love' %} <i class="fas fa-heart"></i> Yêu thích
+                {% elif post.current_user_reaction == 'haha' %} <i class="fas fa-laugh-squint"></i> Haha
+                {% elif post.current_user_reaction == 'sad' %} <i class="fas fa-sad-tear"></i> Buồn
+                {% elif post.current_user_reaction == 'wow' %} <i class="fas fa-surprise"></i> Wow
+                {% elif post.current_user_reaction == 'angry' %} <i class="fas fa-angry"></i> Phẫn nộ
+                {% else %} <i class="far fa-thumbs-up"></i> Thích
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="action-btn" onclick="window.location.href='{% url 'posts:post_detail' post.id %}'">
+            <i class="far fa-comment-alt me-2"></i> Bình luận
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}

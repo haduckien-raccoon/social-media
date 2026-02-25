@@ -1,10 +1,328 @@
-<h2>{{ group.name }}</h2>
-<p>{{ group.description }}</p>
+{% extends 'base.html' %}
+{% load static %}
 
-<a href="{% url 'groups:update_group' group_id=group.id %}">Edit</a>
-<a href="{% url 'groups:delete_group' group_id=group.id %}">Delete</a>
+{% block title %}{{ group.name }} • SUDO{% endblock %}
 
-{% if user.is_authenticated %}
-    <a href="{% url 'groups:join_group' group_id=group.id %}">Join</a>
-    <a href="{% url 'groups:leave_group' group_id=group.id %}">Leave</a>
-{% endif %}
+{% block extra_css %}
+<style>
+    /* =========================================
+       GLOBAL & LAYOUT
+       ========================================= */
+    :root {
+        --bg-body: #f0f2f5;
+        --bg-card: #ffffff;
+        --text-main: #050505;
+        --text-sub: #65676b;
+        --primary: #1877f2;
+        --hover-bg: #f2f2f2;
+        --radius: 8px;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    body { background-color: var(--bg-body); color: var(--text-main); }
+    .group-container { max-width: 900px; margin: 0 auto; padding-top: 20px; padding-bottom: 50px; }
+
+    /* =========================================
+       GROUP HEADER
+       ========================================= */
+    .group-header-card {
+        background: var(--bg-card); border-radius: var(--radius);
+        box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px;
+    }
+    .group-cover { height: 250px; background: linear-gradient(135deg, #1877f2, #28a745); position: relative; }
+    .group-info-section { padding: 24px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px; }
+    .group-titles h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+    .group-titles p { color: var(--text-sub); font-size: 15px; margin: 0; max-width: 600px; }
+    .group-privacy-badge {
+        display: inline-flex; align-items: center; gap: 6px; background: #e4e6eb;
+        padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600;
+        color: var(--text-main); margin-bottom: 12px;
+    }
+
+    .group-actions { display: flex; gap: 10px; }
+    .btn-action {
+        padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 15px;
+        cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+        text-decoration: none; transition: 0.2s; border: none;
+    }
+    .btn-primary { background: #1877f2; color: #fff; }
+    .btn-primary:hover { background: #166fe5; color: #fff; }
+    .btn-gray { background: #e4e6eb; color: var(--text-main); }
+    .btn-gray:hover { background: #d8dadf; color: var(--text-main); }
+    .btn-danger { background: #fbe9e9; color: #dc3545; }
+    .btn-danger:hover { background: #f8d7da; color: #dc3545; }
+    .btn-action:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* =========================================
+       FEED & CREATE POST
+       ========================================= */
+    .feed-center { max-width: 680px; margin: 0 auto; }
+    .create-post { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px 16px; margin-bottom: 20px; }
+    .cp-top { display: flex; align-items: center; border-bottom: 1px solid #f0f2f5; padding-bottom: 12px; margin-bottom: 12px; }
+    .cp-input { flex: 1; background: #f0f2f5; border-radius: 20px; padding: 10px 15px; color: #65676b; cursor: pointer; margin-left: 10px; transition: 0.2s; }
+    .cp-input:hover { background: #e4e6eb; }
+    .cp-actions { display: flex; }
+    .cp-btn { flex: 1; display: flex; justify-content: center; align-items: center; padding: 8px; border-radius: var(--radius); cursor: pointer; color: #65676b; font-weight: 600; transition: 0.2s; }
+    .cp-btn:hover { background: #f2f2f2; }
+
+    /* =========================================
+       POST STYLES
+       ========================================= */
+    .post-card { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px; overflow: visible; position: relative; }
+    .post-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .header-left { display: flex; align-items: center; }
+    .p-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; object-fit: cover; border: 1px solid #eee; }
+    .p-info h5 { margin: 0; font-size: 15px; font-weight: 600; }
+    .p-info h5 a { text-decoration: none; color: inherit; }
+    .p-time { font-size: 13px; color: var(--text-sub); }
+    .post-content { padding: 4px 16px 16px; font-size: 15px; line-height: 1.5; }
+
+    .btn-options { width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent; color: var(--text-sub); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    .btn-options:hover { background-color: var(--hover-bg); color: var(--text-main); }
+    .post-options-menu { position: relative; }
+    .options-dropdown {
+        position: absolute; top: 110%; right: 0; background: #fff; border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 200px; padding: 8px; z-index: 100;
+        display: none; flex-direction: column; gap: 4px; border: 1px solid #eee;
+    }
+    .options-dropdown.show { display: flex; }
+    .dropdown-item {
+        display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px;
+        border: none; background: transparent; border-radius: 6px; cursor: pointer;
+        font-size: 14px; font-weight: 500; color: var(--text-main); text-align: left;
+    }
+    .dropdown-item:hover { background-color: var(--hover-bg); }
+    .dropdown-item.danger { color: #dc3545; }
+
+    .img-grid { display: grid; gap: 1px; overflow: hidden; cursor: pointer; background: #fff; }
+    .grid-1 { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr 1fr; height: 300px; }
+    .grid-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; height: 360px; }
+    .grid-3 .grid-item:first-child { grid-row: span 2; }
+    .grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; height: 360px; }
+    .grid-item { position: relative; width: 100%; height: 100%; }
+    .grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .more-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); color: #fff; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center; }
+
+    .p-stats { padding: 10px 16px; border-bottom: 1px solid #ced0d4; display: flex; justify-content: space-between; font-size: 14px; color: var(--text-sub); }
+    .p-actions { display: flex; padding: 4px; border-top: 1px solid transparent; position: relative; }
+    .action-btn { flex: 1; display: flex; justify-content: center; align-items: center; height: 36px; border-radius: 4px; cursor: pointer; color: var(--text-sub); font-weight: 600; font-size: 14px; background: transparent; transition: 0.2s; gap: 6px;}
+    .action-btn:hover { background-color: var(--hover-bg); }
+
+    .reaction-wrapper { flex: 1; position: relative; display: flex; }
+    .reaction-wrapper::after { content: ''; position: absolute; bottom: 100%; left: 0; width: 100%; height: 15px; display: none; }
+    .reaction-wrapper:hover::after { display: block; }
+    .reaction-popup {
+        position: absolute; bottom: 100%; left: 0; margin-bottom: 5px;
+        background: #fff; border-radius: 50px; padding: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: none; gap: 8px; z-index: 1000;
+        animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .reaction-wrapper:hover .reaction-popup { display: flex; }
+    .emoji-btn { font-size: 24px; cursor: pointer; transition: transform 0.2s; line-height: 1; }
+    .emoji-btn:hover { transform: scale(1.4); }
+
+    .active-like { color: var(--primary) !important; }
+    .active-love { color: #f33e58 !important; }
+    .active-haha, .active-wow, .active-sad { color: #f7b125 !important; }
+    .active-angry { color: #e9710f !important; }
+
+    @keyframes popUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .loading-spinner-box { text-align: center; padding: 20px; display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="group-container">
+    
+    <div class="group-header-card">
+        <div class="group-cover"></div>
+        <div class="group-info-section">
+            <div class="group-titles">
+                <div class="group-privacy-badge">
+                    <i class="fa-solid fa-lock"></i> {% if group.is_private %}Nhóm riêng tư{% else %}Nhóm công khai{% endif %}
+                </div>
+                <h2>{{ group.name }}</h2>
+                <p>{{ group.description }}</p>
+            </div>
+
+            <div class="group-actions">
+                {% comment %} {% if user.is_authenticated %} {% endcomment %}
+                    {% if user_role == 'owner' or user_role == 'admin' %}
+                        <a href="{% url 'groups:manage_group' group_id=group.id %}" class="btn-action btn-gray">
+                            <i class="fa-solid fa-gear"></i> Quản lý nhóm
+                        </a>
+                    {% endif %}
+
+                    {% if user_role == 'owner' %}
+                        <form action="{% url 'groups:delete_group' group_id=group.id %}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa nhóm này vĩnh viễn?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action btn-danger">
+                                <i class="fa-solid fa-trash"></i> Xóa nhóm
+                            </button>
+                        </form>
+                    {% elif user_role == 'admin' or user_role == 'member' %}
+                        <a href="{% url 'groups:leave_group' group_id=group.id %}" class="btn-action btn-gray" onclick="return confirm('Bạn có chắc muốn rời nhóm này?');">
+                            <i class="fa-solid fa-right-from-bracket"></i> Rời nhóm
+                        </a>
+                    {% elif user_role == 'pending' %}
+                        <button class="btn-action btn-gray" disabled>
+                            <i class="fa-solid fa-clock"></i> Đang chờ duyệt
+                        </button>
+                    {% else %}
+                        <a href="{% url 'groups:join_group' group_id=group.id %}" class="btn-action btn-primary">
+                            <i class="fa-solid fa-user-plus"></i> Tham gia nhóm
+                        </a>
+                    {% endif %}
+                {% comment %} {% endif %} {% endcomment %}
+            </div>
+        </div>
+    </div>
+
+    <div class="feed-center">
+        
+        {% if user_role == 'owner' or user_role == 'admin' or user_role == 'member' %}
+        <div class="create-post">
+            <div class="cp-top">
+                <img src="{{ request.user.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}" style="width:40px; height:40px; border-radius:50%">
+                <div class="cp-input" onclick="window.location.href='#'">
+                    Bạn muốn chia sẻ điều gì với nhóm?
+                </div>
+            </div>
+            <div class="cp-actions">
+                <div class="cp-btn" onclick="window.location.href='#'"><i class="fas fa-images text-success me-2"></i> Ảnh/Video</div>
+                <div class="cp-btn" onclick="window.location.href='#'"><i class="fas fa-paperclip text-danger me-2"></i> Tài liệu</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div id="post-feed-container">
+            {% if posts %}
+                {% include 'groups/partials/post_list.html' %}
+            {% endif %}
+        </div>
+        
+        <div id="loading-spinner" class="loading-spinner-box">
+            <i class="fa-solid fa-spinner fa-spin fa-2x text-muted"></i>
+        </div>
+
+        {% if not posts %}
+            <div class="text-center p-5 text-muted" style="background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-color);">
+                {% if user_role == 'none' or user_role == 'pending' %}
+                    Nhóm này là riêng tư. Hãy tham gia nhóm để xem các bài viết!
+                {% else %}
+                    Chưa có bài viết nào trong nhóm này. Hãy là người đầu tiên bắt đầu cuộc trò chuyện!
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ----------------------------------
+    // LAZY LOADING (INFINITE SCROLL)
+    // ----------------------------------
+    let currentPage = 1;
+    let hasNext = {{ has_next|yesno:"true,false" }};
+    let isLoading = false;
+
+    window.addEventListener('scroll', () => {
+        if (isLoading || !hasNext) return;
+        
+        const scrolledToBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 800);
+        if (scrolledToBottom) {
+            loadMorePosts();
+        }
+    });
+
+    function loadMorePosts() {
+        isLoading = true;
+        document.getElementById('loading-spinner').style.display = 'block';
+        currentPage++;
+        
+        fetch(`?page=${currentPage}&ajax=1`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const feedContainer = document.getElementById('post-feed-container');
+            feedContainer.insertAdjacentHTML('beforeend', data.html);
+            
+            hasNext = data.has_next;
+            isLoading = false;
+            document.getElementById('loading-spinner').style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Lỗi tải bài viết:', error);
+            isLoading = false;
+            document.getElementById('loading-spinner').style.display = 'none';
+        });
+    }
+
+    // ----------------------------------
+    // POST ACTIONS & UI
+    // ----------------------------------
+    function toggleDropdown(id, event) {
+        event.stopPropagation();
+        const dropdown = document.getElementById(id);
+        document.querySelectorAll('.options-dropdown').forEach(d => {
+            if (d.id !== id) d.classList.remove('show');
+        });
+        dropdown.classList.toggle('show');
+    }
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.options-dropdown').forEach(d => d.classList.remove('show'));
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function submitReact(postId, type) {
+        const csrftoken = getCookie('csrftoken');
+
+        fetch(`/posts/${postId}/reaction/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `reaction=${type}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            const btn = document.getElementById(`btn-react-${postId}`);
+            const countDiv = document.getElementById(`count-${postId}`);
+            
+            btn.className = 'action-btn'; 
+
+            if (data.status === 'removed') {
+                btn.innerHTML = `<i class="far fa-thumbs-up"></i> Thích`;
+            } else {
+                btn.classList.add(`active-${type}`);
+                const map = { 'like':'Thích', 'love':'Yêu thích', 'haha':'Haha', 'wow':'Wow', 'sad':'Buồn', 'angry':'Phẫn nộ' };
+                const icons = { 'like':'thumbs-up', 'love':'heart', 'haha':'laugh-squint', 'wow':'surprise', 'sad':'sad-tear', 'angry':'angry' };
+                btn.innerHTML = `<i class="fas fa-${icons[type]}"></i> ${map[type]}`;
+            }
+
+            if(data.total_count > 0) {
+                countDiv.innerHTML = `<i class="fas fa-thumbs-up text-primary"></i> ${data.total_count}`;
+            } else {
+                countDiv.innerHTML = '';
+            }
+        });
+    }
+</script>
+{% endblock %}

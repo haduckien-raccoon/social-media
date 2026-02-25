@@ -1,40 +1,62 @@
-<h2>Groups</h2>
+{% extends 'base.html' %}
 
-<a href="{% url 'groups:create_group' %}">Create Group</a>
+{% block title %}Groups • SUDO{% endblock %}
 
-<ul>
-    {% for group in groups %}
-        <li>
-            <a href="{% url 'groups:group_detail' group.pk %}">
-                {{ group.name }}
-            </a>
+{% block content %}
+<div style="width: 100%; max-width: 800px;">
+    <h2 style="margin-bottom: 20px;">Groups</h2>
 
-            {% if user.is_authenticated %}
-                    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 20px; flex-wrap: wrap;">
+        
+        <form method="GET" action="" style="display: flex; gap: 8px; flex: 1; max-width: 400px;">
+            <input type="text" name="q" placeholder="Search groups to join..." value="{{ request.GET.q }}" 
+                   style="width: 100%; padding: 10px 16px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; background: var(--bg-body);">
+            <button type="submit" style="padding: 10px 16px; background: var(--btn-blue-bg); color: #fff; border-radius: 8px; font-weight: bold;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+            {% if request.GET.q %}
+                <a href="{% url 'groups:group_list' %}" style="padding: 10px; color: var(--text-grey); display: flex; align-items: center;">
+                    Clear
+                </a>
+            {% endif %}
+        </form>
+
+        <a href="{% url 'groups:create_group' %}" style="padding: 10px 16px; background: var(--btn-grey-bg); color: var(--text-main); border-radius: 8px; font-weight: 600;">
+            <i class="fa-solid fa-plus"></i> Create Group
+        </a>
+    </div>
+
+    <ul style="list-style: none; padding: 0;">
+        {% for group in groups %}
+            <li style="padding: 16px; border: 1px solid var(--border-color); background: var(--bg-white); border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <a href="{% url 'groups:group_detail' group.pk %}" style="font-weight: 600; font-size: 16px;">
+                    {{ group.name }}
+                </a>
+
+                {% comment %} {% if user.is_authenticated %} {% endcomment %}
                     {# 🚫 Owner không thấy Join/Leave #}
                     {% if group.owner != user %}
-
                         {% if membership %}
-                            
                             {% if membership.status == "approved" %}
-                                <a href="{% url 'groups:leave_group' group.pk %}">
-                                    Leave
-                                </a>
+                                <a href="{% url 'groups:leave_group' group.pk %}" style="color: #ed4956; font-weight: 600; font-size: 14px;">Leave</a>
                             {% elif membership.status == "pending" %}
-                                <span>Pending</span>
+                                <span style="color: var(--text-grey); font-weight: 600; font-size: 14px;">Pending</span>
                             {% endif %}
-
                         {% else %}
-                            <a href="{% url 'groups:join_group' group.pk %}">
-                                Join
-                            </a>
+                            <a href="{% url 'groups:join_group' group.pk %}" style="color: var(--btn-blue-bg); font-weight: 600; font-size: 14px;">Join</a>
                         {% endif %}
-
                     {% endif %}
-
-            {% endif %}
-        </li>
-    {% empty %}
-        <li>No groups yet.</li>
-    {% endfor %}
-</ul>
+                {% comment %} {% endif %} {% endcomment %}
+            </li>
+        {% empty %}
+            <li style="padding: 20px; text-align: center; color: var(--text-grey); border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-white);">
+                {% if request.GET.q %}
+                    No groups found matching "<strong>{{ request.GET.q }}</strong>".
+                {% else %}
+                    No groups available yet.
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
