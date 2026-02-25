@@ -37,6 +37,7 @@ class GroupService:
     @staticmethod
     def get_group_feed(group, user, page=1, page_size=10):
         """
+        Lấy danh sách bài viết trong nhóm dựa trên cài đặt default_sort của nhóm.
         Lấy danh sách bài viết trong nhóm theo từng trang.
         Trả về (posts_list, has_next_page)
         """
@@ -51,8 +52,26 @@ class GroupService:
             'post__images'
         ).annotate(
             reaction_count=Count('post__reactions', distinct=True),
-            comment_count=Count('post__comments', filter=Q(post__comments__is_deleted=False), distinct=True)
-        ).order_by('-is_pinned', '-post__created_at')
+            comment_count=Count('post__comments', filter=Q(post__comments__is_deleted=False), distinct=True),
+            # Lấy thời gian bình luận mới nhất để sort theo Hoạt động mới nhất
+            latest_comment_time=Max('post__comments__created_at')
+        )
+        # .order_by('-is_pinned', '-post__created_at')
+
+        # Xử lý Sắp xếp dựa trên Cài đặt nhóm
+        if group.default_sort == GroupSortChoices.NEWEST:
+            # Bài viết mới: Mới đăng lên đầu tiên
+            group_posts_qs = group_posts_qs.order_by('-is_pinned', '-post__created_at')
+            
+        elif group.default_sort == GroupSortChoices.LATEST_ACTIVITY:
+            # Hoạt động mới nhất: Có bình luận mới thì đẩy lên đầu, nếu không có bình luận thì lấy ngày tạo bài viết
+            # (PostgreSQL/MySQL có thể dùng Coalesce để gộp, ở đây Django sắp xếp linh hoạt)
+            group_posts_qs = group_posts_qs.order_by('-is_pinned', '-latest_comment_time', '-post__created_at')
+            
+        else: # RELEVANT (Phù hợp nhất)
+            # Nếu hệ thống bạn chưa có models Friend rõ ràng, tạm thời lùi về LATEST_ACTIVITY
+            # Nếu có bảng Friend, bạn có thể annotate thêm: is_friend = Case(When(post__author__in=user_friends, then=1), default=0)
+            group_posts_qs = group_posts_qs.order_by('-is_pinned', '-latest_comment_time', '-post__created_at')
 
         # Phân trang QuerySet
         paginator = Paginator(group_posts_qs, page_size)
@@ -143,8 +162,6 @@ class GroupService:
             status='pending'
         ).select_related('user', 'user__profile').order_by('-joined_at')
         
-        pending_count = pending_requests.count()
-
         # 2. Lấy danh sách thành viên chính thức, ưu tiên sắp xếp: Owner > Admin > Moderator > Member
         members = GroupMember.objects.filter(
             group=group, 
@@ -160,20 +177,29 @@ class GroupService:
             )
         ).order_by('role_order', '-joined_at')
 
-        # 3. Lấy danh sách bài viết bị báo cáo (Pending Reports)
-        reported_posts = GroupReport.objects.filter(
+        # 3. Bị báo cáo (Bao gồm cả bài viết và bình luận)
+        reported_items = GroupReport.objects.filter(
             group=group,
-            status='pending',
-            post__isnull=False # Chỉ lấy report cho bài viết
+            status='pending'
         ).select_related(
-            'post', 'post__author', 'post__author__profile'
+            'post', 'post__author', 'comment', 'comment__user'
         ).order_by('-created_at')
+
+        # 4. Bài viết chờ duyệt (Pending posts)
+        pending_posts = GroupPost.objects.filter(
+            group=group,
+            status='pending'
+        ).select_related('post', 'post__author').order_by('created_at')
 
         return {
             'pending_requests': pending_requests,
-            'pending_count': pending_count,
+            'pending_count': pending_requests.count(),
             'members': members,
-            'reported_posts': reported_posts
+            'members_count': members.count(),
+            'reported_items': reported_items,
+            'reports_count': reported_items.count(),
+            'pending_posts': pending_posts,
+            'pending_posts_count': pending_posts.count(),
         }
 
     @staticmethod

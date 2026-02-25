@@ -30,20 +30,20 @@ def create_group(request):
     return render(request, "groups/group_form.html", {"form": form})
 
 
-def update_group(request, group_id):
-    group = get_object_or_404(Group, id=group_id)
-    if not GroupService.can_manage_group(request.user, group):
-        raise PermissionDenied("You do not have permission to edit this group.")
-    if request.method == "POST":
-        form = GroupForm(request.POST, instance=group)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Group updated successfully!")
-            return redirect("groups:group_detail", group_id=group.id)
-    else:
-        form = GroupForm(instance=group)
+# def update_group(request, group_id):
+#     group = get_object_or_404(Group, id=group_id)
+#     if not GroupService.can_manage_group(request.user, group):
+#         raise PermissionDenied("You do not have permission to edit this group.")
+#     if request.method == "POST":
+#         form = GroupForm(request.POST, instance=group)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, "Group updated successfully!")
+#             return redirect("groups:group_detail", group_id=group.id)
+#     else:
+#         form = GroupForm(instance=group)
 
-    return render(request, "groups/group_form.html", {"form": form, "group": group})
+#     return render(request, "groups/group_form.html", {"form": form, "group": group})
 
 def delete_group(request, group_id):
     group = get_object_or_404(Group, id=group_id)
@@ -191,13 +191,33 @@ def manage_group(request, group_id):
         'pending_requests': dashboard_data['pending_requests'],
         'pending_count': dashboard_data['pending_count'],
         'members': dashboard_data['members'],
-        'reported_posts': dashboard_data['reported_posts'],
+        'members_count': dashboard_data['members_count'],
+        'reported_items': dashboard_data['reported_items'],
+        'reports_count': dashboard_data['reports_count'],
+        'pending_posts': dashboard_data['pending_posts'],
+        'pending_posts_count': dashboard_data['pending_posts_count']
     }
     
     return render(request, 'groups/manage_group.html', context)
 
+# def update_group(request, group_id):
+#     """View đơn giản để hứng dữ liệu từ Form Cài đặt nhóm"""
+#     group = GroupService.get_group_by_id(group_id)
+#     user_role = GroupService.get_user_role(request.user, group)
+
+#     if user_role not in [GroupRole.OWNER, GroupRole.ADMIN]:
+#         raise PermissionDenied("Bạn không có quyền chỉnh sửa nhóm này.")
+
+#     if request.method == "POST":
+#         group.name = request.POST.get("name")
+#         group.description = request.POST.get("description")
+#         group.save()
+#         messages.success(request, "Cập nhật thông tin nhóm thành công!")
+        
+#     return redirect('groups:manage_group', group_id=group.id)
+
 def update_group(request, group_id):
-    """View đơn giản để hứng dữ liệu từ Form Cài đặt nhóm"""
+    """View để hứng dữ liệu từ Form Cài đặt nhóm"""
     group = GroupService.get_group_by_id(group_id)
     user_role = GroupService.get_user_role(request.user, group)
 
@@ -205,8 +225,25 @@ def update_group(request, group_id):
         raise PermissionDenied("Bạn không có quyền chỉnh sửa nhóm này.")
 
     if request.method == "POST":
-        group.name = request.POST.get("name")
-        group.description = request.POST.get("description")
+        # a. Thông tin cơ bản
+        group.name = request.POST.get("name", group.name)
+        group.description = request.POST.get("description", group.description)
+        
+        if 'cover_image' in request.FILES:
+            group.cover_image = request.FILES['cover_image']
+
+        # b. Cài đặt Thành viên
+        group.mod_can_approve_member = request.POST.get("mod_can_approve_member") == "on"
+
+        # c. Cài đặt Bài viết
+        group.require_post_approval = request.POST.get("require_post_approval") == "on"
+        group.mod_can_approve_post = request.POST.get("mod_can_approve_post") == "on"
+        
+        group.require_edit_approval = request.POST.get("require_edit_approval") == "on"
+        group.mod_can_approve_edit = request.POST.get("mod_can_approve_edit") == "on"
+
+        group.default_sort = request.POST.get("default_sort", "latest_activity")
+
         group.save()
         messages.success(request, "Cập nhật thông tin nhóm thành công!")
         

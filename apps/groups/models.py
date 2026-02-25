@@ -3,10 +3,15 @@ from django.db import models
 from apps.accounts.models import User
 from apps.posts.models import  *
 # Create your models here.
+class GroupSortChoices(models.TextChoices):
+    LATEST_ACTIVITY = "latest_activity", "Hoạt động mới nhất"
+    NEWEST = "newest", "Bài viết mới"
+    RELEVANT = "relevant", "Phù hợp nhất"
 
 class Group(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    cover_image = models.ImageField(upload_to="group_covers/", null=True, blank=True) # Ảnh bìa nhóm
     is_activate = models.BooleanField(default=True)
     is_private = models.BooleanField(default=True)
 
@@ -14,6 +19,23 @@ class Group(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name="owned_groups"
+    )
+    # --- SETTINGS (CÀI ĐẶT NHÓM) ---
+    # Thành viên
+    mod_can_approve_member = models.BooleanField(default=False, help_text="Cho phép Người kiểm duyệt phê duyệt thành viên")
+    
+    # Bài viết
+    require_post_approval = models.BooleanField(default=False, help_text="Bật để yêu cầu phê duyệt bài viết mới")
+    mod_can_approve_post = models.BooleanField(default=False, help_text="Cho phép Người kiểm duyệt phê duyệt bài viết")
+    
+    require_edit_approval = models.BooleanField(default=False, help_text="Bật để yêu cầu phê duyệt khi chỉnh sửa")
+    mod_can_approve_edit = models.BooleanField(default=False, help_text="Cho phép Người kiểm duyệt phê duyệt chỉnh sửa")
+    
+    default_sort = models.CharField(
+        max_length=20, 
+        choices=GroupSortChoices.choices, 
+        default=GroupSortChoices.LATEST_ACTIVITY,
+        help_text="Tiêu chí sắp xếp bài viết mặc định"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

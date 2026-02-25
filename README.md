@@ -14,7 +14,7 @@
 ------------------------------------------------------------------------
 
 # Run app: 
-- python manage.py runserver
+- python manage.py runserver 8080
 ------------------------------------------------------------------------
 # Run app:
 - uvicorn config.asgi:application --host 127.0.0.1 --port 8080
