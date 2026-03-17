@@ -146,9 +146,11 @@ def verify_email_view(request):
     })
 
 #profile
+from django.db.models import Q
+
 @csrf_exempt
 def profile_view(request, id=None, username=None):
-    # Lấy chính user từ token (như cũ)
+
     access_token = request.COOKIES.get("access")
     if not access_token:
         return redirect("login")
@@ -159,51 +161,62 @@ def profile_view(request, id=None, username=None):
             settings.SECRET_KEY,
             algorithms=["HS256"]
         )
+
         current_user_id = payload.get("user_id")
         current_user = User.objects.get(id=current_user_id)
-        #ép kiểu id sang int
+
         if id is not None:
             id = int(id)
-        # Lấy user profile muốn xem
+
+        # user đang xem
         if id:
-            # Xem profile người khác
             user = get_object_or_404(User, id=id)
         elif username:
-            # Xem profile người khác theo username
             user = get_object_or_404(User, username=username)
         else:
-            # Nếu không truyền username, xem profile chính mình
             user = current_user
 
-        #lấy tất cả bạn bè của user hoặc chính mình
+        # posts + friends
         if user == current_user:
             friends = get_friends_list(current_user)
             posts = get_my_posts(current_user)
         else:
             friends = get_friends_list(user)
-            friends_ids = [friend.id for friend in friends]
+            friends_ids = [f.id for f in friends]
             posts = get_user_posts(current_user, user, friends_ids)
 
-        # for post in posts:
-            # print(f"[DEBUG] Post ID: {post.id}, Content: {post.content}, Image: {post.image}, Shared Post: {post.shared_post}")
+        # friendship status
+        if user != current_user:
+            friendship_status = get_friendship_status(current_user, user)
+        else:
+            friendship_status = "self"
 
-        # print(f"[DEBUG] Number of posts retrieved: {len(posts)}")
+        # luôn khởi tạo
+        request_obj = None
+
+        if friendship_status in ["request_sent", "request_received"]:
+            request_obj = FriendRequest.objects.filter(
+                Q(from_user=current_user, to_user=user) |
+                Q(from_user=user, to_user=current_user),
+                status=FriendRequest.STATUS_PENDING
+            ).first()
 
         count_friends = len(friends)
+
         profile = get_object_or_404(UserProfile, user=user)
-        #in toàn bộ profile để debug
+
         if profile.bio is None:
             profile.bio = ""
-        # print(f"[DEBUG] Viewing profile: {profile.user.username}, Bio: {profile.bio}")
 
-        # Truyền current_user để template so sánh với user đang xem
         return render(request, "accounts/profile.html", {
-            "user": user,  # profile đang xem
+            "user": user,
             "profile": profile,
-            "current_user": current_user,  # user đăng nhập
+            "current_user": current_user,
             "friends": friends,
             "count_friends": count_friends,
-            "posts": posts
+            "posts": posts,
+            "friendship_status": friendship_status,
+            "request_id": request_obj.id if request_obj else None
         })
 
     except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):

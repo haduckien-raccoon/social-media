@@ -1,0 +1,504 @@
+{% extends "base.html" %}
+
+{% block title %}Tạo bài viết • {{ group.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== GLOBAL VARIABLES ===== */
+:root {
+    --primary: #1877f2;
+    --green-btn: #42b72a;
+    --green-hover: #36a420;
+    --bg-gray: #f0f2f5;
+    --card-bg: #fff;
+    --text-color: #050505;
+    --text-gray: #65676b;
+    --radius: 12px;
+}
+
+/* ===== LAYOUT ===== */
+.page {
+    display: flex;
+    justify-content: center;
+    padding: 20px 10px;
+    font-family: Segoe UI, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-gray);
+    min-height: 90vh;
+}
+.card-post {
+    width: 600px;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 4px rgba(0,0,0,.1), 0 8px 16px rgba(0,0,0,.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== HEADER ===== */
+.card-header {
+    text-align: center;
+    padding: 15px;
+    font-size: 20px;
+    font-weight: 700;
+    border-bottom: 1px solid #e4e6eb;
+    position: relative;
+}
+.close-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e4e6eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #606770;
+    text-decoration: none;
+    font-size: 24px;
+    transition: 0.2s;
+}
+.close-btn:hover { background: #d8dadf; }
+
+/* ===== BODY ===== */
+.card-body { padding: 15px; }
+.user-row { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
+.user-row img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.user-name { font-weight: 600; font-size: 15px; }
+
+.privacy {
+    background: #e4e6eb;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    padding: 4px 8px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-color);
+}
+
+/* ===== INPUT ===== */
+.post-text {
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    font-size: 20px;
+    min-height: 80px;
+    margin-bottom: 15px;
+    font-family: inherit;
+}
+.post-text::placeholder { color: var(--text-gray); }
+
+/* ===== TAG ===== */
+.tag-box { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.tag-chip {
+    background: #e7f3ff;
+    color: var(--primary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+}
+.tag-chip span { cursor: pointer; font-size: 16px; font-weight: bold; line-height: 1; }
+
+/* ===== IMAGE ===== */
+.img-grid {
+    display: none;
+    grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
+    gap: 8px;
+    border: 1px solid #e4e6eb;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+.img-grid.active { display: grid; }
+.preview-item { position: relative; height: 100px; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; }
+.preview-item img { width: 100%; height: 100%; object-fit: cover; }
+.remove-btn {
+    position: absolute;
+    top: 4px; right: 4px;
+    background: #fff;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* ===== FILE ===== */
+.file-list { display: none; margin-bottom: 10px; }
+.file-list.active { display: block; }
+.file-item {
+    background: #f0f2f5;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ===== ACTION ===== */
+.add-bar {
+    border: 1px solid #ced0d4;
+    border-radius: 8px;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.action-icons { display: flex; gap: 5px; }
+.icon-btn {
+    width: 36px; height: 36px;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 20px;
+    transition: 0.2s;
+}
+.icon-btn:hover { background: #f2f2f2; }
+
+/* ===== SUBMIT ===== */
+.submit-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #0064fb;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.submit-btn:disabled {
+    background: #e4e6eb;
+    color: #bcc0c4;
+    cursor: not-allowed;
+}
+
+/* ===== MODAL TAG ===== */
+.modal {
+    position: fixed; inset: 0;
+    background: rgba(244, 244, 244, 0.8);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center; align-items: center;
+    z-index: 1000;
+}
+.modal-box {
+    background: #fff;
+    width: 100%; max-width: 400px; height: 500px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    display: flex; flex-direction: column;
+    border: 1px solid #ddd;
+    overflow: hidden;
+}
+.modal-header { padding: 15px; border-bottom: 1px solid #eee; }
+.search-input { width: 100%; padding: 8px 12px; border-radius: 20px; background: #f0f2f5; border: none; outline: none; }
+
+.friend-list { flex: 1; overflow-y: auto; padding: 10px; }
+
+.friend {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px; border-radius: 8px;
+    cursor: pointer; transition: 0.2s;
+}
+.friend:hover { background: #f0f2f5; }
+
+.chk-ui {
+    width: 20px; height: 20px;
+    border: 2px solid #ced0d4; border-radius: 50%;
+    margin-left: auto; position: relative;
+}
+input:checked + .chk-ui { background: var(--primary); border-color: var(--primary); }
+input:checked + .chk-ui::after {
+    content: '✔'; color: #fff; font-size: 12px;
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+}
+
+/* ===== TOAST NOTIFICATION ===== */
+#toast {
+    visibility: hidden;
+    min-width: 280px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 14px 20px;
+    position: fixed;
+    z-index: 2000;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: opacity 0.3s, bottom 0.3s ease-out;
+}
+#toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
+}
+#toast.error { background-color: #dc3545; }
+#toast.success { background-color: #28a745; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page">
+<div class="card-post">
+<div class="card-header">
+    Tạo bài viết
+    <a href="{% url 'groups:group_detail' group.id %}" class="close-btn">&times;</a>
+</div>
+
+<div class="card-body">
+<div class="user-row">
+    <img src="{{ request.user.profile.avatar.url | default:'images/avatars/normal.jpg' }}" alt="User Avatar">
+    <div>
+        <div class="user-name">{{ request.user.username }}</div>
+        <div class="privacy">
+            <i class="fas fa-caret-right text-muted"></i> 
+            {% if group.is_private %}🔒{% else %}🌍{% endif %} {{ group.name }}
+        </div>
+    </div>
+</div>
+
+<form id="postForm">
+    {% csrf_token %}
+
+    <textarea class="post-text" id="content" placeholder="Bạn muốn chia sẻ điều gì với nhóm?"></textarea>
+
+    <div class="tag-box" id="tagPreview"></div>
+    <div class="img-grid" id="imgPreview"></div>
+    <div class="file-list" id="filePreview"></div>
+
+    <div class="add-bar">
+        <small style="font-weight: 600;">Thêm vào bài viết</small>
+        <div class="action-icons">
+            <div class="icon-btn" id="imgBtn"><i class="fas fa-images" style="color:#45bd62"></i></div>
+            <div class="icon-btn" id="tagBtn"><i class="fas fa-user-tag" style="color:#1877f2"></i></div>
+            <div class="icon-btn" id="fileBtn"><i class="fas fa-paperclip" style="color:#f5533d"></i></div>
+        </div>
+    </div>
+
+    <input type="file" id="imgInput" hidden multiple accept="image/*">
+    <input type="file" id="fileInput" hidden multiple>
+
+    <button class="submit-btn" id="submitBtn" disabled>Đăng</button>
+</form>
+</div>
+</div>
+</div>
+
+<div class="modal" id="tagModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <strong>Gắn thẻ bạn bè</strong>
+                <span style="cursor:pointer; font-size:20px;" id="closeTag">&times;</span>
+            </div>
+            <input type="text" class="search-input" id="friendSearch" placeholder="Tìm kiếm bạn bè...">
+        </div>
+        <div class="friend-list">
+            {% for f in friends %}
+            <label class="friend" data-name="{{ f.username|lower }}">
+                <img src="{{ f.profile.avatar.url | default:'images/avatars/normal.jpg' }}" 
+                     style="width:36px;height:36px;border-radius:50%">
+                <span>{{ f.username }}</span>
+                <input type="checkbox" class="friendChk" value="{{ f.id }}" data-name="{{ f.username }}" hidden>
+                <div class="chk-ui"></div>
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div id="toast">Thông báo</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+const els = {
+    form: document.getElementById('postForm'),
+    txt: document.getElementById('content'),
+    imgInp: document.getElementById('imgInput'),
+    fileInp: document.getElementById('fileInput'),
+    imgPre: document.getElementById('imgPreview'),
+    filePre: document.getElementById('filePreview'),
+    tagPre: document.getElementById('tagPreview'),
+    submit: document.getElementById('submitBtn'),
+    tagModal: document.getElementById('tagModal')
+};
+
+let state = { images: [], files: [], tags: [] };
+
+// --- HELPER: TOAST NOTIFICATION ---
+function showToast(message, type = 'normal') {
+    const x = document.getElementById("toast");
+    x.innerText = message;
+    
+    x.className = "show"; 
+    if(type === 'error') x.classList.add("error");
+    else if(type === 'success') x.classList.add("success");
+
+    setTimeout(function(){ 
+        x.className = x.className.replace("show", ""); 
+        x.classList.remove("error", "success");
+    }, 3000);
+}
+
+// --- LOGIC FORM ---
+const updateBtn = () => {
+    els.submit.disabled = !(els.txt.value.trim() || state.images.length || state.files.length);
+};
+
+els.txt.oninput = () => {
+    updateBtn();
+    els.txt.style.height = 'auto';
+    els.txt.style.height = els.txt.scrollHeight + 'px';
+};
+
+// --- CLICK TRIGGERS ---
+document.getElementById('imgBtn').onclick = () => els.imgInp.click();
+document.getElementById('fileBtn').onclick = () => els.fileInp.click();
+
+// --- HANDLE FILES ---
+els.imgInp.onchange = e => {
+    state.images.push(...e.target.files);
+    renderImg(); updateBtn();
+    e.target.value = ''; 
+};
+
+els.fileInp.onchange = e => {
+    state.files.push(...e.target.files);
+    renderFile(); updateBtn();
+    e.target.value = '';
+};
+
+function renderImg() {
+    els.imgPre.innerHTML = '';
+    state.images.forEach((f,i)=>{
+        const r=new FileReader();
+        r.onload=e=>{
+            els.imgPre.innerHTML += `<div class="preview-item">
+                <img src="${e.target.result}">
+                <div class="remove-btn" onclick="rmImg(${i})">&times;</div>
+            </div>`;
+        }; r.readAsDataURL(f);
+    });
+    els.imgPre.classList.toggle('active', state.images.length);
+}
+
+function renderFile() {
+    els.filePre.innerHTML='';
+    state.files.forEach((f,i)=>{
+        els.filePre.innerHTML += `<div class="file-item">
+            <span>📄 ${f.name}</span>
+            <span onclick="rmFile(${i})" style="cursor:pointer;color:red">&times;</span>
+        </div>`;
+    });
+    els.filePre.classList.toggle('active', state.files.length);
+}
+
+window.rmImg=i=>{ state.images.splice(i,1); renderImg(); updateBtn(); };
+window.rmFile=i=>{ state.files.splice(i,1); renderFile(); updateBtn(); };
+
+// --- LOGIC TAG BẠN BÈ ---
+document.getElementById('tagBtn').onclick = () => els.tagModal.style.display = 'flex';
+document.getElementById('closeTag').onclick = () => els.tagModal.style.display = 'none';
+els.tagModal.onclick = (e) => { if(e.target === els.tagModal) els.tagModal.style.display = 'none'; };
+
+document.getElementById('friendSearch').oninput = function() {
+    const val = this.value.toLowerCase();
+    document.querySelectorAll('.friend').forEach(el => {
+        el.style.display = el.dataset.name.includes(val) ? 'flex' : 'none';
+    });
+};
+
+document.querySelectorAll('.friendChk').forEach(chk => {
+    chk.onchange = () => {
+        const id = chk.value;
+        if (chk.checked) {
+            if (!state.tags.includes(id)) state.tags.push(id);
+        } else {
+            state.tags = state.tags.filter(t => t !== id);
+        }
+        renderTags();
+    };
+});
+
+function renderTags() {
+    els.tagPre.innerHTML = '';
+    state.tags.forEach(id => {
+        const chk = document.querySelector(`.friendChk[value="${id}"]`);
+        if(chk) {
+            const name = chk.dataset.name;
+            const div = document.createElement('div');
+            div.className = 'tag-chip';
+            div.innerHTML = `${name} <span onclick="rmTag('${id}')">&times;</span>`;
+            els.tagPre.appendChild(div);
+        }
+    });
+}
+
+window.rmTag = (id) => {
+    state.tags = state.tags.filter(t => t !== id);
+    const chk = document.querySelector(`.friendChk[value="${id}"]`);
+    if(chk) chk.checked = false;
+    renderTags();
+};
+
+// --- SUBMIT ---
+els.form.onsubmit = async e => {
+    e.preventDefault();
+    els.submit.disabled = true;
+    els.submit.innerText = 'Đang đăng...';
+
+    const fd = new FormData();
+    fd.append('content', els.txt.value);
+    
+    // Nối thêm hình ảnh và file
+    state.images.forEach(f=>fd.append('images', f));
+    state.files.forEach(f=>fd.append('files', f));
+    state.tags.forEach(id=>fd.append('tagged_users', id));
+    
+    // Bắt buộc có token
+    fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+    try {
+        const res = await fetch(location.href, {method:'POST', body:fd});
+        if(res.redirected) {
+            location.href = res.url;
+        } else if(res.ok) {
+            // Sau khi post thành công thì chuyển hướng về lại trang chi tiết group
+            location.href = "{% url 'groups:group_detail' group.id %}"; 
+        } else {
+            throw new Error("Server trả về lỗi không xác định");
+        }
+    } catch (err) {
+        console.error(err);
+        els.submit.disabled = false;
+        els.submit.innerText = 'Đăng';
+        
+        showToast('Có lỗi xảy ra, vui lòng thử lại sau!', 'error');
+    }
+};
+});
+</script>
+{% endblock %}

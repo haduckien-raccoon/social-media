@@ -5,7 +5,7 @@ from apps.posts.services import *
 from apps.posts.models import *
 from apps.accounts.models import User
 from django.core.paginator import Paginator, EmptyPage
-from django.db.models import Case, Case, Count, Q, IntegerField, IntegerField, Value, When, When
+from django.db.models import Case, Case, Count, Q, IntegerField, IntegerField, Max, Value, When, When
 from django.utils import timezone
 from django.db.models import Prefetch
 
@@ -52,8 +52,11 @@ class GroupService:
             'post__images'
         ).annotate(
             reaction_count=Count('post__reactions', distinct=True),
-            comment_count=Count('post__comments', filter=Q(post__comments__is_deleted=False), distinct=True),
-            # Lấy thời gian bình luận mới nhất để sort theo Hoạt động mới nhất
+            comment_count=Count(
+                'post__comments',
+                filter=Q(post__comments__is_deleted=False),
+                distinct=True
+            ),
             latest_comment_time=Max('post__comments__created_at')
         )
         # .order_by('-is_pinned', '-post__created_at')
@@ -104,7 +107,7 @@ class GroupService:
         return posts, group_posts_page.has_next()
     
     @staticmethod
-    def create_group(owner, name, description="", is_private=True):
+    def create_group(owner, name, description="",is_private=True):
         group = Group.objects.create(
             owner=owner,
             name=name,
@@ -338,7 +341,7 @@ class GroupMemberService:
     
 class GroupPostService:
     @staticmethod
-    def create_post_in_group(group, user, content="", images=None, files=None):
+    def create_post_in_group(group, user, content="", images=None, files=None, tagged_users=None):
         if not GroupMemberService.is_member(user, group):
             raise PermissionDenied("You must be a member of the group to create posts.")
         
@@ -356,14 +359,63 @@ class GroupPostService:
         if files:
             for file in files:
                 PostFile.objects.create(post=post, file=file, filename=file.name)
+
+        if tagged_users:
+            for user_id in tagged_users:
+                try:
+                    tagged_user = User.objects.get(id=user_id)
+                    PostTagUser.objects.create(post=post, user=tagged_user)
+                except User.DoesNotExist:
+                    continue
+
+        #check quyền user đăng nếu là admin | owner thì duyệt luôn, còn member thường thì để pending
+        status = "approved" if GroupMemberService.is_group_admin_or_owner(user, group) else "pending"
         
         GroupPost.objects.create(
             group=group,
             post=post,
-            status="pending"
+            status=status,
+            is_pinned=False,
+            is_deleted=False
         )
 
         return post
+    
+    @staticmethod
+    def update_post_in_group(group_post, user, content=None, images=None, files=None, tagged_users=None):
+        if group_post.post.author != user:
+            raise PermissionDenied("You can only edit your own posts.")
+        
+        if content is not None:
+            group_post.post.content = content
+
+        if tagged_users is not None:
+            # Xóa tag cũ
+            group_post.post.tagged_users.clear()
+            # Thêm tag mới
+            for user_id in tagged_users:
+                try:
+                    tagged_user = User.objects.get(id=user_id)
+                    group_post.post.tagged_users.add(tagged_user)
+                except User.DoesNotExist:
+                    continue
+        
+        if images is not None:
+            # Xóa ảnh cũ
+            group_post.post.images.all().delete()
+            # Thêm ảnh mới
+            for idx, img in enumerate(images):
+                PostImage.objects.create(post=group_post.post, image=img, order=idx)
+        
+        if files is not None:
+            # Xóa file cũ
+            group_post.post.files.all().delete()
+            # Thêm file mới
+            for file in files:
+                PostFile.objects.create(post=group_post.post, file=file, filename=file.name)
+        
+        group_post.post.save()
+        return group_post.post
     
     @staticmethod
     def get_group_posts(group, user):
@@ -401,6 +453,19 @@ class GroupPostService:
             raise PermissionDenied("Only group admins can approve posts.")
         group_post.status = "approved"
         group_post.save()
+
+    @staticmethod
+    def reject_group_post(group_post, approver):
+        if not GroupMemberService.is_admin(approver, group_post.group):
+            raise PermissionDenied("Only group admins can reject posts.")
+        group_post.status = "rejected"
+        group_post.save()
+
+    @staticmethod
+    def can_edit_post(user, group_post):
+        if group_post.post.author == user:
+            return True
+        return False
 
 def is_member(user, group):
     return GroupMember.objects.filter(group=group, user=user, status="approved").exists()

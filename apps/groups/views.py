@@ -15,6 +15,7 @@ class GroupForm(forms.ModelForm):
 def create_group(request):
     if request.method == "POST":
         form = GroupForm(request.POST)
+        tagged = request.POST.getlist("tagged_users")
         if form.is_valid():
             group = GroupService.create_group(
                 owner=request.user,
@@ -115,15 +116,42 @@ def create_post_in_group(request, group_id):
         raise PermissionDenied("You must be a member of the group to create posts.")
     
     if request.method == "POST":
+        
         content = request.POST.get("content")
+        images = request.FILES.getlist("images")
+        files = request.FILES.getlist("files")
+        tagged = request.POST.getlist("tagged_users")
+
         if content:
-            GroupPostService.create_group_post(group, request.user, content)
+            GroupPostService.create_post_in_group(group, request.user, content, images=images, files=files, tagged_users=tagged)
             messages.success(request, "Post created successfully!")
             return redirect("groups:group_detail", group_id=group.id)
         else:
             messages.error(request, "Content cannot be empty.")
     
     return render(request, "groups/create_post.html", {"group": group})
+
+def update_post_in_group(request, group_id, post_id):
+    group = get_object_or_404(Group, id=group_id)
+    post = get_object_or_404(GroupPost, id=post_id, group=group)
+
+    if not GroupPostService.can_edit_post(request.user, post):
+        raise PermissionDenied("You do not have permission to edit this post.")
+    
+    if request.method == "POST":
+        content = request.POST.get("content")
+        images = request.FILES.getlist("images")
+        files = request.FILES.getlist("files")
+        tagged = request.POST.getlist("tagged_users")
+
+        if content:
+            GroupPostService.update_post_in_group(post, content, images=images, files=files, tagged_users=tagged)
+            messages.success(request, "Post updated successfully!")
+            return redirect("groups:group_detail", group_id=group.id)
+        else:
+            messages.error(request, "Content cannot be empty.")
+    
+    return render(request, "groups/update_post.html", {"group": group, "post": post})
 
 def group_detail(request, group_id):
     group = GroupService.get_group_by_id(group_id)
@@ -200,22 +228,6 @@ def manage_group(request, group_id):
     
     return render(request, 'groups/manage_group.html', context)
 
-# def update_group(request, group_id):
-#     """View đơn giản để hứng dữ liệu từ Form Cài đặt nhóm"""
-#     group = GroupService.get_group_by_id(group_id)
-#     user_role = GroupService.get_user_role(request.user, group)
-
-#     if user_role not in [GroupRole.OWNER, GroupRole.ADMIN]:
-#         raise PermissionDenied("Bạn không có quyền chỉnh sửa nhóm này.")
-
-#     if request.method == "POST":
-#         group.name = request.POST.get("name")
-#         group.description = request.POST.get("description")
-#         group.save()
-#         messages.success(request, "Cập nhật thông tin nhóm thành công!")
-        
-#     return redirect('groups:manage_group', group_id=group.id)
-
 def update_group(request, group_id):
     """View để hứng dữ liệu từ Form Cài đặt nhóm"""
     group = GroupService.get_group_by_id(group_id)
@@ -248,3 +260,25 @@ def update_group(request, group_id):
         messages.success(request, "Cập nhật thông tin nhóm thành công!")
         
     return redirect('groups:manage_group', group_id=group.id)
+
+def approve_post_in_group(request, group_id, post_id):
+    group = get_object_or_404(Group, id=group_id)
+    post = get_object_or_404(GroupPost, id=post_id, group=group)
+
+    if not GroupService.can_manage_group(request.user, group):
+        raise PermissionDenied("You do not have permission to manage this group.")
+    
+    GroupPostService.approve_group_post(post, request.user)
+    messages.success(request, "Post approved successfully!")
+    return redirect("groups:manage_group", group_id=group.id)
+
+def reject_post_in_group(request, group_id, post_id):
+    group = get_object_or_404(Group, id=group_id)
+    post = get_object_or_404(GroupPost, id=post_id, group=group)
+
+    if not GroupService.can_manage_group(request.user, group):
+        raise PermissionDenied("You do not have permission to manage this group.")
+    
+    GroupPostService.reject_group_post(post, request.user)
+    messages.success(request, "Post rejected successfully!")
+    return redirect("groups:manage_group", group_id=group.id)

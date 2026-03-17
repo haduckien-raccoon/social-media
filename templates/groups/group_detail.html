@@ -188,13 +188,13 @@
         <div class="create-post">
             <div class="cp-top">
                 <img src="{{ request.user.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}" style="width:40px; height:40px; border-radius:50%">
-                <div class="cp-input" onclick="window.location.href='#'">
+                <div class="cp-input" onclick="window.location.href='{% url 'groups:create_post_in_group' group.id %}'">
                     Bạn muốn chia sẻ điều gì với nhóm?
                 </div>
             </div>
             <div class="cp-actions">
-                <div class="cp-btn" onclick="window.location.href='#'"><i class="fas fa-images text-success me-2"></i> Ảnh/Video</div>
-                <div class="cp-btn" onclick="window.location.href='#'"><i class="fas fa-paperclip text-danger me-2"></i> Tài liệu</div>
+                <div class="cp-btn" onclick="window.location.href='{% url 'groups:create_post_in_group' group.id %}'"><i class="fas fa-images text-success me-2"></i> Ảnh/Video</div>
+                <div class="cp-btn" onclick="window.location.href='{% url 'groups:create_post_in_group' group.id %}'"><i class="fas fa-paperclip text-danger me-2"></i> Tài liệu</div>
             </div>
         </div>
         {% endif %}

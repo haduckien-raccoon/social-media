@@ -126,7 +126,6 @@
             <a href="#" class="nav-item-fb"><i class="fas fa-history"></i> Kỷ niệm</a>
             <hr>
         </div> {% endcomment %}
-
         <div class="feed-center">
             <div class="create-post">
                 <div class="cp-top">
@@ -136,7 +135,33 @@
                     </div>
                 </div>
                 <div class="cp-actions">
-                    {% comment %} <div class="cp-btn"><i class="fas fa-video text-danger me-2"></i> Trực tiếp</div> {% endcomment %}
+                    <div class="cp-btn" onclick="window.location.href='{% url 'posts:create' %}'"><i class="fas fa-images text-success me-2"></i> Ảnh</div>
+                    <div class="cp-btn" onclick="window.location.href='{% url 'posts:create' %}'"><i class="far fa-smile text-warning me-2"></i> Cảm xúc</div>
+                </div>
+            </div>
+
+            <div id="feed-post-container">
+                {% if posts %}
+                    {% include 'posts/partials/post_list_chunk.html' %}
+                {% else %}
+                    <div class="text-center p-5 text-muted">Chưa có bài viết nào.</div>
+                {% endif %}
+            </div>
+
+            <div id="feed-loading-spinner" style="text-align: center; display: none; padding: 20px;">
+                <i class="fa-solid fa-spinner fa-spin fa-2x text-muted"></i>
+            </div>
+        </div>
+
+        {% comment %} <div class="feed-center">
+            <div class="create-post">
+                <div class="cp-top">
+                    <img src="{{ request.user.profile.avatar.url|default:'images/avatars/normal.jpg' }}" style="width:40px; height:40px; border-radius:50%">
+                    <div class="cp-input" onclick="window.location.href='{% url 'posts:create' %}'">
+                        {{ request.user.username }} ơi, bạn đang nghĩ gì thế?
+                    </div>
+                </div>
+                <div class="cp-actions">
                     <div class="cp-btn" onclick="window.location.href='{% url 'posts:create' %}'"><i class="fas fa-images text-success me-2"></i> Ảnh</div>
                     <div class="cp-btn" onclick="window.location.href='{% url 'posts:create' %}'"><i class="far fa-smile text-warning me-2"></i> Cảm xúc</div>
                 </div>
@@ -290,7 +315,7 @@
             {% empty %}
                 <div class="text-center p-5 text-muted">Chưa có bài viết nào.</div>
             {% endfor %}
-        </div>
+        </div> {% endcomment %}
 
         {% comment %} <div class="sidebar-right">
             <div class="fw-bold text-muted small mb-3">NGƯỜI LIÊN HỆ</div>
@@ -376,6 +401,49 @@
         if (!event || event.target === modal) {
             modal.style.display = 'none';
         }
+    }
+
+    let currentPage = 1;
+    let hasNext = {{ has_next|yesno:"true,false" }}; // Lấy cờ báo còn trang hay không từ Django
+    let isLoading = false;
+
+    window.addEventListener('scroll', () => {
+        // Đang tải dở hoặc hết trang thì không gọi nữa
+        if (isLoading || !hasNext) return;
+        
+        // Tính toán khoảng cách (Nếu cách đáy màn hình khoảng 800px thì bắt đầu load thêm)
+        const scrolledToBottom = (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 800);
+        
+        if (scrolledToBottom) {
+            loadMoreFeed();
+        }
+    });
+
+    function loadMoreFeed() {
+        isLoading = true;
+        document.getElementById('feed-loading-spinner').style.display = 'block';
+        currentPage++;
+        
+        // Gửi yêu cầu AJAX kèm số trang
+        fetch(`?page=${currentPage}&ajax=1`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Nối HTML mới lấy được (từ file partial) vào đuôi bảng tin
+            const feedContainer = document.getElementById('feed-post-container');
+            feedContainer.insertAdjacentHTML('beforeend', data.html);
+            
+            // Cập nhật lại cờ trạng thái
+            hasNext = data.has_next;
+            isLoading = false;
+            document.getElementById('feed-loading-spinner').style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Lỗi tải bài viết:', error);
+            isLoading = false;
+            document.getElementById('feed-loading-spinner').style.display = 'none';
+        });
     }
 </script>
 {% endblock %}

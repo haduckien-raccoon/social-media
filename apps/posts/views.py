@@ -12,64 +12,171 @@ from apps.friends.models import Friend
 from django.shortcuts import render
 from django.db.models import Q, Count
 from .models import Post, PostReaction
+from apps.friends.models import *
+from apps.groups.models import *
+from django.shortcuts import render
+from django.db.models import Q, Count
+from django.core.paginator import Paginator
+from django.template.loader import render_to_string
+from django.http import JsonResponse
+from .models import Post, PostReaction
 
 
+# def feed_view(request):
+#     """
+#     Bảng tin cá nhân (Giống Facebook)
+#     - Tối ưu query
+#     - Tránh N+1 cho Reaction, Profile, Shared Post
+#     """
+
+#     # 1. Lấy danh sách ID bạn bè
+#     friends_ids = get_friend_ids(request.user)
+
+#     # 2. Query cơ bản (lọc quyền riêng tư)
+#     posts = (
+#         Post.objects
+#         .filter(is_deleted=False)
+#         .filter(
+#             Q(privacy="public") |
+#             Q(privacy="friends", author__id__in=friends_ids) |
+#             Q(privacy="only_me", author=request.user)
+#         )
+#         .order_by("-created_at")
+#     )
+
+#     # 3. Eager loading (FIX ĐÚNG FIELD)
+#     posts = (
+#         posts
+#         .select_related(
+#             "author",                # User
+#             "author__profile",       # Profile của User
+#         )
+#         .prefetch_related(
+#             "images",                                   # Ảnh bài viết
+#             "files",                                    # File đính kèm
+#             "comments",                                 # Comment preview
+#             "shared_post",                              # PostShare (reverse)
+#             "shared_post__original_post",               # Bài gốc
+#             "shared_post__original_post__author",
+#             "shared_post__original_post__author__profile",
+#             "shared_post__original_post__images",
+#         )
+#     )
+
+#     # 4. Annotate đếm reaction & comment
+#     posts = posts.annotate(
+#         reaction_count=Count("reactions", distinct=True),
+#         comment_count=Count(
+#             "comments",
+#             filter=Q(comments__is_deleted=False),
+#             distinct=True
+#         )
+#     )
+
+#     # 5. Thực thi SQL (1 QUERY)
+#     post_list = list(posts)
+
+#     # 6. Lấy reaction của user hiện tại (1 QUERY)
+#     if request.user.is_authenticated and post_list:
+#         my_reactions = (
+#             PostReaction.objects
+#             .filter(user=request.user, post__in=post_list)
+#             .values_list("post_id", "reaction_type")
+#         )
+#         my_reaction_map = {pid: rtype for pid, rtype in my_reactions}
+#     else:
+#         my_reaction_map = {}
+
+#     # 7. Gán dữ liệu cho template (KHÔNG QUERY THÊM)
+#     for post in post_list:
+#         # Reaction của user hiện tại
+#         post.current_user_reaction = my_reaction_map.get(post.id)
+
+#         # Xử lý bài share (đã prefetch)
+#         shares = list(post.shared_post.all())
+#         if shares:
+#             post.original_post_obj = shares[0].original_post
+#         else:
+#             post.original_post_obj = None
+
+#     # 8. Context
+#     context = {
+#         "posts": post_list,
+#         "profile": getattr(request.user, "profile", None),
+#     }
+
+#     return render(request, "posts/feed.html", context)
 def feed_view(request):
     """
-    Bảng tin cá nhân (Giống Facebook)
-    - Tối ưu query
-    - Tránh N+1 cho Reaction, Profile, Shared Post
+    Bảng tin cá nhân (Lazy Loading)
+    Đã fix logic chuẩn xác: 
+    - Không chung nhóm -> Không thấy bài nhóm.
+    - Không kết bạn -> Không thấy bài friends (nhưng vẫn thấy bài nhóm nếu chung nhóm).
     """
-
     # 1. Lấy danh sách ID bạn bè
     friends_ids = get_friend_ids(request.user)
 
-    # 2. Query cơ bản (lọc quyền riêng tư)
+    # ==========================================
+    # LUỒNG 1: BÀI VIẾT CÁ NHÂN (Ngoài tường nhà)
+    # ==========================================
+    # Điều kiện: KHÔNG thuộc nhóm NÀO + Thỏa mãn quyền riêng tư
+    personal_posts_q = Q(group_context__isnull=True) & (
+        Q(privacy="public") | 
+        Q(privacy="friends", author__id__in=friends_ids) | 
+        Q(privacy="only_me", author=request.user)
+    )
+
+    # ==========================================
+    # LUỒNG 2: BÀI VIẾT NHÓM
+    # ==========================================
+    # Điều kiện: THUỘC nhóm + Đã duyệt + User đang xem là thành viên hợp lệ HOẶC chủ nhóm
+    # (Bỏ qua check bạn bè ở đây, vì đã chung nhóm là thấy bài)
+    group_posts_q = Q(
+        group_context__isnull=False,
+        group_context__is_deleted=False,
+        group_context__status="approved"
+    ) & (
+        Q(group_context__group__members__user=request.user, group_context__group__members__status="approved") |
+        Q(group_context__group__owner=request.user)
+    )
+
+    # Gộp 2 luồng lại: Lấy bài cá nhân hợp lệ HOẶC bài nhóm hợp lệ
+    final_feed_filter = personal_posts_q | group_posts_q
+
+    # ==========================================
+    # KẾT HỢP QUERY TỔNG (1 QUERY DUY NHẤT)
+    # ==========================================
     posts = (
         Post.objects
         .filter(is_deleted=False)
-        .filter(
-            Q(privacy="public") |
-            Q(privacy="friends", author__id__in=friends_ids) |
-            Q(privacy="only_me", author=request.user)
+        .filter(final_feed_filter)
+        .distinct()  # Bắt buộc có distinct() vì ta có JOIN với bảng GroupMember (Many-to-Many)
+        .select_related("author", "author__profile")
+        .prefetch_related(
+            "images", "files", "comments", "shared_post", 
+            "shared_post__original_post", "shared_post__original_post__author",
+            "shared_post__original_post__author__profile", "shared_post__original_post__images"
+        )
+        .annotate(
+            reaction_count=Count("reactions", distinct=True),
+            comment_count=Count("comments", filter=Q(comments__is_deleted=False), distinct=True)
         )
         .order_by("-created_at")
     )
 
-    # 3. Eager loading (FIX ĐÚNG FIELD)
-    posts = (
-        posts
-        .select_related(
-            "author",                # User
-            "author__profile",       # Profile của User
-        )
-        .prefetch_related(
-            "images",                                   # Ảnh bài viết
-            "files",                                    # File đính kèm
-            "comments",                                 # Comment preview
-            "shared_post",                              # PostShare (reverse)
-            "shared_post__original_post",               # Bài gốc
-            "shared_post__original_post__author",
-            "shared_post__original_post__author__profile",
-            "shared_post__original_post__images",
-        )
-    )
+    # ==========================================
+    # CẮT NHỎ DỮ LIỆU (PAGINATION)
+    # ==========================================
+    paginator = Paginator(posts, 5) # Trả về 5 bài mỗi lần cuộn
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
 
-    # 4. Annotate đếm reaction & comment
-    posts = posts.annotate(
-        reaction_count=Count("reactions", distinct=True),
-        comment_count=Count(
-            "comments",
-            filter=Q(comments__is_deleted=False),
-            distinct=True
-        )
-    )
+    post_list = list(page_obj.object_list)
 
-    # 5. Thực thi SQL (1 QUERY)
-    post_list = list(posts)
-
-    # 6. Lấy reaction của user hiện tại (1 QUERY)
-    if request.user.is_authenticated and post_list:
+    # ==========================================
+    # XỬ LÝ REACTION CHO NGƯỜI DÙNG HIỆN TẠI
+    # ==========================================
+    if post_list:
         my_reactions = (
             PostReaction.objects
             .filter(user=request.user, post__in=post_list)
@@ -79,21 +186,28 @@ def feed_view(request):
     else:
         my_reaction_map = {}
 
-    # 7. Gán dữ liệu cho template (KHÔNG QUERY THÊM)
+    # Gán dữ liệu bổ sung
     for post in post_list:
-        # Reaction của user hiện tại
         post.current_user_reaction = my_reaction_map.get(post.id)
-
-        # Xử lý bài share (đã prefetch)
         shares = list(post.shared_post.all())
-        if shares:
-            post.original_post_obj = shares[0].original_post
-        else:
-            post.original_post_obj = None
+        post.original_post_obj = shares[0].original_post if shares else None
 
-    # 8. Context
+    # ==========================================
+    # TRẢ VỀ DỮ LIỆU (AJAX CHO LAZY LOAD HOẶC LOAD LẦN ĐẦU)
+    # ==========================================
+    if request.GET.get('ajax') == '1':
+        html = render_to_string(
+            "posts/partials/post_list_chunk.html", 
+            {"posts": post_list, "request": request}
+        )
+        return JsonResponse({
+            "html": html,
+            "has_next": page_obj.has_next() 
+        })
+
     context = {
         "posts": post_list,
+        "has_next": page_obj.has_next(), 
         "profile": getattr(request.user, "profile", None),
     }
 
@@ -109,13 +223,11 @@ def public_feed_view(request):
     )
     for post in posts:
         reaction = PostReaction.objects.filter(post=post, user=request.user).first()
-        post.current_user_reaction = reaction.reaction_type if reaction else None
+        setattr(post, 'current_user_reaction', reaction.reaction_type if reaction else None)
     return render(request, "posts/public_feed.html", {"posts": posts})
 
-# apps/posts/views.py
-
 def post_detail_view(request, post_id):
-    """Chi tiết bài viết - Fix logic hiển thị Comment Tree"""
+    """Chi tiết bài viết - Đã tích hợp kiểm tra quyền Group & Bạn bè"""
     post = get_object_or_404(
         Post.objects.select_related("author").prefetch_related(
             "images", "files", "tagged_users", "hashtags", "reactions"
@@ -124,79 +236,97 @@ def post_detail_view(request, post_id):
         is_deleted=False
     )
 
-    # 1. Privacy Check
+    # =========================================================
+    # CHỐT CHẶN 1: KIỂM TRA QUYỀN GROUP (NẾU BÀI THUỘC GROUP)
+    # =========================================================
+    group_post = GroupPost.objects.filter(
+        post=post, 
+        is_deleted=False, 
+        status="approved" # Chỉ tính các bài đã duyệt trong group
+    ).select_related('group').first()
+
+    if group_post:
+        group = group_post.group
+        
+        if not request.user.is_authenticated:
+            return HttpResponseForbidden("Bạn cần đăng nhập để xem nội dung của nhóm.")
+
+        is_owner = (group.owner == request.user)
+        is_author = (post.author == request.user)
+        is_approved_member = GroupMember.objects.filter(
+            group=group,
+            user=request.user,
+            status="approved"
+        ).exists()
+
+        if not (is_owner or is_author or is_approved_member):
+            return HttpResponseForbidden("Bài viết này thuộc một nhóm kín mà bạn chưa tham gia.")
+
+    # =========================================================
+    # CHỐT CHẶN 2: KIỂM TRA QUYỀN PRIVACY CÁ NHÂN (BẠN BÈ)
+    # =========================================================
     if post.privacy == "only_me" and post.author != request.user:
         return HttpResponseForbidden("Bài viết riêng tư")
+    
     if post.privacy == "friends":
-        is_friend = Friend.objects.filter(
-            Q(user=post.author, friend=request.user) | 
-            Q(user=request.user, friend=post.author)
-        ).exists()
-        if not is_friend and post.author != request.user:
-            return HttpResponseForbidden("Chỉ bạn bè mới xem được")
+        # Tối ưu: Nếu là tác giả thì không cần query db check bạn bè
+        if post.author != request.user:
+            is_friend = Friend.objects.filter(
+                Q(user=post.author, friend=request.user) | 
+                Q(user=request.user, friend=post.author)
+            ).exists()
+            if not is_friend:
+                return HttpResponseForbidden("Chỉ bạn bè mới xem được bài viết này.")
 
-    # 2. Get All Comments (Chưa sắp xếp thứ tự hiển thị, chỉ sắp xếp thời gian để xử lý logic)
+    # =========================================================
+    # PHẦN CÒN LẠI GIỮ NGUYÊN (XỬ LÝ COMMENT, REACTION, SHARE)
+    # =========================================================
     raw_comments = (
         Comment.objects
         .filter(post=post, is_deleted=False)
         .select_related("user")
         .prefetch_related("images", "files")
         .annotate(likes_count=Count('reactions'))
-        .order_by("created_at") # Order by time để đảm bảo con sinh sau nằm dưới con sinh trước
+        .order_by("created_at") 
     )
 
-    # --- LOGIC SẮP XẾP CÂY (FLATTEN TREE) ---
-    # Mục tiêu: Biến danh sách phẳng lộn xộn thành danh sách: [Cha A, Con A1, Con A1a, Cha B, ...]
-    
-    # B1: Gom nhóm comment theo parent_id
     from collections import defaultdict
     children_map = defaultdict(list)
     root_comments = []
     
-    # Map để lấy reaction của user hiện tại (Tối ưu query)
     comment_reactions = CommentReaction.objects.filter(
         comment__post=post, user=request.user
     ).values_list('comment_id', 'reaction_type')
     my_reaction_map = {c_id: r_type for c_id, r_type in comment_reactions}
 
     for c in raw_comments:
-        # Xử lý data phụ trợ luôn trong vòng lặp này
         c.current_reaction = my_reaction_map.get(c.id)
-        c.index_px = max(0, (c.level - 1) * 20) # Tính padding
+        c.index_px = max(0, (c.level - 1) * 20) 
 
         if c.parent_id:
             children_map[c.parent_id].append(c)
         else:
             root_comments.append(c)
 
-    # B2: Hàm đệ quy để tạo danh sách phẳng
     sorted_comments = []
     def recursive_add(comment):
         sorted_comments.append(comment)
-        # Tìm các con của comment này
         children = children_map.get(comment.id, [])
         for child in children:
             recursive_add(child)
 
-    # B3: Duyệt qua các comment gốc
     for root in root_comments:
         recursive_add(root)
     
-    # ----------------------------------------
-
-    # 4. Post Reaction của User hiện tại
     post_reaction = PostReaction.objects.filter(post=post, user=request.user).first()
     post.current_user_reaction = post_reaction.reaction_type if post_reaction else None
 
-    # Reaction Breakdown
     reaction_counts = PostReaction.objects.filter(post=post).values('reaction_type').annotate(count=Count('id'))
     reaction_breakdown = {item['reaction_type']: item['count'] for item in reaction_counts}
 
     count_comment = get_comment_count(post)
-
     report_reaseons = ReportReason.objects.all()
 
-    #lấy bài viết gốc của bài viết được chia sẻ (nếu có)
     original_post = None
     share_info = post.shared_post.select_related(
         "original_post",
@@ -209,15 +339,12 @@ def post_detail_view(request, post_id):
     ).first()
     if share_info:
         original_post = share_info.original_post
-    else:
-        original_post = None
 
-    #in ra log để debug
-    print(f"[DEBUG] Original Post: {original_post}")
     context = {
         "post": post,
+        "group_post": group_post, # Truyền ra context để HTML biết bài này ở group nào (nếu cần hiển thị tên nhóm)
         "original_post": original_post,
-        "comments": sorted_comments, # TRUYỀN DANH SÁCH ĐÃ SẮP XẾP
+        "comments": sorted_comments, 
         "reaction_breakdown": reaction_breakdown,
         "total_reactions": PostReaction.objects.filter(post=post).count(),
         "total_comments": len(sorted_comments),
@@ -455,3 +582,116 @@ def toggle_hide_counts_view(request, post_id):
         return JsonResponse({"success": True})
     except PermissionDenied as e:
         return JsonResponse({"error": str(e)}, status=403)
+    
+# def post_detail_view(request, post_id):
+#     """Chi tiết bài viết - Fix logic hiển thị Comment Tree"""
+#     post = get_object_or_404(
+#         Post.objects.select_related("author").prefetch_related(
+#             "images", "files", "tagged_users", "hashtags", "reactions"
+#         ),
+#         id=post_id,
+#         is_deleted=False
+#     )
+
+#     # 1. Privacy Check
+#     if post.privacy == "only_me" and post.author != request.user:
+#         return HttpResponseForbidden("Bài viết riêng tư")
+#     if post.privacy == "friends":
+#         is_friend = Friend.objects.filter(
+#             Q(user=post.author, friend=request.user) | 
+#             Q(user=request.user, friend=post.author)
+#         ).exists()
+#         if not is_friend and post.author != request.user:
+#             return HttpResponseForbidden("Chỉ bạn bè mới xem được")
+
+#     # 2. Get All Comments (Chưa sắp xếp thứ tự hiển thị, chỉ sắp xếp thời gian để xử lý logic)
+#     raw_comments = (
+#         Comment.objects
+#         .filter(post=post, is_deleted=False)
+#         .select_related("user")
+#         .prefetch_related("images", "files")
+#         .annotate(likes_count=Count('reactions'))
+#         .order_by("created_at") # Order by time để đảm bảo con sinh sau nằm dưới con sinh trước
+#     )
+
+#     # --- LOGIC SẮP XẾP CÂY (FLATTEN TREE) ---
+#     # Mục tiêu: Biến danh sách phẳng lộn xộn thành danh sách: [Cha A, Con A1, Con A1a, Cha B, ...]
+    
+#     # B1: Gom nhóm comment theo parent_id
+#     from collections import defaultdict
+#     children_map = defaultdict(list)
+#     root_comments = []
+    
+#     # Map để lấy reaction của user hiện tại (Tối ưu query)
+#     comment_reactions = CommentReaction.objects.filter(
+#         comment__post=post, user=request.user
+#     ).values_list('comment_id', 'reaction_type')
+#     my_reaction_map = {c_id: r_type for c_id, r_type in comment_reactions}
+
+#     for c in raw_comments:
+#         # Xử lý data phụ trợ luôn trong vòng lặp này
+#         c.current_reaction = my_reaction_map.get(c.id)
+#         c.index_px = max(0, (c.level - 1) * 20) # Tính padding
+
+#         if c.parent_id:
+#             children_map[c.parent_id].append(c)
+#         else:
+#             root_comments.append(c)
+
+#     # B2: Hàm đệ quy để tạo danh sách phẳng
+#     sorted_comments = []
+#     def recursive_add(comment):
+#         sorted_comments.append(comment)
+#         # Tìm các con của comment này
+#         children = children_map.get(comment.id, [])
+#         for child in children:
+#             recursive_add(child)
+
+#     # B3: Duyệt qua các comment gốc
+#     for root in root_comments:
+#         recursive_add(root)
+    
+#     # ----------------------------------------
+
+#     # 4. Post Reaction của User hiện tại
+#     post_reaction = PostReaction.objects.filter(post=post, user=request.user).first()
+#     post.current_user_reaction = post_reaction.reaction_type if post_reaction else None
+
+#     # Reaction Breakdown
+#     reaction_counts = PostReaction.objects.filter(post=post).values('reaction_type').annotate(count=Count('id'))
+#     reaction_breakdown = {item['reaction_type']: item['count'] for item in reaction_counts}
+
+#     count_comment = get_comment_count(post)
+
+#     report_reaseons = ReportReason.objects.all()
+
+#     #lấy bài viết gốc của bài viết được chia sẻ (nếu có)
+#     original_post = None
+#     share_info = post.shared_post.select_related(
+#         "original_post",
+#         "original_post__author"
+#     ).prefetch_related(
+#         "original_post__images",
+#         "original_post__files",
+#         "original_post__tagged_users",
+#         "original_post__hashtags",
+#     ).first()
+#     if share_info:
+#         original_post = share_info.original_post
+#     else:
+#         original_post = None
+
+#     #in ra log để debug
+#     print(f"[DEBUG] Original Post: {original_post}")
+#     context = {
+#         "post": post,
+#         "original_post": original_post,
+#         "comments": sorted_comments, # TRUYỀN DANH SÁCH ĐÃ SẮP XẾP
+#         "reaction_breakdown": reaction_breakdown,
+#         "total_reactions": PostReaction.objects.filter(post=post).count(),
+#         "total_comments": len(sorted_comments),
+#         "count_comment": count_comment,
+#         "report_reasons": report_reaseons,
+#     }
+
+#     return render(request, "posts/post_detail.html", context)

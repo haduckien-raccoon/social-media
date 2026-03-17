@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    .reaction-picker {
+        display: none;
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border-radius: 30px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        padding: 8px 12px;
+        z-index: 1000;
+        margin-bottom: 5px;
+    }
+    .reaction-emoji {
+        font-size: 24px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        display: inline-block;
+        padding: 4px 8px;
+    }
+    .reaction-emoji:hover {
+        transform: scale(1.4);
+    }
+    .reaction-btn {
+        transition: all 0.2s ease;
+    }
+    .reaction-btn:hover {
+        transform: scale(1.05);
+    }
+    .reaction-active {
+        color: #1877f2 !important;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% block posts_content %}{% endblock %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // ========================================
+    // GLOBAL JAVASCRIPT FOR POSTS
+    // ========================================
+    
+    // 1. CSRF TOKEN HELPER
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // 2. REACTION FUNCTIONS
+    let reactionTimeout;
+    
+    function delayShowReactions(postId) {
+        clearTimeout(reactionTimeout);
+        reactionTimeout = setTimeout(() => {
+            const picker = document.getElementById(`reaction-picker-${postId}`);
+            if (picker) picker.style.display = 'block';
+        }, 500);
+    }
+    
+    function hideReactions(postId) {
+        clearTimeout(reactionTimeout);
+        setTimeout(() => {
+            const picker = document.getElementById(`reaction-picker-${postId}`);
+            if (picker) picker.style.display = 'none';
+        }, 300);
+    }
+    
+    function showReactionPicker(postId) {
+        const picker = document.getElementById(`reaction-picker-${postId}`);
+        if (picker) {
+            const isVisible = picker.style.display === 'block';
+            document.querySelectorAll('.reaction-picker').forEach(p => p.style.display = 'none');
+            picker.style.display = isVisible ? 'none' : 'block';
+        }
+    }
+    
+    function toggleReaction(postId, type) {
+        type = type || 'like';
+        const btn = document.getElementById(`btn-post-like-${postId}`);
+        const text = document.getElementById(`text-post-like-${postId}`);
+        const countSpan = document.getElementById(`reaction-count-${postId}`);
+        
+        // Hide picker
+        const picker = document.getElementById(`reaction-picker-${postId}`);
+        if (picker) picker.style.display = 'none';
+        
+        fetch(`/posts/${postId}/reaction/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `reaction=${type}`
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Network error");
+            return res.json();
+        })
+        .then(data => {
+            if (data.status === 'added' || data.status === 'changed') {
+                btn.classList.add('reaction-active');
+                btn.classList.remove('text-muted');
+                const names = {
+                    'like': 'Thích',
+                    'love': 'Yêu thích',
+                    'haha': 'Haha',
+                    'sad': 'Buồn',
+                    'angry': 'Phẫn nộ'
+                };
+                text.innerText = names[type] || 'Thích';
+            } else {
+                btn.classList.remove('reaction-active');
+                btn.classList.add('text-muted');
+                text.innerText = "Thích";
+            }
+            if (countSpan && data.total_count !== undefined) {
+                countSpan.innerText = data.total_count;
+            }
+        })
+        .catch(err => {
+            console.error('Reaction error:', err);
+            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        });
+    }
+
+    // 3. POST ACTIONS
+    function sharePost(postId) {
+        const caption = prompt("Viết lời nhắn khi chia sẻ (tùy chọn):");
+        if (caption !== null) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/posts/${postId}/share/`;
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrftoken;
+            
+            const captionInput = document.createElement('input');
+            captionInput.type = 'hidden';
+            captionInput.name = 'caption';
+            captionInput.value = caption;
+            
+            form.appendChild(csrfInput);
+            form.appendChild(captionInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    
+    function deletePost(postId) {
+        if (confirm("Bạn có chắc muốn xóa bài viết này?")) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/posts/${postId}/delete/`;
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrftoken;
+            
+            form.appendChild(csrfInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    // 4. COMMENT FUNCTIONS
+    function submitComment(parentId, inputEl) {
+        if (typeof POST_ID === 'undefined') {
+            console.error('POST_ID is not defined');
+            return;
+        }
+        
+        const el = inputEl || document.getElementById('main-comment-input');
+        if (!el) {
+            console.error('Comment input not found');
+            return;
+        }
+        
+        const content = el.value.trim();
+        if (!content) {
+            alert('Vui lòng nhập nội dung bình luận');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('content', content);
+        if (parentId) formData.append('parent_id', parentId);
+
+        fetch(`/posts/${POST_ID}/comment/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken},
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                el.value = '';
+                if (parentId) {
+                    const replyBox = document.getElementById(`reply-box-${parentId}`);
+                    if (replyBox) replyBox.classList.add('d-none');
+                }
+            } else {
+                alert(data.error || 'Có lỗi xảy ra');
+            }
+        })
+        .catch(err => {
+            console.error('Comment error:', err);
+            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        });
+    }
+
+    function toggleCommentLike(commentId) {
+        fetch(`/posts/comment/${commentId}/reaction/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'reaction=like'
+        })
+        .then(res => res.json())
+        .then(data => {
+            const linkEl = document.getElementById(`comment-like-${commentId}`);
+            if (linkEl) {
+                if (data.status === 'added' || data.status === 'changed') {
+                    linkEl.classList.add('text-primary', 'fw-bold');
+                    linkEl.classList.remove('text-muted');
+                } else {
+                    linkEl.classList.remove('text-primary', 'fw-bold');
+                    linkEl.classList.add('text-muted');
+                }
+            }
+        })
+        .catch(err => console.error('Comment reaction error:', err));
+    }
+
+    function deleteComment(commentId) {
+        if (!confirm("Bạn có chắc muốn xóa bình luận này?")) return;
+        
+        fetch(`/posts/comment/${commentId}/delete/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken}
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status !== 'ok') {
+                alert(data.error || 'Có lỗi xảy ra');
+            }
+        })
+        .catch(err => console.error('Delete comment error:', err));
+    }
+
+    function showReply(commentId) {
+        const box = document.getElementById(`reply-box-${commentId}`);
+        if (box) {
+            box.classList.toggle('d-none');
+            if (!box.classList.contains('d-none')) {
+                const input = box.querySelector('input');
+                if (input) input.focus();
+            }
+        }
+    }
+
+    // 5. UTILITY
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // 6. CLOSE PICKERS ON OUTSIDE CLICK
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.reaction-btn') && !e.target.closest('.reaction-picker')) {
+            document.querySelectorAll('.reaction-picker').forEach(p => p.style.display = 'none');
+        }
+    });
+    
+    console.log('✅ Posts global functions loaded');
+</script>
+
+{% block posts_scripts %}{% endblock %}
+{% endblock %}

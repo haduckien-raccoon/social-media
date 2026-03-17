@@ -433,6 +433,70 @@
     @keyframes fadeIn { from{opacity:0} to{opacity:1} }
     .fade-in { animation: fadeIn 0.4s ease; }
     .d-none { display: none !important; }
+    /* =========================================
+    FILE ATTACHMENTS (FACEBOOK STYLE)
+    ========================================= */
+
+    .post-files{
+        padding:12px 16px 16px;
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+    }
+
+    .file-item{
+        display:flex;
+        align-items:center;
+        gap:12px;
+        padding:12px 14px;
+        border-radius:12px;
+        background:#f0f2f5;
+        border:1px solid #e4e6eb;
+        text-decoration:none;
+        transition:all 0.2s ease;
+    }
+
+    .file-item:hover{
+        background:#e7f3ff;
+        border-color:#1877f2;
+        transform:translateY(-1px);
+    }
+
+    .file-icon{
+        width:40px;
+        height:40px;
+        border-radius:10px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#fff;
+        border:1px solid #e4e6eb;
+        font-size:18px;
+    }
+
+    .file-info{
+        flex:1;
+        overflow:hidden;
+    }
+
+    .file-name{
+        font-size:14px;
+        font-weight:600;
+        color:#050505;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+
+    .file-meta{
+        font-size:12px;
+        color:#65676b;
+    }
+
+    .file-download{
+        color:#1877f2;
+        font-size:18px;
+    }
 </style>
 {% endblock %}
 
@@ -526,6 +590,59 @@
                 {% endfor %}
             </div>
         {% endwith %}
+        {% endif %}
+
+        {% if post.files.all and not original_post %}
+            <div class="post-files">
+
+            {% for file in post.files.all %}
+            <a class="file-item" href="{{ file.file.url }}" download>
+
+                <div class="file-icon">
+
+                    {% with ext=file.file.name|lower %}
+                        {% if ".pdf" in ext %}
+                            <i class="fas fa-file-pdf" style="color:#e53935"></i>
+
+                        {% elif ".doc" in ext or ".docx" in ext %}
+                            <i class="fas fa-file-word" style="color:#1e88e5"></i>
+
+                        {% elif ".xls" in ext or ".xlsx" in ext %}
+                            <i class="fas fa-file-excel" style="color:#43a047"></i>
+
+                        {% elif ".zip" in ext or ".rar" in ext %}
+                            <i class="fas fa-file-archive" style="color:#fb8c00"></i>
+
+                        {% elif ".png" in ext or ".jpg" in ext or ".jpeg" in ext %}
+                            <i class="fas fa-file-image" style="color:#8e24aa"></i>
+
+                        {% elif ".txt" in ext %}
+                            <i class="fas fa-file-lines" style="color:#607d8b"></i>
+
+                        {% else %}
+                            <i class="fas fa-file"></i>
+                        {% endif %}
+                    {% endwith %}
+
+                </div>
+
+                <div class="file-info">
+                    <div class="file-name">
+                        {{ file.file.name|cut:"/posts/files/" }}
+                    </div>
+
+                    <div class="file-meta">
+                        {{ file.file.size|filesizeformat }}
+                    </div>
+                </div>
+
+                <div class="file-download">
+                    <i class="fas fa-download"></i>
+                </div>
+            </a>
+            {% endfor %}
+
+            </div>
         {% endif %}
 
         <div class="post-stats">

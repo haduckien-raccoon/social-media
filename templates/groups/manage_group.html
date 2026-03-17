@@ -154,8 +154,25 @@
                             <div class="user-name">{{ gpost.post.author.username }}</div>
                         </div>
                         <div class="action-btns">
-                            <button class="btn-sm btn-approve">Phê duyệt</button>
-                            <button class="btn-sm btn-reject">Từ chối</button>
+                            <div class="action-btns">
+
+                                <form action="{% url 'groups:approve_post' group.id gpost.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-sm btn-approve"
+                                        onclick="return confirm('Phê duyệt bài viết này?');">
+                                        Phê duyệt
+                                    </button>
+                                </form>
+
+                                <form action="{% url 'groups:reject_post' group.id gpost.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-sm btn-reject"
+                                        onclick="return confirm('Từ chối bài viết này?');">
+                                        Từ chối
+                                    </button>
+                                </form>
+
+                            </div>
                         </div>
                     </div>
                     <div style="background: #f7f8fa; padding: 10px; border-radius: 6px; width: 100%; font-size: 14px;">
@@ -179,12 +196,12 @@
                         <form action="#" method="POST" style="display:inline;">
                             {% csrf_token %}
                             <input type="hidden" name="user_id" value="{{ req.user.id }}">
-                            <button type="submit" name="action" value="approve" class="btn-sm btn-approve">Phê duyệt</button>
+                            <button type="submit" name="action" value="approve" class="btn-sm btn-approve" onclick="return confirm('Are you sure you want to approve this request?');">Phê duyệt</button>
                         </form>
                         <form action="#" method="POST" style="display:inline;">
                             {% csrf_token %}
                             <input type="hidden" name="user_id" value="{{ req.user.id }}">
-                            <button type="submit" name="action" value="reject" class="btn-sm btn-reject">Từ chối</button>
+                            <button type="submit" name="action" value="reject" class="btn-sm btn-reject" onclick="return confirm('Are you sure you want to reject this request?');">Từ chối</button>
                         </form>
                     </div>
                 </div>
@@ -211,9 +228,9 @@
                     </div>
                     <div class="action-btns">
                         {% if user_role == 'owner' and member.role != 'owner' %}
-                            <button class="btn-sm btn-danger-sm">Chặn</button>
+                            <button class="btn-sm btn-danger-sm" onclick="return confirm('Are you sure you want to ban this member?');">Chặn</button>
                         {% elif user_role == 'admin' and member.role in 'member,moderator' %}
-                            <button class="btn-sm btn-danger-sm">Chặn</button>
+                            <button class="btn-sm btn-danger-sm" onclick="return confirm('Are you sure you want to ban this member?');  ">Chặn</button>
                         {% endif %}
                     </div>
                 </div>

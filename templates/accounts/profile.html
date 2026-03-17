@@ -178,16 +178,83 @@
             <div class="header-info-col">
                 <div class="info-row-1">
                     <h2 class="username-text" id="usernameTrigger" title="Click to view info">{{ user.username }}</h2>
-
                     {% if current_user == user %}
-                        <a href="/accounts/edit_profile/" class="btn btn-grey">Edit Profile</a>
-                        <button class="btn btn-grey">View Archive</button>
-                        <button class="btn btn-grey"><i class="fa-solid fa-gear"></i></button>
-                    {% else %}
-                        <button class="btn btn-blue">Follow</button>
-                        <button class="btn btn-grey">Message</button>
-                        <button class="btn btn-grey"><i class="fa-solid fa-user-plus"></i></button>
-                        <button class="btn btn-grey"><i class="fa-solid fa-ellipsis"></i></button>
+                    <button class="btn btn-grey" onclick="window.location.href='{% url 'accounts:edit_profile' %}'">
+                        Edit Profile
+                        <i class="fa-solid fa-pen-to-square ms-1"></i>
+                    </button>
+                    {% endif %}
+                    {% comment %} {% if friendship_status == "friends" %}
+                        <button id="friendBtn"
+                                class="btn btn-grey"
+                                data-action="unfriend"
+                                data-user="{{ user.id }}">
+                            Friends
+                        </button>
+
+                        {% elif friendship_status == "request_sent" %}
+                        <button id="friendBtn"
+                                class="btn btn-grey"
+                                data-action="cancel"
+                                data-request="{{ request_id }}">
+                            Cancel Request
+                        </button>
+
+                        {% elif friendship_status == "request_received" %}
+                        <button id="friendBtn"
+                                class="btn btn-blue"
+                                data-action="accept"
+                                data-request="{{ request_id }}">
+                            Accept Request
+                        </button>
+
+                        {% elif friendship_status == "not_friends" %}
+                        <button id="friendBtn"
+                                class="btn btn-blue"
+                                data-action="send"
+                                data-user="{{ user.id }}">
+                            Add Friend
+                        </button>
+                    {% endif %} {% endcomment %}
+                    {% if friendship_status == "friends" %}
+                        <button id="friendBtn"
+                                class="btn btn-grey"
+                                data-action="unfriend"
+                                data-user="{{ user.id }}">
+                            Friends
+                        </button>
+
+                        {% elif friendship_status == "request_sent" %}
+                        <button id="friendBtn"
+                                class="btn btn-grey"
+                                data-action="cancel"
+                                data-request="{{ request_id }}">
+                            Cancel Request
+                        </button>
+
+                        {% elif friendship_status == "request_received" %}
+                        <button id="friendBtn"
+                                class="btn btn-blue"
+                                data-action="accept"
+                                data-request="{{ request_id }}">
+                            Accept Request
+                        </button>
+
+                        {% elif friendship_status == "not_friends" %}
+                        <button id="friendBtn"
+                                class="btn btn-blue"
+                                data-action="send"
+                                data-user="{{ user.id }}">
+                            Add Friend
+                        </button>
+                    {% endif %}
+
+                    {% if current_user != user %}
+                        <button id="blockBtn"
+                                class="btn btn-grey"
+                                data-user="{{ user.id }}">
+                            Block
+                        </button>
                     {% endif %}
                 </div>
 
@@ -308,6 +375,23 @@
             </div>
         </div>
     </div>
+    <div id="confirmModal" class="modal">
+        <div class="modal-content" style="width:320px;">
+            <div class="modal-header">
+                <span id="confirmTitle">Confirm</span>
+                <span class="close-modal" id="confirmClose">&times;</span>
+            </div>
+
+            <div class="modal-body" style="text-align:center;">
+                <p id="confirmText"></p>
+
+                <div style="display:flex; gap:10px; justify-content:center;">
+                    <button id="confirmYes" class="btn btn-blue">Yes</button>
+                    <button id="confirmNo" class="btn btn-grey">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_js %}
@@ -325,6 +409,224 @@
     }
     window.onclick = function(event) {
         if (event.target == modal) { modal.style.display = "none"; }
+    }
+    const btn = document.getElementById("friendBtn");
+
+    const confirmModal = document.getElementById("confirmModal");
+    const confirmText = document.getElementById("confirmText");
+    const confirmYes = document.getElementById("confirmYes");
+    const confirmNo = document.getElementById("confirmNo");
+    const confirmClose = document.getElementById("confirmClose");
+
+    let currentAction = null;
+
+    function openConfirm(text, action){
+        confirmText.innerText = text;
+        confirmModal.style.display = "block";
+        currentAction = action;
+    }
+
+    function closeConfirm(){
+        confirmModal.style.display = "none";
+    }
+
+    confirmNo.onclick = closeConfirm;
+    confirmClose.onclick = closeConfirm;
+
+    confirmYes.onclick = function(){
+        if(currentAction){
+            currentAction();
+        }
+        closeConfirm();
+    }
+
+    if(btn){
+
+        btn.addEventListener("click", function(){
+
+            const action = btn.dataset.action;
+
+            if(action === "send"){
+                sendRequest();
+            }
+
+            if(action === "cancel"){
+                openConfirm("Cancel friend request?", cancelRequest);
+            }
+
+            if(action === "accept"){
+                openConfirm("Accept friend request?", acceptRequest);
+            }
+
+            if(action === "unfriend"){
+                openConfirm("Unfriend this user?", unfriend);
+            }
+
+        });
+
+    }
+
+    /* -------- API CALLS -------- */
+
+    function sendRequest(){
+
+        const userId = btn.dataset.user;
+
+        fetch(`/friends/api/send/${userId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken()
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+
+            console.log("SEND RESPONSE:", data);   // debug
+
+            if(data.status === "success"){
+
+                btn.innerText = "Cancel Request";
+
+                btn.dataset.action = "cancel";
+
+                // QUAN TRỌNG
+                btn.dataset.request = data.request_id;
+
+                btn.classList.remove("btn-blue");
+                btn.classList.add("btn-grey");
+
+            }
+
+        });
+
+    }
+
+    function cancelRequest(){
+
+        const reqId = btn.dataset.request;
+
+        fetch(`/friends/api/cancel/${reqId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken()
+            }
+        })
+        .then(res => res.json())
+        .then(() => {
+
+            btn.innerText = "Add Friend";
+            btn.dataset.action = "send";
+
+            btn.classList.remove("btn-grey");
+            btn.classList.add("btn-blue");
+
+        });
+
+    }
+
+
+    function acceptRequest(){
+
+        const reqId = btn.dataset.request;
+
+        fetch(`/friends/accept/${reqId}/`,{
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken()
+            }
+        })
+        .then(() => {
+
+            btn.innerText = "Friends";
+            btn.dataset.action = "unfriend";
+
+            btn.classList.remove("btn-blue");
+            btn.classList.add("btn-grey");
+
+        });
+
+    }
+
+
+    function unfriend(){
+
+        const userId = btn.dataset.user;
+
+        fetch(`/friends/unfriend/${userId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken()
+            }
+        })
+        .then(()=>{
+
+            btn.innerText = "Add Friend";
+            btn.dataset.action = "send";
+
+            btn.classList.remove("btn-grey");
+            btn.classList.add("btn-blue");
+
+        });
+
+    }
+    const blockBtn = document.getElementById("blockBtn");
+
+if(blockBtn){
+
+    blockBtn.addEventListener("click", function(){
+
+        openConfirm("Block this user?", blockUser);
+
+    });
+
+}
+
+function blockUser(){
+
+    const userId = blockBtn.dataset.user;
+
+        fetch(`/friends/block/${userId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken()
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+
+            if(data.status === "success"){
+
+                blockBtn.innerText = "Blocked";
+
+                blockBtn.disabled = true;
+
+                if(btn){
+                    btn.style.display = "none";
+                }
+
+            }
+
+        });
+
+    }
+
+    function getCSRFToken() {
+        let cookieValue = null;
+
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+
+                if (cookie.substring(0, 10) === "csrftoken=") {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+
+        return cookieValue;
     }
 </script>
 {% endblock %}

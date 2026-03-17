@@ -9,6 +9,7 @@ from datetime import timedelta
 from django.core.mail import send_mail
 from .models import User, EmailVerificationToken, UserProfile
 from django.conf import settings
+from django.db.models import Q
 from apps.friends.models import *
 
 JWT_SECRET = settings.SECRET_KEY
@@ -69,7 +70,7 @@ def register_user(username, email, password):
         print(f"[DEBUG] Username đã tồn tại: {username}")
         return None, "Username already exists"
 
-    user = User.objects.create_user(username=username, email=email, password=password)
+    user = User.objects.create(username=username, email=email, password=password)
     # Tạo token email
     token = EmailVerificationToken.objects.create(
         user=user,
@@ -305,3 +306,25 @@ def get_friends_list(user):
     """Liệt kê bạn bè để tag vào bài viết"""
     friends = Friend.objects.filter(user=user).select_related('friend')
     return [f.friend for f in friends]
+
+def get_friendship_status(user1, user2):
+    if user1 == user2:
+        return "self"
+
+    if Friend.objects.filter(
+        Q(user=user1, friend=user2) | Q(user=user2, friend=user1)
+    ).exists():
+        return "friends"
+
+    request = FriendRequest.objects.filter(
+        Q(from_user=user1, to_user=user2) |
+        Q(from_user=user2, to_user=user1)
+    ).first()
+
+    if request:
+        if request.status == FriendRequest.STATUS_PENDING:
+            if request.from_user == user1:
+                return "request_sent"
+            return "request_received"
+
+    return "not_friends"

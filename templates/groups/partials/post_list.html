@@ -43,6 +43,13 @@
                     </form>
                 {% endif %}
 
+                {# SỬA BÀI VIẾT (Chỉ tác giả bài viết) #}
+                {% if request.user == post.author %}
+                    <a href="{% url 'posts:edit_post' post.id %}" class="dropdown-item">
+                        <i class="fa-solid fa-pen-to-square"></i> Sửa bài viết
+                    </a>
+                {% endif %}
+
                 {# BÁO CÁO (Chỉ Member thường thấy nút này, không tính tác giả) #}
                 {% if request.user != post.author %}
                     <button onclick="alert('Đã mở form báo cáo!')" class="dropdown-item">

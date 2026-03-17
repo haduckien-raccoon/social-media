@@ -1,0 +1,146 @@
+{% for post in posts %}
+<div class="post-card" id="post-{{ post.id }}">
+    <div class="post-header">
+        <a href="{% url 'accounts:profile' post.author.username %}">
+            <img src="{{ post.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="p-avatar">
+        </a>
+        <div class="p-info">
+            <h5><a href="{% url 'accounts:profile' post.author.username %}">{{ post.author.username }}</a></h5>
+            <div class="p-time">
+                {{ post.created_at|timesince }} trước • 
+                {% if post.privacy == 'public' %}<i class="fas fa-globe-americas"></i>
+                {% elif post.privacy == 'friends' %}<i class="fas fa-user-friends"></i>
+                {% else %}<i class="fas fa-lock"></i>{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="post-content">{{ post.content|linebreaksbr }}</div>
+
+    {% if post.original_post_obj %}
+    <div class="shared-box" onclick="window.location.href='{% url 'posts:post_detail' post.original_post_obj.id %}'">
+        <div class="sb-header">
+            <img src="{{ post.original_post_obj.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="sb-avatar">
+            <div>
+                <strong>{{ post.original_post_obj.author.username }}</strong>
+                <div class="small text-muted">{{ post.original_post_obj.created_at|timesince }} trước</div>
+            </div>
+        </div>
+        <div class="p-3">
+            {{ post.original_post_obj.content|truncatechars:150 }}
+        </div>
+        {% if post.original_post_obj.images.all %}
+            {% with total=post.original_post_obj.images.count %}
+            <div class="img-grid grid-{% if total > 4 %}4{% else %}{{ total }}{% endif %}">
+                {% for img in post.original_post_obj.images.all|slice:":4" %}
+                <div class="grid-item">
+                    <img src="{{ img.image.url }}">
+                    {% if forloop.last and total > 4 %}<div class="more-overlay">+{{ total|add:"-3" }}</div>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endwith %}
+        {% endif %}
+    </div>
+    {% elif post.shared_post.exists and not post.original_post_obj %}
+        <div class="alert alert-warning m-3">Bài viết gốc đã bị xóa.</div>
+    {% endif %}
+
+    {% if post.images.all and not post.original_post_obj %}
+        {% with total=post.images.count %}
+        <a href="{% url 'posts:post_detail' post.id %}" style="display:block">
+            <div class="img-grid grid-{% if total > 4 %}4{% else %}{{ total }}{% endif %}">
+                {% for img in post.images.all|slice:":4" %}
+                <div class="grid-item">
+                    <img src="{{ img.image.url }}">
+                    {% if forloop.last and total > 4 %}<div class="more-overlay">+{{ total|add:"-3" }}</div>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </a>
+        {% endwith %}
+    {% endif %}
+
+    <div class="p-stats">
+        <div id="count-{{ post.id }}">
+            {% if post.reaction_count > 0 %}
+            <i class="fas fa-thumbs-up text-primary"></i> {{ post.reaction_count }}
+            {% endif %}
+        </div>
+        <div>{{ post.comment_count }} bình luận</div>
+    </div>
+
+    <div class="p-actions">
+        <div class="reaction-wrapper">
+            <div class="reaction-popup">
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'like')">👍</span>
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'love')">❤️</span>
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'haha')">😆</span>
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'wow')">😮</span>
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'sad')">😢</span>
+                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'angry')">😡</span>
+            </div>
+            <div class="action-btn {% if post.current_user_reaction %}active-{{ post.current_user_reaction }}{% endif %}" 
+                 id="btn-react-{{ post.id }}" 
+                 onclick="submitReact({{ post.id }}, 'like')"
+                 style="width: 100%;">
+                
+                {% if post.current_user_reaction == 'like' %} <i class="fas fa-thumbs-up"></i> Thích
+                {% elif post.current_user_reaction == 'love' %} <i class="fas fa-heart"></i> Yêu thích
+                {% elif post.current_user_reaction == 'haha' %} <i class="fas fa-laugh-squint"></i> Haha
+                {% elif post.current_user_reaction == 'sad' %} <i class="fas fa-sad-tear"></i> Buồn
+                {% elif post.current_user_reaction == 'wow' %} <i class="fas fa-surprise"></i> Wow
+                {% elif post.current_user_reaction == 'angry' %} <i class="fas fa-angry"></i> Phẫn nộ
+                {% else %} <i class="far fa-thumbs-up"></i> Thích
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="action-btn" onclick="window.location.href='{% url 'posts:post_detail' post.id %}'">
+            <i class="far fa-comment-alt me-2"></i> Bình luận
+        </div>
+        <div class="action-btn" onclick="openShareModal({{ post.id }})">
+            <i class="fas fa-share me-2"></i> Chia sẻ
+        </div>
+    </div>
+</div>
+
+<div id="shareModal-{{ post.id }}" class="share-modal" onclick="closeShareModal(event, {{ post.id }})">
+    <div class="share-box">
+        <div class="share-header">
+            Chia sẻ bài viết
+            <span class="close-btn" onclick="closeShareModal(null, {{ post.id }})">&times;</span>
+        </div>
+        <form action="{% url 'posts:share_post' post.id %}" method="POST" class="share-body">
+            {% csrf_token %}
+            <div class="share-user">
+                <img src="{{ request.user.profile.avatar.url|default:'images/avatars/normal.jpg' }}">
+                <div>
+                    <div style="font-weight: 600;">{{ request.user.username }}</div>
+                    <select name="privacy" class="share-privacy">
+                        <option value="public">🌍 Công khai</option>
+                        <option value="friends">👥 Bạn bè</option>
+                        <option value="only_me">🔒 Chỉ mình tôi</option>
+                    </select>
+                </div>
+            </div>
+            <textarea name="caption" class="share-caption" placeholder="Hãy nói gì đó về nội dung này..."></textarea>
+            
+            <div class="share-preview">
+                {% if post.original_post_obj %}
+                    <div class="small fw-bold mb-1">Bài viết của {{ post.original_post_obj.author.username }}</div>
+                    <div class="text-muted small">{{ post.original_post_obj.content|truncatechars:100 }}</div>
+                {% else %}
+                    <div class="small fw-bold mb-1">Bài viết của {{ post.author.username }}</div>
+                    <div class="text-muted small">{{ post.content|truncatechars:100 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="share-actions">
+                <button type="button" class="btn-share-cancel" onclick="closeShareModal(null, {{ post.id }})">Hủy</button>
+                <button type="submit" class="btn-share-submit">Chia sẻ ngay</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
