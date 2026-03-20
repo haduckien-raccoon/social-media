@@ -87,3 +87,11 @@ def delete_all_notifications(user: User):
     notifications = Notification.objects.filter(user=user)
     notifications.delete()
     return True
+
+def get_unread_notification_count(user: User):
+    """
+    Docstring for get_unread_notification_count
+    
+    :param user: Description
+    """
+    return Notification.objects.filter(user=user, is_read=False).count()
