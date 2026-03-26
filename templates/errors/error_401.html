@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permission Denied</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2D898B; /* Có thể đổi sang màu xanh dương để hợp màu ảnh hơn nếu muốn */
+            --text-main: #111111;
+            --text-muted: #777777;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #eef2f5, #d1e0e0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .desktop-container {
+            background: white;
+            width: 100%;
+            max-width: 680px;
+            min-height: 480px;
+            border-radius: 20px;
+            padding: 45px 38px;
+            box-shadow: 0 18px 45px rgba(0,0,0,0.14);
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 16px; 
+        }
+
+        /* Ẩn số lỗi đi để tập trung vào hình ảnh như thiết kế mới */
+        .error-code {
+            display: none; 
+        }
+
+        .illustration {
+            width: 100%;
+            max-width: 400px; /* Tăng kích thước để hiển thị rõ ảnh cây cầu gãy */
+            margin-bottom: 20px;
+            object-fit: contain;
+            /* Bỏ drop-shadow nếu ảnh của bạn đã có nền trong suốt đẹp */
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.05));
+        }
+
+        h2 {
+            font-size: 36px; 
+            color: var(--text-main);
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 18px; 
+            margin-bottom: 25px;
+            max-width: 520px;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(45, 137, 139, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background-color: #f1f1f1;
+            color: #333;
+            box-shadow: none;
+        }
+
+        .btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 12px 25px rgba(45, 137, 139, 0.35);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            background-color: #e5e5e5;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .desktop-container {
+                max-width: 85%;
+                padding: 35px;
+            }
+            .illustration { max-width: 350px; }
+            h2 { font-size: 32px; }
+            p { font-size: 16px; }
+        }
+
+        @media (max-width: 768px) {
+            .desktop-container {
+                max-width: 100%;
+                padding: 30px;
+                border-radius: 18px;
+            }
+            .illustration { max-width: 300px; }
+            h2 { font-size: 28px; }
+            p { font-size: 15px; }
+            .btn-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            .btn { 
+                width: 100%; 
+            }
+        }
+
+        @media (max-width: 480px) {
+            body { 
+                background: white; 
+                padding: 10px;
+            }
+            .desktop-container { 
+                box-shadow: none; 
+                padding: 15px;
+            }
+            .illustration { max-width: 250px; }
+            h2 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="desktop-container">
+        <div class="content">
+            <img src="/images/errors/permission_denied.png" alt="Permission Denied Illustration" class="illustration">
+
+            <h2>Permission Denied</h2>
+            <p>You have to subscribe enterprise plan for access</p>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="goBack()">Go Back</button>
+                <button class="btn" onclick="upgradePlan()">Upgrade Plan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+
+        function upgradePlan() {
+            // Đổi URL này trỏ tới trang đăng ký/nâng cấp của bạn
+            window.location.href = '/pricing'; 
+        }
+    </script>
+</body>
+</html>

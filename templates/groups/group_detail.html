@@ -29,6 +29,28 @@
         background: var(--bg-card); border-radius: var(--radius);
         box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px;
     }
+    /* =========================================
+    GROUP HEADER
+    ========================================= */
+    .group-header-card {
+        background: var(--bg-card); border-radius: var(--radius);
+        box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px;
+    }
+    .group-cover { 
+        height: 250px; 
+        background: linear-gradient(135deg, #1877f2, #28a745); 
+        position: relative; 
+    }
+
+    /* THÊM ĐOẠN NÀY ĐỂ FIX LỖI ẢNH TRÀN */
+    .group-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .group-info-section { padding: 24px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px; }
     .group-cover { height: 250px; background: linear-gradient(135deg, #1877f2, #28a745); position: relative; }
     .group-info-section { padding: 24px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px; }
     .group-titles h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
@@ -138,7 +160,7 @@
     
     <div class="group-header-card">
         <div class="group-cover">
-            <img src="{{ group.cover_image }}" alt="">
+            <img src="/images/{{ group.cover_image }}" alt="">
         </div>
         <div class="group-info-section">
             <div class="group-titles">

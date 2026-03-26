@@ -161,6 +161,7 @@ def group_detail(request, group_id):
     page = int(request.GET.get('page', 1))
     posts = []
     has_next = False
+    cover_image = group.cover_image.url if group.cover_image else None
     
     if not (group.is_private and user_role in ['none', 'pending']):
         posts, has_next = GroupService.get_group_feed(group, request.user, page=page, page_size=10)
@@ -183,7 +184,10 @@ def group_detail(request, group_id):
         'user_role': user_role,
         'posts': posts,
         'has_next': has_next, # Truyền ra ngoài để JS biết còn dữ liệu không
+        'cover_image': cover_image
     }
+
+    print("Group Detail Context:", context)  # Debug: In ra context để kiểm tra dữ liệu truyền ra template
     return render(request, 'groups/group_detail.html', context)
 
 def manage_group(request, group_id):
@@ -223,8 +227,11 @@ def manage_group(request, group_id):
         'reported_items': dashboard_data['reported_items'],
         'reports_count': dashboard_data['reports_count'],
         'pending_posts': dashboard_data['pending_posts'],
-        'pending_posts_count': dashboard_data['pending_posts_count']
+        'pending_posts_count': dashboard_data['pending_posts_count'],
+        'cover_image': dashboard_data['cover_image']
     }
+
+    print("Dashboard Data:", dashboard_data)  # Debug: In ra dữ liệu dashboard để kiểm tra
     
     return render(request, 'groups/manage_group.html', context)
 

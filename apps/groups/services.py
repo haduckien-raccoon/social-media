@@ -194,6 +194,9 @@ class GroupService:
             status='pending'
         ).select_related('post', 'post__author').order_by('created_at')
 
+        #5 Lấy ảnh bìa
+        cover_image = group.cover_image.url if group.cover_image else None
+
         return {
             'pending_requests': pending_requests,
             'pending_count': pending_requests.count(),
@@ -203,6 +206,7 @@ class GroupService:
             'reports_count': reported_items.count(),
             'pending_posts': pending_posts,
             'pending_posts_count': pending_posts.count(),
+            'cover_image': cover_image,
         }
 
     @staticmethod
