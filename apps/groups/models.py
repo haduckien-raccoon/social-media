@@ -22,14 +22,14 @@ class Group(models.Model):
     )
     # --- SETTINGS (CÀI ĐẶT NHÓM) ---
     # Thành viên
-    mod_can_approve_member = models.BooleanField(default=False, help_text="Cho phép Người kiểm duyệt phê duyệt thành viên")
+    admin_can_approve_member = models.BooleanField(default=True, help_text="Cho phép Admin phê duyệt thành viên")    
     
     # Bài viết
-    require_post_approval = models.BooleanField(default=False, help_text="Bật để yêu cầu phê duyệt bài viết mới")
-    mod_can_approve_post = models.BooleanField(default=False, help_text="Cho phép Người kiểm duyệt phê duyệt bài viết")
+    require_post_approval = models.BooleanField(default=False)
+    admin_can_approve_post = models.BooleanField(default=True, help_text="Cho phép Admin phê duyệt bài viết")
     
-    require_edit_approval = models.BooleanField(default=False, help_text="Bật để yêu cầu phê duyệt khi chỉnh sửa")
-    mod_can_approve_edit = models.BooleanField(default=False, help_text="Cho phép Người kiểm duyệt phê duyệt chỉnh sửa")
+    require_edit_approval = models.BooleanField(default=False)
+    admin_can_approve_edit = models.BooleanField(default=True, help_text="Cho phép Admin phê duyệt bài viết đã sửa")
     
     default_sort = models.CharField(
         max_length=20, 
@@ -45,10 +45,10 @@ class Group(models.Model):
         return self.name
     
 class GroupRole(models.TextChoices):
-    OWNER = "owner", "Owner"
-    ADMIN = "admin", "Admin"
-    MEMBER = "member", "Member"
-    MODERATOR = "moderator", "Moderator"
+    OWNER = "owner", "Chủ sở hữu"
+    ADMIN = "admin",  "Quản trị viên"
+    MEMBER = "member", "Thành viên"
+    # MODERATOR = "moderator", "Moderator"
 
 class GroupMember(models.Model):
     STATUS_CHOICES = (

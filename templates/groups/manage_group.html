@@ -94,6 +94,10 @@
                 <i class="fa-solid fa-users"></i> Thành viên
                 <span class="badge-count">{{ members_count }}</span>
             </div>
+            <div class="menu-item" onclick="switchTab('blocked')">
+                <i class="fa-solid fa-user-slash"></i> Thành viên bị chặn
+                <span class="badge-count">{{ blocked_count }}</span>
+            </div>
         </div>
 
         <div class="sidebar-section">
@@ -218,22 +222,58 @@
                         <img src="{{ member.user.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}">
                         <div>
                             <div class="user-name">{{ member.user.username }}</div>
-                            <div style="font-size: 12px; font-weight: bold; color: {% if member.role == 'owner' %}#d60000{% elif member.role == 'admin' %}#e67e22{% elif member.role == 'moderator' %}#2ecc71{% else %}var(--text-sub){% endif %};">
-                                {% if member.role == 'owner' %}Owner
+                            <div style="font-size: 12px; font-weight: bold; 
+                                color: {% if member.role == 'owner' %}#d60000{% elif member.role == 'admin' %}#1877f2{% else %}var(--text-sub){% endif %};">
+                                {% if member.role == 'owner' %}Chủ sở hữu
                                 {% elif member.role == 'admin' %}Quản trị viên
-                                {% elif member.role == 'moderator' %}Người kiểm duyệt
                                 {% else %}Thành viên{% endif %}
                             </div>
                         </div>
                     </div>
                     <div class="action-btns">
-                        {% if user_role == 'owner' and member.role != 'owner' %}
-                            <button class="btn-sm btn-danger-sm" onclick="return confirm('Are you sure you want to ban this member?');">Chặn</button>
-                        {% elif user_role == 'admin' and member.role in 'member,moderator' %}
-                            <button class="btn-sm btn-danger-sm" onclick="return confirm('Are you sure you want to ban this member?');  ">Chặn</button>
+                        {% if user_role == 'owner' or user_role == 'admin' %}
+                            {% if member.user != request.user and member.role != 'owner' %}
+                                <form method="POST" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="user_id" value="{{ member.user.id }}">
+                                    
+                                    {% if user_role == 'owner' %}
+                                        {% if member.role == 'member' %}
+                                            <button name="action" value="promote_admin" class="btn-sm btn-approve">Thăng Admin</button>
+                                        {% elif member.role == 'admin' %}
+                                            <button name="action" value="demote_member" class="btn-sm btn-reject">Gỡ Admin</button>
+                                        {% endif %}
+                                    {% endif %}
+        
+                                    <button name="action" value="remove_member" class="btn-sm btn-reject" onclick="return confirm('Xóa thành viên này? họ có thể xin vào lại.');">Xóa</button>
+                                    <button name="action" value="ban" class="btn-sm btn-danger-sm" onclick="return confirm('Chặn vĩnh viễn thành viên này?');">Chặn</button>
+                                </form>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
+            {% endfor %}
+        </div>
+
+        <div id="tab-blocked" class="tab-pane">
+            <div class="tab-title">Thành viên bị chặn ({{ blocked_count }})</div>
+            <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 15px;">Người dùng trong danh sách này sẽ không thể tìm thấy hoặc gửi yêu cầu tham gia lại nhóm.</p>
+            {% for member in blocked_members %}
+                <div class="user-list-item">
+                    <div class="user-info">
+                        <img src="{{ member.user.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}">
+                        <div class="user-name">{{ member.user.username }}</div>
+                    </div>
+                    <div class="action-btns">
+                        <form method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ member.user.id }}">
+                            <button name="action" value="unban" class="btn-sm btn-approve">Gỡ chặn</button>
+                        </form>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="color: var(--text-sub); text-align: center; padding: 20px;">Không có thành viên nào bị chặn.</div>
             {% endfor %}
         </div>
 
@@ -265,13 +305,13 @@
                     <h4><i class="fa-solid fa-users-gear"></i> Quản lý thành viên</h4>
                     <div class="form-group">
                         <label>Ai có thể phê duyệt yêu cầu làm thành viên?</label>
-                        <div class="form-text">Quản trị viên (Admin) mặc định luôn có quyền này.</div>
+                        <div class="form-text">Chủ sở hữu (Owner) mặc định luôn có quyền này.</div>
                         <div class="checkbox-role mt-2">
-                            <input type="checkbox" checked disabled> <span>Quản trị viên</span>
+                            <input type="checkbox" checked disabled> <span>Owner</span>
                         </div>
                         <div class="checkbox-role">
-                            <input type="checkbox" name="mod_can_approve_member" {% if group.mod_can_approve_member %}checked{% endif %}> 
-                            <span>Người kiểm duyệt</span>
+                            <input type="checkbox" name="admin_can_approve_member" {% if group.admin_can_approve_member %}checked{% endif %}> 
+                            <span>Quản trị viên (Admin)</span>
                         </div>
                     </div>
                 </div>
@@ -287,8 +327,8 @@
                         <div class="form-text">Bài viết của thành viên phải được duyệt trước khi hiển thị trong nhóm.</div>
                         <div id="post_roles" class="sub-options" style="{% if group.require_post_approval %}display:block;{% endif %}">
                             <label>Ai có thể phê duyệt?</label>
-                            <div class="checkbox-role"><input type="checkbox" checked disabled> Quản trị viên</div>
-                            <div class="checkbox-role"><input type="checkbox" name="mod_can_approve_post" {% if group.mod_can_approve_post %}checked{% endif %}> Người kiểm duyệt</div>
+                            <div class="checkbox-role"><input type="checkbox" checked disabled>Chủ sở hữu (Owner)</div>
+                            <div class="checkbox-role"><input type="checkbox" name="admin_can_approve_post" {% if group.admin_can_approve_post %}checked{% endif %}> Quản trị viên (Admin)</div>
                         </div>
                     </div>
 
@@ -300,8 +340,8 @@
                         <div class="form-text">Các bài viết đã chỉnh sửa cần được duyệt lại.</div>
                         <div id="edit_roles" class="sub-options" style="{% if group.require_edit_approval %}display:block;{% endif %}">
                             <label>Ai có thể phê duyệt?</label>
-                            <div class="checkbox-role"><input type="checkbox" checked disabled> Quản trị viên</div>
-                            <div class="checkbox-role"><input type="checkbox" name="mod_can_approve_edit" {% if group.mod_can_approve_edit %}checked{% endif %}> Người kiểm duyệt</div>
+                            <div class="checkbox-role"><input type="checkbox" checked disabled>Chủ sở hữu (Owner)</div>
+                            <div class="checkbox-role"><input type="checkbox" name="admim_can_approve_edit" {% if group.admin_can_approve_edit %}checked{% endif %}>Quản trị viên (Admin)</div>
                         </div>
                     </div>
 

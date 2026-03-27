@@ -204,12 +204,35 @@ def manage_group(request, group_id):
         action = request.POST.get("action")
         user_id = request.POST.get("user_id")
 
+        # Logic thăng chức/giáng chức (Chỉ Owner làm được)
+        if action in ['promote_admin', 'demote_member']:
+            new_role = GroupRole.ADMIN if action == 'promote_admin' else GroupRole.MEMBER
+            success, msg = GroupService.change_member_role(request.user, group, user_id, new_role)
+            if success: messages.success(request, msg)
+            else: messages.error(request, msg)
+
         if action in ['approve', 'reject'] and user_id:
             success, msg = GroupService.handle_join_request(group, user_id, action)
             if success:
                 messages.success(request, msg)
             else:
                 messages.error(request, msg)
+        if action == 'remove_member':
+            success, msg = GroupMemberService.remove_member(request.user, group, user_id)
+            messages.success(request, msg) if success else messages.error(request, msg)
+        
+        elif action == 'ban': # Chặn thành viên
+            # Tận dụng hàm ban_member có sẵn hoặc viết lại logic ở service
+            membership = get_object_or_404(GroupMember, group=group, user_id=user_id)
+            try:
+                GroupMemberService.ban_member(request.user, membership)
+                messages.success(request, "Đã chặn thành viên thành công.")
+            except PermissionDenied as e:
+                messages.error(request, str(e))
+
+        elif action == 'unban': # Gỡ chặn
+            success, msg = GroupMemberService.unban_member(request.user, group, user_id)
+            messages.success(request, msg) if success else messages.error(request, msg)
         
         # Xử lý xong thì redirect lại chính trang quản lý để reset form
         return redirect('groups:manage_group', group_id=group.id)
@@ -224,6 +247,8 @@ def manage_group(request, group_id):
         'pending_count': dashboard_data['pending_count'],
         'members': dashboard_data['members'],
         'members_count': dashboard_data['members_count'],
+        'blocked_members': dashboard_data['blocked_members'], # Mới
+        'blocked_count': dashboard_data['blocked_count'],
         'reported_items': dashboard_data['reported_items'],
         'reports_count': dashboard_data['reports_count'],
         'pending_posts': dashboard_data['pending_posts'],
@@ -252,14 +277,14 @@ def update_group(request, group_id):
             group.cover_image = request.FILES['cover_image']
 
         # b. Cài đặt Thành viên
-        group.mod_can_approve_member = request.POST.get("mod_can_approve_member") == "on"
+        group.admin_can_approve_member = request.POST.get("admin_can_approve_member") == "on"
 
         # c. Cài đặt Bài viết
         group.require_post_approval = request.POST.get("require_post_approval") == "on"
-        group.mod_can_approve_post = request.POST.get("mod_can_approve_post") == "on"
+        group.admin_can_approve_post = request.POST.get("admin_can_approve_post") == "on"
         
         group.require_edit_approval = request.POST.get("require_edit_approval") == "on"
-        group.mod_can_approve_edit = request.POST.get("mod_can_approve_edit") == "on"
+        group.admin_can_approve_edit = request.POST.get("admin_can_approve_edit") == "on"
 
         group.default_sort = request.POST.get("default_sort", "latest_activity")
 

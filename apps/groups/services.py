@@ -130,12 +130,14 @@ class GroupService:
     
     @staticmethod
     def can_manage_group(user, group):
-        return GroupMember.objects.filter(
-            group=group,
-            user=user,
-            role__in=[GroupRole.OWNER, GroupRole.ADMIN],
-            status="approved"
-        ).exists()
+        # return GroupMember.objects.filter(
+        #     group=group,
+        #     user=user,
+        #     role__in=[GroupRole.OWNER, GroupRole.ADMIN],
+        #     status="approved"
+        # ).exists()
+        role = GroupService.get_user_role(user, group)
+        return role in [GroupRole.OWNER, GroupRole.ADMIN]
     
     @staticmethod
     def is_owner(user, group):
@@ -155,6 +157,23 @@ class GroupService:
         ).exists()
     
     @staticmethod
+    def change_member_role(request_user, group, target_user_id, new_role):
+        """Owner thay đổi chức vụ cho Member/Admin"""
+        if not GroupService.is_owner(request_user, group):
+            return False, "Chỉ chủ sở hữu mới có quyền thay đổi chức vụ."
+        
+        try:
+            membership = GroupMember.objects.get(group=group, user_id=target_user_id)
+            if membership.user == request_user:
+                return False, "Bạn không thể tự thay đổi chức vụ của chính mình."
+            
+            membership.role = new_role
+            membership.save()
+            return True, f"Đã cập nhật vai trò của {membership.user.username} thành {new_role}."
+        except GroupMember.DoesNotExist:
+            return False, "Không tìm thấy thành viên."
+        
+    @staticmethod
     def get_manage_dashboard_data(group):
         """
         Lấy toàn bộ dữ liệu cần thiết cho trang Quản lý nhóm.
@@ -173,9 +192,8 @@ class GroupService:
             role_order=Case(
                 When(role=GroupRole.OWNER, then=Value(1)),
                 When(role=GroupRole.ADMIN, then=Value(2)),
-                When(role=GroupRole.MODERATOR, then=Value(3)),
-                When(role=GroupRole.MEMBER, then=Value(4)),
-                default=Value(5),
+                When(role=GroupRole.MEMBER, then=Value(3)),
+                default=Value(4),
                 output_field=IntegerField(),
             )
         ).order_by('role_order', '-joined_at')
@@ -197,11 +215,19 @@ class GroupService:
         #5 Lấy ảnh bìa
         cover_image = group.cover_image.url if group.cover_image else None
 
-        return {
+        # 5. Lấy danh sách thành viên bị chặn
+        blocked_members = GroupMember.objects.filter(
+            group=group, 
+            status='banned'
+        ).select_related('user', 'user__profile').order_by('-updated_at')
+
+        data = {
             'pending_requests': pending_requests,
             'pending_count': pending_requests.count(),
             'members': members,
             'members_count': members.count(),
+            'blocked_members': blocked_members, # Mới
+            'blocked_count': blocked_members.count(), # Mới
             'reported_items': reported_items,
             'reports_count': reported_items.count(),
             'pending_posts': pending_posts,
@@ -209,6 +235,7 @@ class GroupService:
             'cover_image': cover_image,
         }
 
+        return data
     @staticmethod
     def handle_join_request(group, user_id, action):
         """
@@ -305,6 +332,32 @@ class GroupMemberService:
             raise PermissionDenied("Only group owner or admin can ban members.")
         membership.status = "banned"
         membership.save()
+    
+    @staticmethod
+    def remove_member(request_user, group, target_user_id):
+        """Xóa thành viên khỏi nhóm (có thể xin vào lại)"""
+        if not GroupService.can_manage_group(request_user, group):
+            return False, "Bạn không có quyền."
+        try:
+            membership = GroupMember.objects.get(group=group, user_id=target_user_id)
+            if membership.role == GroupRole.OWNER:
+                return False, "Không thể xóa chủ sở hữu."
+            membership.delete() # Xóa hẳn record để họ có thể join lại
+            return True, "Đã xóa thành viên khỏi nhóm."
+        except GroupMember.DoesNotExist:
+            return False, "Thành viên không tồn tại."
+
+    @staticmethod
+    def unban_member(request_user, group, target_user_id):
+        """Gỡ chặn (xóa record banned để họ có thể tìm thấy và xin vào lại)"""
+        if not GroupService.can_manage_group(request_user, group):
+            return False, "Bạn không có quyền."
+        try:
+            membership = GroupMember.objects.get(group=group, user_id=target_user_id, status='banned')
+            membership.delete() # Xóa record banned để trạng thái trở thành 'none'
+            return True, "Đã gỡ chặn thành viên."
+        except GroupMember.DoesNotExist:
+            return False, "Thành viên không nằm trong danh sách chặn."
 
     @staticmethod
     def leave_group(user, group):
