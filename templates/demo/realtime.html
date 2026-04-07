@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Realtime Demo - MySite{% endblock %}
+
+{% block content %}
+  <section class="page-hero social-hero">
+    <span class="hero-badge"><i class="fa-solid fa-globe"></i> Realtime Social Feed</span>
+    <h1 class="hero-title">Live timeline with direct post-level comment interactions.</h1>
+    <p class="hero-subtitle">
+      Comment/reply/react/edit/delete được thao tác ngay dưới từng bài viết. List feed chỉ hiển thị 5 comment chính gần nhất,
+      còn chi tiết thread mở ở panel detail để xem replies đầy đủ.
+    </p>
+    <div class="inline-actions mt-16">
+      <span class="status-chip disconnected" id="ws-status-chip">
+        <span class="dot"></span>
+        <span id="ws-status-text">Disconnected</span>
+      </span>
+      <span class="status-chip">
+        <i class="fa-solid fa-id-card"></i>
+        Request ID: <strong id="last-request-id" class="muted">-</strong>
+      </span>
+      <button class="btn btn-soft btn-sm" id="ws-reconnect-btn" type="button" title="Reconnect websocket ngay nếu kết nối bị gián đoạn.">
+        <i class="fa-solid fa-rotate"></i>
+        Reconnect WS
+      </button>
+      <button class="btn btn-outline btn-sm" id="dev-stream-toggle-btn" type="button" title="Mở panel kỹ thuật để xem raw event stream.">
+        <i class="fa-solid fa-terminal"></i>
+        Dev Stream
+      </button>
+    </div>
+  </section>
+
+  <div id="demo-alert-stack" class="alert-stack"></div>
+
+  <section
+    class="social-layout"
+    id="realtime-demo-root"
+    data-api-base="{{ api_base }}"
+    data-ws-path="{{ ws_path }}"
+    data-current-user-id="{% if current_user %}{{ current_user.id }}{% endif %}"
+    data-reactions="{{ reaction_values|join:',' }}"
+  >
+    <div class="social-main">
+      <article class="card composer-card">
+        <div class="mini-toolbar">
+          <h2 class="page-section-title"><i class="fa-solid fa-pen-to-square"></i> Create Post</h2>
+          <span class="pill-tag">image / audio / file</span>
+        </div>
+
+        <form id="create-post-form" class="form-stack mt-12" enctype="multipart/form-data">
+          <label class="form-field">
+            <span class="form-label">Post content</span>
+            <textarea class="textarea-control" name="content" placeholder="Share update cho network của bạn..."></textarea>
+          </label>
+
+          <div class="form-field">
+            <span class="form-label">
+              Attachments
+              <span class="help-hint" data-tip="Tối đa 4 file mỗi post, preview tự động theo loại tệp."><i class="fa-regular fa-circle-question"></i></span>
+            </span>
+            <input class="input-control" id="post-attachments" name="attachments" type="file" multiple>
+            <div class="attachment-picker-preview" id="attachment-picker-preview">No file selected.</div>
+          </div>
+
+          <button class="btn btn-primary" type="submit" id="create-post-btn">
+            <i class="fa-solid fa-paper-plane"></i>
+            Publish to Feed
+          </button>
+        </form>
+      </article>
+
+      <article class="card feed-card">
+        <div class="mini-toolbar">
+          <h2 class="page-section-title"><i class="fa-solid fa-newspaper"></i> Following Feed</h2>
+          <button class="btn btn-soft btn-sm" type="button" id="refresh-feed-btn">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            Refresh
+          </button>
+        </div>
+        <p class="help-text">
+          Mỗi post hiển thị tối đa 5 comment chính gần nhất. Reply comments chỉ xem trong panel detail.
+        </p>
+
+        <div class="feed-list mt-16" id="feed-post-list">
+          <p class="empty-state">Loading feed...</p>
+        </div>
+      </article>
+    </div>
+
+    <aside class="social-side">
+      <article class="card detail-card">
+        <h2 class="page-section-title"><i class="fa-solid fa-circle-nodes"></i> Post Detail Thread</h2>
+
+        <label class="form-field mt-12">
+          <span class="form-label">Active post</span>
+          <select class="select-control" id="active-post-select"></select>
+        </label>
+
+        <div class="detail-post-summary mt-12" id="detail-post-summary">
+          <p class="muted">Select a post to view full thread.</p>
+        </div>
+
+        <form class="form-stack mt-12" id="detail-root-comment-form" data-action="detail-root-comment-form">
+          <label class="form-field">
+            <span class="form-label">Add root comment</span>
+            <textarea class="textarea-control" name="content" placeholder="Write a root comment..." required></textarea>
+          </label>
+          <button class="btn btn-primary" type="submit">
+            <i class="fa-solid fa-comment-dots"></i>
+            Add Comment
+          </button>
+        </form>
+
+        <div class="detail-thread mt-16" id="detail-thread">
+          <p class="empty-state">Select post to open detail thread.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2 class="page-section-title"><i class="fa-solid fa-user-check"></i> Presence & Typing</h2>
+        <p class="help-text">Online viewers và typing indicator realtime theo active post room.</p>
+
+        <div class="inline-actions mt-12">
+          <button class="btn btn-soft btn-sm" type="button" id="heartbeat-btn" title="Gia hạn trạng thái online khi đang mở post lâu.">Heartbeat</button>
+          <button class="btn btn-soft btn-sm" type="button" id="typing-start-btn" title="Phát event đang gõ.">Typing start</button>
+          <button class="btn btn-soft btn-sm" type="button" id="typing-stop-btn" title="Dừng event đang gõ.">Typing stop</button>
+        </div>
+
+        <ul class="viewer-list mt-16" id="viewer-list">
+          <li class="muted">No online viewers yet.</li>
+        </ul>
+      </article>
+    </aside>
+  </section>
+
+  <div class="drawer-backdrop hidden" id="dev-stream-backdrop"></div>
+  <aside class="dev-drawer" id="dev-stream-drawer" aria-hidden="true">
+    <div class="dev-drawer-head">
+      <h2 class="page-section-title"><i class="fa-solid fa-terminal"></i> Developer Stream</h2>
+      <button class="btn btn-soft btn-sm" type="button" id="dev-stream-close-btn">
+        <i class="fa-solid fa-xmark"></i>
+        Close
+      </button>
+    </div>
+
+    <p class="help-text mt-12">Panel kỹ thuật để theo dõi payload event và thao tác subscribe thủ công.</p>
+
+    <div class="inline-actions mt-12">
+      <button class="btn btn-primary btn-sm" type="button" id="feed-subscribe-btn">Subscribe feed</button>
+      <button class="btn btn-soft btn-sm" type="button" id="feed-unsubscribe-btn">Unsubscribe feed</button>
+      <button class="btn btn-soft btn-sm" type="button" id="subscribe-btn">Subscribe post</button>
+      <button class="btn btn-soft btn-sm" type="button" id="unsubscribe-btn">Unsubscribe post</button>
+      <button class="btn btn-soft btn-sm" type="button" id="clear-log-btn">Clear</button>
+    </div>
+
+    <pre class="log-console mt-12" id="event-log"></pre>
+  </aside>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'js/realtime_demo.js' %}"></script>
+{% endblock %}

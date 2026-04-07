@@ -1,118 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Email Verification</title>
+{% extends "base.html" %}
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+{% block title %}Verify Email - MySite{% endblock %}
 
-<style>
-* {
-    margin: 0; padding: 0; box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
-body {
-    background: #f4f6f8;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+{% block content %}
+  <section class="auth-shell">
+    <div class="auth-panel auth-accent">
+      <span class="hero-badge"><i class="fa-solid fa-envelope-circle-check"></i> Verification</span>
+      <h1 class="auth-title">Email verification status</h1>
+      <p class="auth-subtitle">Finalize your account before entering the full demo workspace.</p>
+      <a href="{% url 'login' %}" class="btn btn-outline">Back to login</a>
+    </div>
 
-.container {
-    background: #fff;
-    width: 100%;
-    max-width: 480px;
-    padding: 40px 35px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    text-align: center;
-}
-
-.logo {
-    font-size: 28px;
-    font-weight: 600;
-    color: #6a5af9;
-    margin-bottom: 25px;
-}
-
-.icon {
-    width: 120px;
-    margin-bottom: 20px;
-}
-
-h1 {
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.message {
-    font-size: 14px;
-    margin-bottom: 25px;
-    line-height: 1.6;
-}
-
-.message.success {
-    color: #28a745;
-}
-
-.message.error {
-    color: #dd2a7b;
-}
-
-.btn {
-    display: inline-block;
-    padding: 12px 35px;
-    background: #6a5af9;
-    color: white;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    transition: 0.3s;
-}
-
-.btn:hover {
-    background: #5846e0;
-}
-
-@media (max-width: 500px) {
-    .container {
-        padding: 30px 20px;
-    }
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-    <div class="logo">MyApp</div>
-
-    {% if message %}
-        <img class="icon"
-             src="https://cdn-icons-png.flaticon.com/512/845/845646.png"
-             alt="Success">
-        <h1>Email Verified</h1>
-        <div class="message success">
-            {{ message }}
+    <div class="auth-panel">
+      {% if message %}
+        <h2 class="auth-form-title">Email verified</h2>
+        <div class="alert alert-success mt-12"><i class="fa-solid fa-circle-check"></i>{{ message }}</div>
+        <div class="card-actions mt-16">
+          <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
         </div>
-        <a href="/accounts/login/" class="btn">Go to Login</a>
-
-    {% elif error %}
-        <img class="icon"
-             src="https://cdn-icons-png.flaticon.com/512/753/753345.png"
-             alt="Error">
-        <h1>Verification Failed</h1>
-        <div class="message error">
-            {{ error }}
+      {% elif error %}
+        <h2 class="auth-form-title">Verification failed</h2>
+        <div class="alert alert-error mt-12"><i class="fa-solid fa-circle-xmark"></i>{{ error }}</div>
+        <div class="card-actions mt-16">
+          <a href="{% url 'register' %}" class="btn btn-outline">Register again</a>
         </div>
-        <a href="/accounts/register/" class="btn">Register Again</a>
-    {% endif %}
-</div>
-
-</body>
-</html>
+      {% else %}
+        <h2 class="auth-form-title">Waiting for token</h2>
+        <div class="alert alert-warning mt-12"><i class="fa-solid fa-triangle-exclamation"></i>Verification token is missing.</div>
+        <div class="card-actions mt-16">
+          <a href="{% url 'register' %}" class="btn btn-outline">Create account</a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

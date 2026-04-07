@@ -1,6 +1,11 @@
 django>=3.2
-PyMySQL
+mysqlclient>=2.2.1
 python-dotenv
 djangorestframework
+whitenoise
 PyJWT
 Pillow
+channels
+channels-redis
+redis
+daphne

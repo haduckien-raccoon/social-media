@@ -1,160 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register</title>
+{% extends "base.html" %}
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% block title %}Register - MySite{% endblock %}
 
-<style>
-* {
-    margin: 0; padding: 0; box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
-body {
-    display: flex; justify-content: center; align-items: center;
-    min-height: 100vh; background: #fff;
-}
-.container {
-    display: flex; width: 900px; height: 550px;
-    background: #fff; border-radius: 30px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
+{% block content %}
+  <section class="auth-shell">
+    <div class="auth-panel">
+      <h2 class="auth-form-title">Create account</h2>
 
-/* LEFT (FORM) */
-.left-section {
-    width: 50%;
-    padding: 40px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-.header-title {
-    font-size: 32px;
-    text-align: center;
-    margin-bottom: 30px;
-}
-.input-group {
-    position: relative;
-    margin-bottom: 20px;
-}
-.input-group input {
-    width: 100%;
-    padding: 15px 45px 15px 20px;
-    background: #e0e2e5;
-    border: none;
-    border-radius: 8px;
-}
-.input-group i {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-}
-.btn-register {
-    width: 100%;
-    padding: 15px;
-    background: #6a5af9;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-}
-.btn-register:hover { background: #5846e0; }
+      {% if error %}
+        <div class="alert alert-error mt-12"><i class="fa-solid fa-circle-xmark"></i>{{ error }}</div>
+      {% endif %}
+      {% if message %}
+        <div class="alert alert-success mt-12"><i class="fa-solid fa-circle-check"></i>{{ message }}</div>
+      {% endif %}
 
-.message {
-    margin-top: 15px;
-    text-align: center;
-    font-size: 14px;
-}
-.message.error { color: #dd2a7b; }
-.message.success { color: #28a745; }
+      <form method="POST" action="{% url 'register' %}" class="form-stack mt-16">
+        {% csrf_token %}
 
-/* RIGHT (WELCOME) */
-.right-section {
-    width: 50%;
-    background: #6a5af9;
-    border-top-left-radius: 120px;
-    border-bottom-left-radius: 120px;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-.btn-login {
-    padding: 12px 50px;
-    border: 2px solid white;
-    border-radius: 10px;
-    color: white;
-    text-decoration: none;
-}
-.btn-login:hover {
-    background: white;
-    color: #6a5af9;
-}
-</style>
-</head>
+        <label class="form-field">
+          <span class="form-label">Username</span>
+          <input class="input-control" type="text" name="username" placeholder="Choose username" required>
+        </label>
 
-<body>
+        <label class="form-field">
+          <span class="form-label">Email</span>
+          <input class="input-control" type="email" name="email" placeholder="you@example.com" required>
+        </label>
 
-<div class="container">
-    <div class="left-section">
-        <h1 class="header-title">Register</h1>
+        <label class="form-field">
+          <span class="form-label">Password</span>
+          <input class="input-control" type="password" name="password" id="password-input" placeholder="Create password" required>
+        </label>
 
-        <form method="POST" action="/accounts/register/">
-            {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Register</button>
+      </form>
 
-            <div class="input-group">
-                <input type="text" name="username" placeholder="Username" required>
-                <i class="fa-regular fa-user"></i>
-            </div>
-
-            <div class="input-group">
-                <input type="email" name="email" placeholder="Email" required>
-                <i class="fa-regular fa-envelope"></i>
-            </div>
-
-            <div class="input-group">
-                <input type="password" name="password" placeholder="Password" required id="password-input">
-                <i class="fa-solid fa-eye" id="toggle-password"></i>
-            </div>
-            <button type="submit" class="btn-register">Register</button>
-            {% if error %}
-                <div class="message error">{{ error }}</div>
-            {% endif %}
-
-            {% if message %}
-                <div class="message success">{{ message }}</div>
-            {% endif %}
-            <br></br>
-        </form>
+      <p class="auth-footnote">
+        Already have an account?
+        <a href="{% url 'login' %}">Login now</a>
+      </p>
     </div>
 
-    <div class="right-section">
-        <h2>Welcome!</h2>
-        <p>Already have an account?</p>
-        <br></br>
-        <a href="/accounts/login/" class="btn-login">Login</a>
+    <div class="auth-panel auth-accent">
+      <span class="hero-badge"><i class="fa-solid fa-user-plus"></i> Join Demo Team</span>
+      <h1 class="auth-title">Start your demo account in seconds.</h1>
+      <p class="auth-subtitle">
+        Register once and you can immediately showcase authentication flow, social graph actions, and realtime events.
+      </p>
+      <div class="auth-checks">
+        <span><i class="fa-solid fa-check"></i> Quick onboarding form</span>
+        <span><i class="fa-solid fa-check"></i> Email verification support</span>
+        <span><i class="fa-solid fa-check"></i> Realtime-ready account</span>
+      </div>
+      <button type="button" class="btn btn-outline" id="toggle-password">
+        <i class="fa-solid fa-eye"></i>
+        Show Password
+      </button>
     </div>
-</div>
+  </section>
+{% endblock %}
 
+{% block scripts %}
 <script>
-const toggle = document.getElementById("toggle-password");
-const input = document.getElementById("password-input");
+  (function () {
+    const toggleButton = document.getElementById("toggle-password");
+    const passwordInput = document.getElementById("password-input");
 
-toggle.addEventListener("click", () => {
-    const type = input.type === "password" ? "text" : "password";
-    input.type = type;
-    toggle.classList.toggle("fa-eye");
-    toggle.classList.toggle("fa-eye-slash");
-});
+    if (!toggleButton || !passwordInput) {
+      return;
+    }
+
+    toggleButton.addEventListener("click", function () {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      this.innerHTML = isPassword
+        ? '<i class="fa-solid fa-eye-slash"></i> Hide Password'
+        : '<i class="fa-solid fa-eye"></i> Show Password';
+    });
+  })();
 </script>
-
-</body>
-</html>
+{% endblock %}

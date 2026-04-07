@@ -59,24 +59,63 @@ def create_password_reset_token(user):
     return token
 
 def register_user(username, email, password):
+    """Đăng ký user mới, tạo verification token và gửi email xác thực.
+
+    Input: username (str), email (str), password (str).
+    Output: (User, None) nếu thành công, (None, error_message) nếu thất bại.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    # Validate input
+    if not username or not username.strip():
+        return None, "Username is required"
+    if not email or not email.strip():
+        return None, "Email is required"
+    if not password or len(password) < 6:
+        return None, "Password must be at least 6 characters"
+
+    username = username.strip()
+    email = email.strip().lower()
+
     # Check trùng
     if User.objects.filter(email=email).exists():
-        #in ra log cho dễ debug
-        print(f"[DEBUG] Email đã tồn tại: {email}")
+        logger.info("register_duplicate_email", extra={"email": email})
         return None, "Email already exists"
     if User.objects.filter(username=username).exists():
-        print(f"[DEBUG] Username đã tồn tại: {username}")
+        logger.info("register_duplicate_username", extra={"username": username})
         return None, "Username already exists"
 
-    user = User.objects.create_user(username=username, email=email, password=password)
-    # Tạo token email
-    token = EmailVerificationToken.objects.create(
-        user=user,
-        expires_at=timezone.now() + timedelta(hours=1)
-    )
-    # Gửi mail
-    verify_url = f"http://127.0.0.1:8080/accounts/verify-email?token={token.token}"
-    send_mail('Verify email', f'Click: {verify_url}', settings.EMAIL_HOST_USER, [user.email])
+    try:
+        # Tạo user với is_active=True để có thể đăng nhập ngay (dev mode)
+        # Trong production, nên dùng email verification
+        user = User.objects.create_user(
+            username=username, 
+            email=email, 
+            password=password,
+            is_active=True
+        )
+        
+        # Tạo UserProfile mặc định
+        UserProfile.objects.get_or_create(user=user)
+        
+    except Exception as exc:
+        logger.exception("register_create_user_failed")
+        return None, "Failed to create user account"
+
+    # Tạo token email và gửi mail
+    try:
+        token = EmailVerificationToken.objects.create(
+            user=user,
+            expires_at=timezone.now() + timedelta(hours=1)
+        )
+        verify_url = f"{settings.APP_PUBLIC_BASE_URL}/accounts/verify-email?token={token.token}"
+        send_mail('Verify email', f'Click: {verify_url}', settings.EMAIL_HOST_USER, [user.email])
+    except Exception as exc:
+        logger.warning(
+            "register_send_email_failed",
+            extra={"email": email, "error": str(exc)},
+        )
 
     return user, None
 

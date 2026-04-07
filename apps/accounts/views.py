@@ -17,14 +17,31 @@ from .services import (
 
 @csrf_exempt
 def register_view(request):
+    """GET: hiển thị form đăng ký. POST: tạo tài khoản mới.
+
+    Input: POST fields username, email, password.
+    Output: render template với message thành công hoặc lỗi.
+    """
     if request.method == "GET":
         return render(request, "accounts/register.html")
 
-    username = request.POST.get("username")
-    email = request.POST.get("email")
-    password = request.POST.get("password")
+    username = request.POST.get("username", "").strip()
+    email = request.POST.get("email", "").strip()
+    password = request.POST.get("password", "")
 
-    user, error = register_user(username, email, password)
+    if not username or not email or not password:
+        return render(request, "accounts/register.html", {
+            "error": "All fields are required"
+        })
+
+    try:
+        user, error = register_user(username, email, password)
+    except Exception:
+        import logging
+        logging.getLogger(__name__).exception("register_view_unexpected_error")
+        return render(request, "accounts/register.html", {
+            "error": "An unexpected error occurred. Please try again."
+        })
 
     if error:
         return render(request, "accounts/register.html", {
@@ -84,7 +101,7 @@ def forgot_password_view(request):
         user = User.objects.get(email=email)
         token = create_password_reset_token(user)
 
-        reset_url = f"http://127.0.0.1:8080/accounts/reset-password/?token={token.token}"
+        reset_url = f"{settings.APP_PUBLIC_BASE_URL}/accounts/reset-password/?token={token.token}"
         send_mail(
             "Reset password",
             f"Click here: {reset_url}",

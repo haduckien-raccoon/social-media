@@ -1,62 +1,106 @@
-<!-- templates/home.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Home - MySite</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif;}
-    body { background: #f4f6f8; color:#333; min-height:100vh; display:flex; flex-direction:column; }
-    header { background:#6a5af9; color:white; padding:20px 40px; display:flex; justify-content:space-between; align-items:center; }
-    header h1 { font-size:24px; font-weight:600; }
-    header nav a { color:white; text-decoration:none; margin-left:20px; font-weight:500; transition:0.3s;}
-    header nav a:hover { text-decoration:underline; }
-    main { flex:1; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:40px; }
-    main h2 { font-size:28px; margin-bottom:20px; }
-    main p { font-size:18px; margin-bottom:20px; color:#555; text-align:center; max-width:600px; }
-    .btn { padding:12px 30px; background:#6a5af9; color:white; border:none; border-radius:8px; font-size:16px; cursor:pointer; transition:0.3s; text-decoration:none; }
-    .btn:hover { background:#5846e0; }
-    footer { text-align:center; padding:20px; font-size:14px; color:#888; }
-    @media(max-width:768px){
-        header { flex-direction:column; align-items:flex-start; }
-        header nav { margin-top:10px; }
-    }
-</style>
-</head>
-<body>
-<header>
-    <h1>MySite</h1>
-    <nav>
-        {% if is_authenticated %}
-            <span>Welcome, {{ user.username }}</span>
-            <a href="{% url 'logout' %}">Logout</a>
+{% extends "base.html" %}
+
+{% block title %}Home - MySite{% endblock %}
+
+{% block content %}
+  <section class="page-hero">
+    <div class="hero-grid">
+      <div>
+        <span class="hero-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> Realtime Social Demo</span>
+        <h1 class="hero-title">A modern, collaborative workspace to demo auth, friends, and realtime interactions.</h1>
+        {% if is_authenticated and current_user %}
+          <p class="hero-subtitle">
+            Welcome back, <strong>{{ current_user.username }}</strong>. Start from Realtime playground to showcase comment/reaction fanout,
+            then move to Friends flow for collaboration scenarios.
+          </p>
+          <div class="card-actions mt-16">
+            <a href="{% url 'realtime_demo' %}" class="btn btn-primary">
+              <i class="fa-solid fa-satellite-dish"></i>
+              Open Realtime Demo
+            </a>
+            <a href="{% url 'friends:list' %}" class="btn btn-outline">
+              <i class="fa-solid fa-user-group"></i>
+              Open Friends
+            </a>
+          </div>
         {% else %}
-            <a href="/accounts/login">Login</a>
-            <a href="/accounts/register">Register</a>
+          <p class="hero-subtitle">
+            Login to unlock full demo suite: secure authentication, social graph actions, and realtime online comment workflow.
+          </p>
+          <div class="card-actions mt-16">
+            <a href="{% url 'login' %}" class="btn btn-primary">
+              <i class="fa-solid fa-right-to-bracket"></i>
+              Login
+            </a>
+            <a href="{% url 'register' %}" class="btn btn-outline">
+              <i class="fa-solid fa-user-plus"></i>
+              Register
+            </a>
+          </div>
         {% endif %}
-    </nav>
-</header>
+      </div>
 
-<main>
-    <h2>Welcome to MySite!</h2>
+      <aside class="hero-panel">
+        <h3><i class="fa-solid fa-route"></i> Suggested Demo Script</h3>
+        <ul>
+          <li>Login and create a post in Realtime Demo.</li>
+          <li>Open second tab to show presence and typing sync.</li>
+          <li>Add/accept friend requests to validate social module.</li>
+          <li>Use event log and request_id to trace backend events.</li>
+        </ul>
+      </aside>
+    </div>
 
-    {% if is_authenticated %}
-        <p>
-            Hello <strong>{{ user.username }}</strong>,
-            you are logged in using JWT authentication.
-        </p>
-    {% else %}
-        <p>
-            Please login or register to access exclusive features of MySite.
-        </p>
-        <a href="/accounts/register" class="btn">Get Started</a>
-    {% endif %}
-</main>
-<footer>
-    &copy; 2026 MySite. All rights reserved.
-</footer>
+    <div class="kpi-grid">
+      <article class="kpi-card">
+        <p class="kpi-label">Realtime Endpoint</p>
+        <p class="kpi-value">/ws/realtime/</p>
+      </article>
+      <article class="kpi-card">
+        <p class="kpi-label">API Version</p>
+        <p class="kpi-value">v1</p>
+      </article>
+      <article class="kpi-card">
+        <p class="kpi-label">Reaction Types</p>
+        <p class="kpi-value">6</p>
+      </article>
+      <article class="kpi-card">
+        <p class="kpi-label">Online Signals</p>
+        <p class="kpi-value">Presence + Typing</p>
+      </article>
+    </div>
+  </section>
 
-</body>
-</html>
+  <section class="grid grid-cols-3">
+    <article class="card">
+      <h2 class="card-title"><i class="fa-solid fa-user-lock"></i> Auth Journey</h2>
+      <p class="card-subtitle">
+        Consistent forms for register, login, password reset and email verification with clear feedback states.
+      </p>
+      <div class="card-actions">
+        <a href="{% url 'register' %}" class="btn btn-soft">Register</a>
+        <a href="{% url 'login' %}" class="btn btn-soft">Login</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2 class="card-title"><i class="fa-solid fa-users"></i> Friends Module</h2>
+      <p class="card-subtitle">
+        Manage pending requests, suggestions, and existing friends in one glance with minimal click actions.
+      </p>
+      <div class="card-actions">
+        <a href="{% url 'friends:list' %}" class="btn btn-soft">Open Friends</a>
+      </div>
+    </article>
+
+    <article class="card card-muted">
+      <h2 class="card-title"><i class="fa-solid fa-bolt"></i> Realtime Playground</h2>
+      <p class="card-subtitle">
+        Full control center for post/comment/reaction plus websocket presence, typing, reconnect and event timeline.
+      </p>
+      <div class="card-actions">
+        <a href="{% url 'realtime_demo' %}" class="btn btn-primary">Launch Demo</a>
+      </div>
+    </article>
+  </section>
+{% endblock %}

@@ -1,136 +1,112 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Friends</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    body { background: #f0f2f5; padding: 20px; }
-    
-    .container { max-width: 1000px; margin: 0 auto; }
-    
-    .section { background: #fff; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    .section-title { font-size: 20px; font-weight: 600; color: #333; margin-bottom: 15px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
-    
-    .user-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
-    
-    .user-card { 
-        border: 1px solid #e0e2e5; border-radius: 10px; padding: 15px; 
-        display: flex; align-items: center; justify-content: space-between;
-        background: #fff;
-    }
-    
-    .user-info { display: flex; align-items: center; gap: 10px; }
-    .avatar-placeholder { 
-        width: 40px; height: 40px; background: #6a5af9; color: #fff; 
-        border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; 
-    }
-    
-    .actions { display: flex; gap: 5px; }
-    
-    .btn { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; color: #fff; text-decoration: none; transition: 0.3s; }
-    .btn-accept { background: #6a5af9; }
-    .btn-accept:hover { background: #5846e0; }
-    .btn-reject, .btn-unfriend { background: #dd2a7b; }
-    .btn-reject:hover { background: #c01b63; }
-    .btn-add { background: #444; }
-    
-    .alert { padding: 10px; border-radius: 8px; margin-bottom: 15px; color: #fff; text-align: center; }
-    .alert-success { background: #2ecc71; }
-    .alert-error { background: #e74c3c; }
-    
-    .empty-msg { color: #888; font-style: italic; }
-</style>
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="container">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
-                {{ message }}
+{% block title %}Friends - MySite{% endblock %}
+
+{% block content %}
+  <section class="page-hero">
+    <span class="hero-badge"><i class="fa-solid fa-user-group"></i> Social Graph</span>
+    <h1 class="hero-title">Manage requests and connections with a clean, predictable workflow.</h1>
+    <p class="hero-subtitle">
+      Keep your collaboration network ready for demos by processing requests quickly and tracking all friend states in one page.
+    </p>
+
+    <div class="friends-summary mt-16">
+      <article class="kpi-card">
+        <p class="kpi-label">Pending Requests</p>
+        <p class="kpi-value">{{ pending_requests|length }}</p>
+      </article>
+      <article class="kpi-card">
+        <p class="kpi-label">Suggestions</p>
+        <p class="kpi-value">{{ suggestions|length }}</p>
+      </article>
+      <article class="kpi-card">
+        <p class="kpi-label">My Friends</p>
+        <p class="kpi-value">{{ friends|length }}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="friends-layout">
+    <article class="card">
+      <h2 class="page-section-title"><i class="fa-solid fa-user-clock"></i> Pending Requests</h2>
+      <p class="card-subtitle">Review incoming requests and decide in one click.</p>
+      <div class="grid mt-16">
+        {% for req in pending_requests %}
+          <div class="friend-item">
+            <div class="friend-meta">
+              <span class="avatar-dot">{{ req.from_user.username|make_list|first|upper }}</span>
+              <div>
+                <p class="friend-name">{{ req.from_user.username }}</p>
+                <p class="friend-sub">{{ req.from_user.email }}</p>
+              </div>
             </div>
+            <div class="friend-actions">
+              <form action="{% url 'friends:accept_request' req.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Accept</button>
+              </form>
+              <form action="{% url 'friends:reject_request' req.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-xmark"></i> Reject</button>
+              </form>
+            </div>
+          </div>
+        {% empty %}
+          <p class="empty-state">No pending requests right now.</p>
         {% endfor %}
-    {% endif %}
+      </div>
+    </article>
 
-    <div class="section">
-        <h2 class="section-title"><i class="fa-solid fa-user-clock"></i> Friend Requests</h2>
-        <div class="user-list">
-            {% for req in pending_requests %}
-            <div class="user-card">
-                <div class="user-info">
-                    <div class="avatar-placeholder">{{ req.from_user.username|make_list|first|upper }}</div>
-                    <div>
-                        <strong>{{ req.from_user.username }}</strong><br>
-                        <small>{{ req.from_user.email }}</small>
-                    </div>
-                </div>
-                <div class="actions">
-                    <form action="{% url 'friends:accept_request' req.id %}" method="POST">
-                        <button type="submit" class="btn btn-accept"><i class="fa-solid fa-check"></i></button>
-                    </form>
-                    <form action="{% url 'friends:reject_request' req.id %}" method="POST">
-                        <button type="submit" class="btn btn-reject"><i class="fa-solid fa-xmark"></i></button>
-                    </form>
-                </div>
+    <article class="card">
+      <h2 class="page-section-title"><i class="fa-solid fa-wand-magic-sparkles"></i> People You May Know</h2>
+      <p class="card-subtitle">Suggested users based on current friend graph.</p>
+      <div class="grid mt-16">
+        {% for suggested in suggestions %}
+          <div class="friend-item">
+            <div class="friend-meta">
+              <span class="avatar-dot">{{ suggested.username|make_list|first|upper }}</span>
+              <div>
+                <p class="friend-name">{{ suggested.username }}</p>
+                <p class="friend-sub">Suggested user</p>
+              </div>
             </div>
-            {% empty %}
-            <p class="empty-msg">No pending requests.</p>
-            {% endfor %}
-        </div>
-    </div>
-
-    <div class="section">
-        <h2 class="section-title"><i class="fa-solid fa-wand-magic-sparkles"></i> People You May Know</h2>
-        <div class="user-list">
-            {% for user in suggestions %}
-            <div class="user-card">
-                <div class="user-info">
-                    <div class="avatar-placeholder" style="background: #ff9f43">{{ user.username|make_list|first|upper }}</div>
-                    <div>
-                        <strong>{{ user.username }}</strong><br>
-                        <small>Suggested</small>
-                    </div>
-                </div>
-                <div class="actions">
-                    <form action="{% url 'friends:send_request' user.id %}" method="POST">
-                        <button type="submit" class="btn btn-add">Add Friend</button>
-                    </form>
-                </div>
+            <div class="friend-actions">
+              <form action="{% url 'friends:send_request' suggested.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-soft btn-sm"><i class="fa-solid fa-user-plus"></i> Add</button>
+              </form>
             </div>
-            {% empty %}
-            <p class="empty-msg">No suggestions available right now.</p>
-            {% endfor %}
-        </div>
-    </div>
+          </div>
+        {% empty %}
+          <p class="empty-state">No suggestions available.</p>
+        {% endfor %}
+      </div>
+    </article>
 
-    <div class="section">
-        <h2 class="section-title"><i class="fa-solid fa-users"></i> My Friends ({{ friends|length }})</h2>
-        <div class="user-list">
-            {% for friend in friends %}
-            <div class="user-card">
-                <div class="user-info">
-                    <div class="avatar-placeholder" style="background: #2ecc71">{{ friend.username|make_list|first|upper }}</div>
-                    <div>
-                        <strong>{{ friend.username }}</strong><br>
-                        <small>{{ friend.email }}</small>
-                    </div>
-                </div>
-                <div class="actions">
-                    <form action="{% url 'friends:unfriend' friend.id %}" method="POST" onsubmit="return confirm('Are you sure?');">
-                        <button type="submit" class="btn btn-unfriend">Unfriend</button>
-                    </form>
-                </div>
+    <article class="card">
+      <h2 class="page-section-title"><i class="fa-solid fa-users"></i> My Friends ({{ friends|length }})</h2>
+      <p class="card-subtitle">Current accepted friendships for your account.</p>
+      <div class="grid mt-16">
+        {% for friend in friends %}
+          <div class="friend-item">
+            <div class="friend-meta">
+              <span class="avatar-dot">{{ friend.username|make_list|first|upper }}</span>
+              <div>
+                <p class="friend-name">{{ friend.username }}</p>
+                <p class="friend-sub">{{ friend.email }}</p>
+              </div>
             </div>
-            {% empty %}
-            <p class="empty-msg">You have no friends yet.</p>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-
-</body>
-</html>
+            <div class="friend-actions">
+              <form action="{% url 'friends:unfriend' friend.id %}" method="POST" onsubmit="return confirm('Are you sure you want to unfriend this user?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-user-minus"></i> Unfriend</button>
+              </form>
+            </div>
+          </div>
+        {% empty %}
+          <p class="empty-state">You do not have friends yet.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+{% endblock %}

@@ -16,6 +16,8 @@ Including another URLconf
 """
 
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path, include
 
 urlpatterns = [
@@ -23,4 +25,8 @@ urlpatterns = [
     path("", include("apps.core.urls")),
     path('accounts/', include('apps.accounts.urls')),
     path('friends/', include('apps.friends.urls')),
+    path("api/v1/", include("apps.posts.urls")),
 ]
+
+if settings.SERVE_MEDIA_FROM_DJANGO:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

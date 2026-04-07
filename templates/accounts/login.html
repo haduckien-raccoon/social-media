@@ -1,145 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
+{% extends "base.html" %}
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% block title %}Login - MySite{% endblock %}
 
-<style>
-* {
-    margin: 0; padding: 0; box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
-body {
-    display: flex; justify-content: center; align-items: center;
-    min-height: 100vh; background: #fff;
-}
-.container {
-    display: flex; width: 900px; height: 550px;
-    background: #fff; border-radius: 30px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-
-/* LEFT */
-.left-section {
-    width: 50%;
-    background-color: #6a5af9;
-    border-top-right-radius: 150px;
-    border-bottom-right-radius: 150px;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-    color: white; text-align: center;
-}
-.welcome-title { font-size: 32px; font-weight: 600; }
-.sub-text { margin: 15px 0 30px; }
-.btn-switch {
-    padding: 10px 45px;
-    border: 2px solid white;
-    border-radius: 10px;
-    color: white; text-decoration: none;
-}
-.btn-switch:hover {
-    background: white; color: #6a5af9;
-}
-
-/* RIGHT */
-.right-section {
-    width: 50%;
-    padding: 40px 60px;
-    display: flex; flex-direction: column;
-    justify-content: center;
-}
-.header-title {
-    font-size: 32px;
-    text-align: center;
-    margin-bottom: 30px;
-}
-.input-group {
-    position: relative;
-    margin-bottom: 20px;
-}
-.input-group input {
-    width: 100%;
-    padding: 15px 45px 15px 20px;
-    background: #e0e2e5;
-    border: none;
-    border-radius: 8px;
-}
-.input-group i {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.forgot-pass {
-    display: inline-block;
-    margin-bottom: 20px;
-    font-size: 14px;
-    text-decoration: none;
-    color: #444;
-}
-
-.btn-submit {
-    width: 100%;
-    padding: 15px;
-    background: #6a5af9;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-}
-.btn-submit:hover { background: #5846e0; }
-
-.error-message {
-    color: #dd2a7b;
-    text-align: center;
-    margin-bottom: 15px;
-    font-size: 14px;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-    <div class="left-section">
-        <h1 class="welcome-title">Hello, Welcome!</h1>
-        <p class="sub-text">Don't have an account?</p>
-        <a href="/accounts/register/" class="btn-switch">Register</a>
+{% block content %}
+  <section class="auth-shell">
+    <div class="auth-panel auth-accent">
+      <span class="hero-badge"><i class="fa-solid fa-shield-heart"></i> Secure Access</span>
+      <h1 class="auth-title">Welcome back to your realtime workspace.</h1>
+      <p class="auth-subtitle">
+        Sign in to continue your demo flow and monitor live events across posts, comments, and reactions.
+      </p>
+      <div class="auth-checks">
+        <span><i class="fa-solid fa-check"></i> JWT cookie session flow</span>
+        <span><i class="fa-solid fa-check"></i> Presence and typing indicators</span>
+        <span><i class="fa-solid fa-check"></i> Request trace with request_id</span>
+      </div>
+      <a href="{% url 'register' %}" class="btn btn-outline">Create account</a>
     </div>
 
-    <div class="right-section">
-        <h2 class="header-title">Login</h2>
+    <div class="auth-panel">
+      <h2 class="auth-form-title">Login</h2>
 
-        {% if error %}
-            <div class="error-message">{{ error }}</div>
-        {% endif %}
+      {% if error %}
+        <div class="alert alert-error mt-12"><i class="fa-solid fa-circle-xmark"></i>{{ error }}</div>
+      {% endif %}
 
-        <form method="POST" action="/accounts/login/">
-            {% csrf_token %}
+      <form method="POST" action="{% url 'login' %}" class="form-stack mt-16">
+        {% csrf_token %}
 
-            <div class="input-group">
-                <input type="email" name="email" placeholder="Email" required>
-                <i class="fa-regular fa-user"></i>
-            </div>
+        <label class="form-field">
+          <span class="form-label">Email</span>
+          <input class="input-control" type="email" name="email" placeholder="you@example.com" required>
+        </label>
 
-            <div class="input-group">
-                <input type="password" name="password" placeholder="Password" required>
-                <i class="fa-solid fa-lock"></i>
-            </div>
+        <label class="form-field">
+          <span class="form-label">Password</span>
+          <input class="input-control" type="password" name="password" placeholder="Your password" required>
+        </label>
 
-            <a href="/accounts/forgot-password/" class="forgot-pass">Forgot Password?</a>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
 
-            <button type="submit" class="btn-submit">Login</button>
-        </form>
+      <p class="auth-footnote">
+        Forgot password?
+        <a href="{% url 'forgot_password' %}">Reset it here</a>
+      </p>
     </div>
-</div>
-
-</body>
-</html>
+  </section>
+{% endblock %}

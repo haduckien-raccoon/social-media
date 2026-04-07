@@ -1,0 +1,83 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: social-media-app
+    restart: unless-stopped
+    ports:
+      - "8001:8080"
+    environment:
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,app"
+      APP_PUBLIC_BASE_URL: "http://127.0.0.1:8001"
+      MYSQL_DATABASE: "social_media"
+      MYSQL_USER: "social_user"
+      MYSQL_PASSWORD: "social_password"
+      MYSQL_TEST_USER: "root"
+      MYSQL_TEST_PASSWORD: "root_password"
+      MYSQL_HOST: "mysql"
+      MYSQL_PORT: "3306"
+      REDIS_URL: "redis://redis:6379/1"
+      LOG_FORMAT: "json"
+      LOG_LEVEL: "INFO"
+      SERVE_MEDIA_FROM_DJANGO: "True"
+      WS_RATE_WINDOW_SECONDS: "10"
+      WS_RATE_MAX_MESSAGES: "20"
+      WS_RATE_TYPING_MAX: "8"
+      WS_RATE_HEARTBEAT_MAX: "15"
+      WS_RATE_VIOLATION_CLOSE_THRESHOLD: "5"
+      POST_MAX_ATTACHMENTS: "4"
+      POST_ATTACHMENT_MAX_SIZE_MB: "20"
+    volumes:
+      - media_data:/app/media
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.create_connection(('127.0.0.1',8080),2); s.close()"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: social-media-redis
+    restart: unless-stopped
+    expose:
+      - "6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mysql:
+    image: mysql:8.0
+    container_name: social-media-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: "social_media"
+      MYSQL_USER: "social_user"
+      MYSQL_PASSWORD: "social_password"
+      MYSQL_ROOT_PASSWORD: "root_password"
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    expose:
+      - "3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  redis_data:
+  mysql_data:
+  media_data:

@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MySite{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="app-body {% block body_class %}{% endblock %}">
+  <div class="bg-orb orb-one"></div>
+  <div class="bg-orb orb-two"></div>
+
+  <header class="app-header">
+    <div class="container app-header-inner">
+      <a href="{% url 'home' %}" class="brand-link" aria-label="MySite Home">
+        <span class="brand-badge"><i class="fa-solid fa-bolt"></i></span>
+        <span class="brand-name">MySite</span>
+      </a>
+
+      <nav class="app-nav" aria-label="Main navigation">
+        {% if is_authenticated or current_user or request.user.is_authenticated %}
+          <a href="{% url 'home' %}" class="nav-link {% if request.path == '/' %}is-active{% endif %}">Home</a>
+          <a href="{% url 'friends:list' %}" class="nav-link {% if request.path|slice:':9' == '/friends/' %}is-active{% endif %}">Friends</a>
+          <a href="{% url 'realtime_demo' %}" class="nav-link {% if request.path|slice:':14' == '/demo/realtime' %}is-active{% endif %}">Realtime Demo</a>
+          <a href="/api/v1/posts" class="nav-link" target="_blank" rel="noreferrer">API v1</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="nav-link {% if request.path|slice:':16' == '/accounts/login/' %}is-active{% endif %}">Login</a>
+          <a href="{% url 'register' %}" class="nav-link {% if request.path|slice:':19' == '/accounts/register/' %}is-active{% endif %}">Register</a>
+        {% endif %}
+      </nav>
+
+      <div class="app-user-actions">
+        {% if current_user %}
+          <span class="user-chip"><i class="fa-regular fa-user"></i>{{ current_user.username }}</span>
+          <a href="{% url 'logout' %}" class="btn btn-outline btn-sm">Logout</a>
+        {% elif user and user.is_authenticated %}
+          <span class="user-chip"><i class="fa-regular fa-user"></i>{{ user.username }}</span>
+          <a href="{% url 'logout' %}" class="btn btn-outline btn-sm">Logout</a>
+        {% elif request.user.is_authenticated %}
+          <span class="user-chip"><i class="fa-regular fa-user"></i>{{ request.user.username }}</span>
+          <a href="{% url 'logout' %}" class="btn btn-outline btn-sm">Logout</a>
+        {% else %}
+          <a href="{% url 'register' %}" class="btn btn-primary btn-sm">Get Started</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div class="container">
+      {% if messages %}
+        <div class="alert-stack" role="status" aria-live="polite">
+          {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}">
+              {% if message.tags == 'success' %}<i class="fa-solid fa-circle-check"></i>{% endif %}
+              {% if message.tags == 'error' %}<i class="fa-solid fa-circle-xmark"></i>{% endif %}
+              {% if message.tags == 'warning' %}<i class="fa-solid fa-triangle-exclamation"></i>{% endif %}
+              {% if not message.tags or message.tags == 'info' %}<i class="fa-solid fa-circle-info"></i>{% endif %}
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <p>Realtime social demo workspace with consistent UI and production-focused flows.</p>
+      <div class="footer-links">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'friends:list' %}">Friends</a>
+        <a href="{% url 'realtime_demo' %}">Realtime</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/main.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
