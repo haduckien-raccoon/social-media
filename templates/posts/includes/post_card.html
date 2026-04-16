@@ -74,8 +74,8 @@
         <div class="small text-muted mb-2">
             <i class="fas fa-user-tag me-1"></i>
             Cùng với
-            {% for tag in post.tagged_users.all %}
-                <a href="#" class="text-decoration-none">{{ tag.user.username }}</a>{% if not forloop.last %}, {% endif %}
+            {% for user in post.tagged_users.all %}
+                <a href="#" class="text-decoration-none">{{ user.username }}</a>
             {% endfor %}
         </div>
         {% endif %}

@@ -213,6 +213,19 @@ def update_post(
 
     post.updated_at = timezone.now()
     post.save()
+
+    if tagged_users is not None:
+        # Xóa tag cũ
+        PostTagUser.objects.filter(post=post).delete()
+
+        # Lấy user mới
+        users = User.objects.filter(id__in=tagged_users)
+
+        # Tạo lại
+        PostTagUser.objects.bulk_create([
+            PostTagUser(post=post, user=user)
+            for user in users
+        ])
     
     send_ws_message(f"post_{post.id}", "post_event", {
         "event": "post_updated",
@@ -552,6 +565,8 @@ def get_comment_count(post):
 def get_my_posts(user):
     """Lấy tất cả bài viết của user"""
     posts =  Post.objects.filter(author=user, is_deleted=False).order_by('-created_at')
+    #Lọc các bài post không nằm trong group (vì group = private))
+    posts = posts.exclude(group_context__isnull=False)
     #nếu là post là bài share thì lấy ảnh của bài gốc
     for post in posts:
         if hasattr(post, "shared_post") and post.shared_post.exists():
@@ -571,6 +586,8 @@ def get_user_posts(viewer, profile_user, friends_ids):
         Q(privacy="friends", author__id__in=friends_ids) |
         Q(privacy="only_me", author=viewer)
     ).select_related('author').prefetch_related('images', 'reactions').order_by('-created_at')
+    #Lọc các bài post không nằm trong group (vì group = private))
+    posts = posts.exclude(group_context__isnull=False)
     #nếu là post là bài share thì lấy ảnh của bài gốc
     for post in posts:
         if hasattr(post, "shared_post") and post.shared_post.exists():

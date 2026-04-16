@@ -295,11 +295,11 @@
                 <div id="deletedItemsContainer"></div>
 
                 <div class="tag-box" id="tagPreview">
-                    {% for u in post.tagged_users.all %}
-                        <div class="tag-chip" id="tag-existing-{{ u.id }}">
-                            {{ u.username }}
-                            <span onclick="untagExisting('{{ u.id }}')">&times;</span>
-                            <input type="hidden" name="tagged_users" value="{{ u.id }}">
+                    {% for tag in post.tagged_users.all %}
+                        <div class="tag-chip" id="tag-existing-{{ tag.user.id }}">
+                            {{ tag.user.username }}
+                            <span onclick="untagExisting('{{ tag.user.id }}')">&times;</span>
+                            <input type="hidden" name="tagged_users" value="{{ tag.user.id }}">
                         </div>
                     {% endfor %}
                 </div>

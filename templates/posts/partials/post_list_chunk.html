@@ -41,6 +41,18 @@
             </div>
             {% endwith %}
         {% endif %}
+        {% if post.original_post_obj.files.all %}
+            <div class="p-3">
+                {% for file in post.original_post_obj.files.all %}
+                    <div style="border:1px solid #ddd; padding:10px; border-radius:8px; margin-bottom:8px;">
+                        <i class="fas fa-file-alt me-2"></i>
+                        <a href="{{ file.file.url }}" target="_blank">
+                            {{ file.file.name|truncatechars:40 }}
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
     {% elif post.shared_post.exists and not post.original_post_obj %}
         <div class="alert alert-warning m-3">Bài viết gốc đã bị xóa.</div>
@@ -59,6 +71,18 @@
             </div>
         </a>
         {% endwith %}
+    {% endif %}
+    {% if post.files.all and not post.original_post_obj %}
+        <div class="p-3">
+            {% for file in post.files.all %}
+                <div style="border:1px solid #ddd; padding:10px; border-radius:8px; margin-bottom:8px;">
+                    <i class="fas fa-file-alt me-2"></i>
+                    <a href="{{ file.file.url }}" target="_blank">
+                        {{ file.file.name|truncatechars:40 }}
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 
     <div class="p-stats">
