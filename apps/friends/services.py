@@ -2,6 +2,7 @@ from django.db.models import Q, Count
 # from django.contrib.auth import get_user_model
 from .models import FriendRequest, Friend
 from apps.accounts.models import User
+from apps.notifications.services import create_notification
 
 # -------------------------------
 # 1. Helper Check Status
@@ -116,8 +117,22 @@ def send_friend_request(from_user, to_user):
         if existing.status == 'rejected': 
             existing.status = 'pending'
             existing.save()
+            create_notification(
+                actor=from_user,
+                recipient=to_user,
+                verb_code="friend_request",
+                target=from_user,
+                link=f"/accounts/profile/{from_user.username}/",
+            )
             return existing, "Request sent again." # Trả về existing request object
-            
+
+    create_notification(
+        actor=from_user,
+        recipient=to_user,
+        verb_code="friend_request",
+        target=from_user,
+        link=f"/accounts/profile/{from_user.username}/",
+    )
     return existing, "Request sent." # Trả về new request object
 
 def accept_friend_request(user, request_id):
@@ -130,6 +145,14 @@ def accept_friend_request(user, request_id):
         # Tạo quan hệ 2 chiều trong bảng Friend
         Friend.objects.get_or_create(user=req.from_user, friend=req.to_user)
         Friend.objects.get_or_create(user=req.to_user, friend=req.from_user)
+
+        create_notification(
+            actor=user,
+            recipient=req.from_user,
+            verb_code="friend_accept",
+            target=user,
+            link=f"/accounts/profile/{user.username}/",
+        )
         
         return True, "Friend request accepted."
     except FriendRequest.DoesNotExist:

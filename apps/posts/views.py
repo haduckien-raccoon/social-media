@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Q
+from django.core.exceptions import ValidationError
 from apps.posts.models import *
 from apps.posts.services import *
 from apps.friends.models import Friend
@@ -17,6 +18,7 @@ from django.core.paginator import Paginator
 from django.template.loader import render_to_string
 from django.http import JsonResponse
 from .models import Post, PostReaction
+from apps.accounts.services import create_user_profile
 
 def feed_view(request):
     """
@@ -71,7 +73,8 @@ def feed_view(request):
         )
         .annotate(
             reaction_count=Count("reactions", distinct=True),
-            comment_count=Count("comments", filter=Q(comments__is_deleted=False), distinct=True)
+            comment_count=Count("comments", filter=Q(comments__is_deleted=False), distinct=True),
+            share_count=Count("shares", distinct=True),
         )
         .order_by("-created_at")
     )
@@ -131,7 +134,8 @@ def public_feed_view(request):
     posts = get_public_feed()
     posts = posts.annotate(
         reaction_count=Count('reactions', distinct=True),
-        comment_count=Count('comments', filter=Q(comments__is_deleted=False), distinct=True)
+        comment_count=Count('comments', filter=Q(comments__is_deleted=False), distinct=True),
+        share_count=Count('shares', distinct=True),
     )
     for post in posts:
         reaction = PostReaction.objects.filter(post=post, user=request.user).first()
@@ -260,6 +264,7 @@ def post_detail_view(request, post_id):
         "reaction_breakdown": reaction_breakdown,
         "total_reactions": PostReaction.objects.filter(post=post).count(),
         "total_comments": len(sorted_comments),
+        "total_shares": PostShare.objects.filter(original_post=post).count(),
         "count_comment": count_comment,
         "report_reasons": report_reaseons,
     }
@@ -282,21 +287,26 @@ def create_post_view(request):
         tagged = request.POST.getlist("tagged_users")
         location = request.POST.get("location", "")
 
-        post = create_post(
-            user=request.user,
-            content=content,
-            privacy=privacy,
-            images=images,
-            files=files,
-            tagged_users=tagged,
-            location_name=location
-        )
+        try:
+            post = create_post(
+                user=request.user,
+                content=content,
+                privacy=privacy,
+                images=images,
+                files=files,
+                tagged_users=tagged,
+                location_name=location
+            )
+        except ValidationError as e:
+            return JsonResponse({"error": str(e)}, status=400)
 
         return redirect("posts:post_detail", post_id=post.id)
     
     # GET request - Show form
+    profile, _ = create_user_profile(request.user)
     friends = list_people_tag(request.user)
-    profile = request.user.profile
+    for friend in friends:
+        create_user_profile(friend)
     return render(request, "posts/create_post.html", {"friends": friends, "profile": profile})
 
 def edit_post_view(request, post_id):
@@ -324,21 +334,26 @@ def edit_post_view(request, post_id):
         print(f"[DEBUG] New Images: {images}")
         print(f"[DEBUG] Delete Img IDs: {delete_image_ids}")
 
-        update_post(
-            post, 
-            content=content, 
-            privacy=privacy, 
-            tagged_users=tag_users, 
-            images=images, 
-            files=files, 
-            location_name=location,
-            delete_image_ids=delete_image_ids, # Truyền vào service
-            delete_file_ids=delete_file_ids    # Truyền vào service
-        )
+        try:
+            update_post(
+                post,
+                content=content,
+                privacy=privacy,
+                tagged_users=tag_users,
+                images=images,
+                files=files,
+                location_name=location,
+                delete_image_ids=delete_image_ids, # Truyền vào service
+                delete_file_ids=delete_file_ids    # Truyền vào service
+            )
+        except ValidationError as e:
+            return JsonResponse({"error": str(e)}, status=400)
         return redirect("posts:post_detail", post_id=post.id)
     
+    profile, _ = create_user_profile(request.user)
     friends = list_people_tag(request.user)
-    profile = request.user.profile
+    for friend in friends:
+        create_user_profile(friend)
     #tạo 1 dictionary {id: user} để dễ lookup trong template
     tagged_user_map = {
         tag.user.id: tag.user

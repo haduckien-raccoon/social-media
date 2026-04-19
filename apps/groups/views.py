@@ -1,11 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django import forms
 from apps.groups.models import *
 from apps.groups.services import *
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from apps.accounts.services import create_user_profile
 
 class GroupForm(forms.ModelForm):
     class Meta:
@@ -116,20 +118,35 @@ def create_post_in_group(request, group_id):
         raise PermissionDenied("You must be a member of the group to create posts.")
     
     if request.method == "POST":
-        
-        content = request.POST.get("content")
+        content = request.POST.get("content", "")
         images = request.FILES.getlist("images")
         files = request.FILES.getlist("files")
         tagged = request.POST.getlist("tagged_users")
 
-        if content:
-            GroupPostService.create_post_in_group(group, request.user, content, images=images, files=files, tagged_users=tagged)
+        if content.strip() or images or files:
+            try:
+                GroupPostService.create_post_in_group(
+                    group,
+                    request.user,
+                    content,
+                    images=images,
+                    files=files,
+                    tagged_users=tagged,
+                )
+            except ValidationError as e:
+                return JsonResponse({"error": str(e)}, status=400)
             messages.success(request, "Post created successfully!")
             return redirect("groups:group_detail", group_id=group.id)
         else:
-            messages.error(request, "Content cannot be empty.")
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({"error": "Post must include content, images, or files."}, status=400)
+            messages.error(request, "Post must include content, images, or files.")
     
-    return render(request, "groups/create_post.html", {"group": group})
+    create_user_profile(request.user)
+    friends = list_people_tag(request.user)
+    for friend in friends:
+        create_user_profile(friend)
+    return render(request, "groups/create_post.html", {"group": group, "friends": friends})
 
 def update_post_in_group(request, group_id, post_id):
     group = get_object_or_404(Group, id=group_id)

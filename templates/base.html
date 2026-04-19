@@ -78,6 +78,46 @@
         .nav-item i { font-size: 24px; width: 24px; }
         .nav-item span { font-size: 16px; }
         .nav-item.active span { font-weight: 700; }
+        .nav-item-badge-wrap { position: relative; display: inline-flex; align-items: center; }
+        .nav-notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: #e53935;
+            color: #fff;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 0 5px;
+            line-height: 1;
+        }
+        .global-toast {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 9999;
+            background: #262626;
+            color: #fff;
+            border-radius: 10px;
+            padding: 10px 14px;
+            max-width: 320px;
+            font-size: 13px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .global-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -100,7 +140,13 @@
             <div class="nav-item" onclick="friend()"><i class="fa-solid fa-user-group"></i><span>Friend</span></div>
             <div class="nav-item" onclick="group()"><i class="fa-solid fa-people-group"></i> <span>Group</span></div>
             <div class="nav-item"><i class="fa-brands fa-facebook-messenger"></i> <span>Messages</span></div>
-            <div class="nav-item"><i class="fa-regular fa-heart"></i> <span>Notifications</span></div>
+            <div class="nav-item" onclick="goNotifications()">
+                <span class="nav-item-badge-wrap">
+                    <i class="fa-regular fa-bell"></i>
+                    <span id="global-notification-badge" class="nav-notification-badge">0</span>
+                </span>
+                <span>Notifications</span>
+            </div>
             <div class="nav-item" onclick="createPost()"><i class="fa-regular fa-square-plus"></i> <span>Create</span></div>
             <div class="nav-item" onclick="profile()">
                 <i class="fa-solid fa-circle-user"></i> <span>{{ request.user.username }}</span>
@@ -113,6 +159,7 @@
     <main class="main-content">
         {% block content %}{% endblock %}
     </main>
+    <div id="global-notification-toast" class="global-toast"></div>
     
 
     <script>
@@ -123,6 +170,123 @@
         function createPost() { window.location.href = "/posts/create/"; }
         function search() { window.location.href = "/search/"; }
         function group() { window.location.href = "/groups/"; }
+        function goNotifications() { window.location.href = "/notifications/"; }
+
+        (function initGlobalNotifications() {
+            const badge = document.getElementById("global-notification-badge");
+            const toast = document.getElementById("global-notification-toast");
+            if (!badge || !toast) return;
+
+            const showToast = (message, link) => {
+                if (!message) return;
+                toast.textContent = message;
+                toast.dataset.link = link || "";
+                toast.style.cursor = link ? "pointer" : "default";
+                toast.classList.add("show");
+                window.clearTimeout(window.__globalNotifToastTimer);
+                window.__globalNotifToastTimer = window.setTimeout(() => {
+                    toast.classList.remove("show");
+                }, 3500);
+            };
+
+            toast.addEventListener("click", () => {
+                const link = toast.dataset.link || "";
+                if (link) {
+                    window.location.href = link;
+                } else {
+                    goNotifications();
+                }
+            });
+
+            const renderBadge = (count) => {
+                const unread = Number.isFinite(count) ? count : 0;
+                if (unread > 0) {
+                    badge.textContent = unread > 99 ? "99+" : String(unread);
+                    badge.style.display = "inline-flex";
+                } else {
+                    badge.style.display = "none";
+                }
+            };
+
+            const refreshUnreadCount = async () => {
+                try {
+                    const response = await fetch("/notifications/unread-count/", {
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    renderBadge(Number(data.unread_count || 0));
+                } catch (error) {
+                    // keep UI stable when network/SSE is temporary unavailable
+                }
+            };
+
+            refreshUnreadCount();
+            const unreadPollTimer = window.setInterval(refreshUnreadCount, 10000);
+
+            if (!window.EventSource) return;
+            const eventSource = new EventSource("/notifications/sse/", { withCredentials: true });
+
+            eventSource.addEventListener("notification", (event) => {
+                try {
+                    const payload = JSON.parse(event.data || "{}");
+                    const openUrl = payload.open_url || payload.link || "";
+                    if (payload.verb_text) showToast(payload.verb_text, openUrl);
+                } catch (error) {
+                    // ignore malformed payload and keep connection alive
+                }
+                refreshUnreadCount();
+            });
+
+            eventSource.addEventListener("connected", () => {
+                refreshUnreadCount();
+            });
+
+            eventSource.onerror = () => {
+                // EventSource auto reconnects; avoid noisy logs in UI
+            };
+
+            window.addEventListener("beforeunload", () => {
+                window.clearInterval(unreadPollTimer);
+                eventSource.close();
+            });
+        })();
+
+        (function initRelativeTimeUpdater() {
+            const formatRelativeTime = (isoValue) => {
+                if (!isoValue) return "Vừa xong";
+                const dateValue = new Date(isoValue);
+                if (Number.isNaN(dateValue.getTime())) return "Vừa xong";
+
+                const diffSeconds = Math.max(0, Math.floor((Date.now() - dateValue.getTime()) / 1000));
+                if (diffSeconds < 60) return "Vừa xong";
+
+                const diffMinutes = Math.floor(diffSeconds / 60);
+                if (diffMinutes < 60) return `${diffMinutes} phút trước`;
+
+                const diffHours = Math.floor(diffMinutes / 60);
+                if (diffHours < 24) return `${diffHours} giờ trước`;
+
+                const diffDays = Math.floor(diffHours / 24);
+                if (diffDays < 30) return `${diffDays} ngày trước`;
+
+                const diffMonths = Math.floor(diffDays / 30);
+                if (diffMonths < 12) return `${diffMonths} tháng trước`;
+
+                return `${Math.floor(diffMonths / 12)} năm trước`;
+            };
+
+            const refreshRelativeTime = () => {
+                document.querySelectorAll(".js-relative-time[data-time-iso]").forEach((element) => {
+                    const isoValue = element.getAttribute("data-time-iso");
+                    element.textContent = formatRelativeTime(isoValue);
+                });
+            };
+
+            window.__relativeTimeRefresh = refreshRelativeTime;
+            refreshRelativeTime();
+            window.setInterval(refreshRelativeTime, 60 * 1000);
+        })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     

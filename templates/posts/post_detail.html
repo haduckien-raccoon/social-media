@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
 {% block extra_css %}
@@ -507,11 +507,13 @@
         
         <div class="post-header">
             <div class="header-left">
-                <img src="{{ post.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="post-avatar">
+                <a href="{% url 'accounts:profile' post.author.username %}">
+                    <img src="{{ post.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="post-avatar">
+                </a>
                 <div class="post-info">
-                    <h4><a href="{% url 'accounts:profile' post.author.id %}">{{ post.author.username }}</a></h4>
+                    <h4><a href="{% url 'accounts:profile' post.author.username %}">{{ post.author.username }}</a></h4>
                     <div class="post-time">
-                        <span>{{ post.created_at|timesince }} trước</span> • 
+                        <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span> • 
                         {% if post.privacy == 'public' %}<i class="fas fa-globe-americas"></i>
                         {% elif post.privacy == 'friends' %}<i class="fas fa-user-friends"></i>
                         {% else %}<i class="fas fa-lock"></i>{% endif %}
@@ -546,10 +548,14 @@
         {% if original_post %}
         <div class="shared-post-container" onclick="window.location.href='{% url 'posts:post_detail' original_post.id %}'">
             <div class="shared-header">
-                <img src="{{ original_post.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="shared-avatar">
+                <a href="{% url 'accounts:profile' original_post.author.username %}" onclick="event.stopPropagation();">
+                    <img src="{{ original_post.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="shared-avatar">
+                </a>
                 <div>
-                    <div class="shared-info">{{ original_post.author.username }}</div>
-                    <div class="shared-time" style="font-size: 12px; color: #65676b;">{{ original_post.created_at|timesince }} trước</div>
+                    <div class="shared-info">
+                        <a href="{% url 'accounts:profile' original_post.author.username %}" onclick="event.stopPropagation();">{{ original_post.author.username }}</a>
+                    </div>
+                    <div class="shared-time js-relative-time" data-time-iso="{{ original_post.created_at|date:'c' }}" style="font-size: 12px; color: #65676b;">{{ original_post.created_at|timesince }} trước</div>
                 </div>
             </div>
             
@@ -647,14 +653,15 @@
 
         <div class="post-stats">
             <div class="reaction-count">
-                {% if total_reactions > 0 %}
-                    <i class="fas fa-thumbs-up" style="background-color: #166fe5; color: #fff; border-radius: 50%; padding: 4px; font-size: 12px;"></i>
-                    <span id="post-reaction-count" style="margin-left: 4px; color: var(--text-main); font-weight: 500;">{{ total_reactions }}</span>
-                {% else %}
-                    <span>Chưa có cảm xúc nào</span>
-                {% endif %}
+                <i id="post-reaction-icon" class="fas fa-thumbs-up" style="background-color: #166fe5; color: #fff; border-radius: 50%; padding: 4px; font-size: 12px; display: {% if total_reactions > 0 %}inline-flex{% else %}none{% endif %};"></i>
+                <span id="post-reaction-count" style="margin-left: 4px; color: var(--text-main); font-weight: 500; display: {% if total_reactions > 0 %}inline{% else %}none{% endif %};">{{ total_reactions }}</span>
+                <span id="post-reaction-empty" style="display: {% if total_reactions > 0 %}none{% else %}inline{% endif %};">Chưa có cảm xúc nào</span>
             </div>
-            <div class="comment-count"><span id="total-comments-label" style="color: var(--text-main); font-weight: 500;">{{ total_comments }}</span> bình luận</div>
+            <div class="comment-count">
+                <span id="total-comments-label" style="color: var(--text-main); font-weight: 500;">{{ total_comments }}</span> bình luận
+                <span aria-hidden="true"> · </span>
+                <span id="total-shares-label" style="color: var(--text-main); font-weight: 500;">{{ total_shares }}</span> chia sẻ
+            </div>
         </div>
 
         <div class="post-actions">
@@ -721,11 +728,13 @@
                         <div class="d-flex position-relative w-100">
                             {% if comment.level > 1 %}<div class="thread-line"></div>{% endif %}
                             
-                            <img src="https://ui-avatars.com/api/?name={{ comment.user.username }}&background=random" class="my-avatar" style="width: 32px; height: 32px;">
+                            <a href="{% url 'accounts:profile' comment.user.username %}">
+                                <img src="https://ui-avatars.com/api/?name={{ comment.user.username }}&background=random" class="my-avatar" style="width: 32px; height: 32px;">
+                            </a>
                             
                             <div style="flex: 1;">
                                 <div class="comment-bubble">
-                                    <a href="#" class="comment-author-name">{{ comment.user.username }}</a>
+                                    <a href="{% url 'accounts:profile' comment.user.username %}" class="comment-author-name">{{ comment.user.username }}</a>
                                     <div class="comment-text-content">{{ comment.content }}</div>
                                     {% if comment.images.all %}
                                         {% for img in comment.images.all %}<img src="{{ img.image.url }}" class="comment-img-preview" style="max-height: 120px; display: block; margin-top: 8px; border-radius: 8px;">{% endfor %}
@@ -739,7 +748,7 @@
                                 </div>
                                 
                                 <div class="comment-meta">
-                                    <span>{{ comment.created_at|timesince }}</span>
+                                    <span class="js-relative-time" data-time-iso="{{ comment.created_at|date:'c' }}">{{ comment.created_at|timesince }}</span>
                                     
                                     <div class="comment-reaction-wrapper">
                                         <div class="comment-popup">
@@ -1021,7 +1030,51 @@
             const icons = { 'like':'thumbs-up', 'love':'heart', 'haha':'laugh-squint', 'wow':'surprise', 'sad':'sad-tear', 'angry':'angry' };
             btn.innerHTML = `<i class="fas fa-${icons[type]}"></i> ${map[type]}`;
         }
-        document.getElementById('post-reaction-count').innerText = count;
+
+        updatePostStatsRealtime({ reaction_count: count });
+    }
+
+    function updatePostStatsRealtime(stats = {}) {
+        if (stats.reaction_count !== undefined) {
+            const reactionCount = Number(stats.reaction_count);
+            if (Number.isFinite(reactionCount)) {
+                const reactionIcon = document.getElementById('post-reaction-icon');
+                const reactionCountLabel = document.getElementById('post-reaction-count');
+                const reactionEmpty = document.getElementById('post-reaction-empty');
+
+                if (reactionCount > 0) {
+                    if (reactionIcon) reactionIcon.style.display = 'inline-flex';
+                    if (reactionCountLabel) {
+                        reactionCountLabel.style.display = 'inline';
+                        reactionCountLabel.innerText = reactionCount;
+                    }
+                    if (reactionEmpty) reactionEmpty.style.display = 'none';
+                } else {
+                    if (reactionIcon) reactionIcon.style.display = 'none';
+                    if (reactionCountLabel) {
+                        reactionCountLabel.style.display = 'none';
+                        reactionCountLabel.innerText = '0';
+                    }
+                    if (reactionEmpty) reactionEmpty.style.display = 'inline';
+                }
+            }
+        }
+
+        if (stats.comment_count !== undefined) {
+            const commentCount = Number(stats.comment_count);
+            const commentLabel = document.getElementById('total-comments-label');
+            if (commentLabel && Number.isFinite(commentCount)) {
+                commentLabel.innerText = commentCount;
+            }
+        }
+
+        if (stats.share_count !== undefined) {
+            const shareCount = Number(stats.share_count);
+            const shareLabel = document.getElementById('total-shares-label');
+            if (shareLabel && Number.isFinite(shareCount)) {
+                shareLabel.innerText = shareCount;
+            }
+        }
     }
 
     function submitCommentReaction(commentId, type) {
@@ -1100,17 +1153,32 @@
     const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
     const chatSocket = new WebSocket(wsScheme + '://' + window.location.host + '/ws/post/' + POST_ID + '/');
     chatSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data).data;
+        const payload = JSON.parse(e.data);
+        const data = payload.data || payload;
         if (data.event === 'comment_new') {
             document.getElementById('no-comments')?.remove();
+            updatePostStatsRealtime({ comment_count: data.comment_count });
             // Hàm renderNewComment nên được thêm vào đây (như file cũ) để hiển thị comment mới
              window.location.reload(); // Tạm thời reload để cập nhật UI mới nhất nếu function render phức tạp
         } else if (data.event === 'comment_deleted') {
+            updatePostStatsRealtime({ comment_count: data.comment_count });
             window.location.reload(); 
         } else if (data.event === 'reaction' || data.event === 'comment_reaction') {
             // Logic update reaction không cần reload
-             if (data.event === 'reaction') updateReactionUI(data.status === 'removed' ? null : data.reaction_type, data.total_count);
+             if (data.event === 'reaction') {
+                updateReactionUI(data.status === 'removed' ? null : data.reaction_type, data.total_count);
+                updatePostStatsRealtime({
+                    comment_count: data.comment_count,
+                    share_count: data.share_count,
+                });
+             }
              else updateCommentReactionUI(data.comment_id, data.status === 'removed' ? null : data.reaction_type, data.count);
+        } else if (data.event === 'share_updated') {
+            updatePostStatsRealtime({
+                reaction_count: data.reaction_count,
+                comment_count: data.comment_count,
+                share_count: data.share_count,
+            });
         }
     };
 
@@ -1179,3 +1247,4 @@
     });
 </script>
 {% endblock %}
+

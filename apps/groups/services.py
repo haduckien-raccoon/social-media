@@ -4,6 +4,7 @@ from apps.groups.models import *
 from apps.posts.services import *
 from apps.posts.models import *
 from apps.accounts.models import User
+from apps.notifications.services import create_notification
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Case, Case, Count, Q, IntegerField, IntegerField, Max, Value, When, When
 from django.utils import timezone
@@ -282,14 +283,29 @@ class GroupMemberService:
             if membership.status == "rejected":
                 membership.status = "pending"
                 membership.save()
+                create_notification(
+                    actor=user,
+                    recipient=group.owner,
+                    verb_code="group_join_request",
+                    target=group,
+                    link=f"/groups/{group.id}/manage/",
+                )
                 return membership
-            
-        return GroupMember.objects.create(
+             
+        membership = GroupMember.objects.create(
             user=user,
             group=group,
             role="member",
             status="pending"
         )
+        create_notification(
+            actor=user,
+            recipient=group.owner,
+            verb_code="group_join_request",
+            target=group,
+            link=f"/groups/{group.id}/manage/",
+        )
+        return membership
     
     @staticmethod
     def reject_member(request_user, membership):
@@ -318,6 +334,13 @@ class GroupMemberService:
             raise PermissionDenied("Only group owner or admin can approve members.")
         membership.status = "approved"
         membership.save()
+        create_notification(
+            actor=request_user,
+            recipient=membership.user,
+            verb_code="group_request_accept",
+            target=membership.group,
+            link=f"/groups/{membership.group_id}/",
+        )
 
     @staticmethod
     def ban_member(request_user, membership):
@@ -401,29 +424,44 @@ class GroupPostService:
     def create_post_in_group(group, user, content="", images=None, files=None, tagged_users=None):
         if not GroupMemberService.is_member(user, group):
             raise PermissionDenied("You must be a member of the group to create posts.")
+
+        normalized_content = content.strip() if content else ""
+        image_list = list(images or [])
+        file_list = list(files or [])
+        if not normalized_content and not image_list and not file_list:
+            raise ValidationError("Post must include content, images, or files.")
         
         post = Post.objects.create(
             author=user,
-            content = content,
+            content=normalized_content,
             privacy=PostPrivacy.PUBLIC,
             status=ContentStatus.NORMAL
         )
 
-        if images:
-            for idx, img in enumerate(images):
+        if image_list:
+            for idx, img in enumerate(image_list):
                 PostImage.objects.create(post=post, image=img, order=idx)
             
-        if files:
-            for file in files:
+        if file_list:
+            for file in file_list:
                 PostFile.objects.create(post=post, file=file, filename=file.name)
 
+        tagged_user_ids = set()
         if tagged_users:
+            friend_ids = set(get_friend_ids(user))
             for user_id in tagged_users:
                 try:
-                    tagged_user = User.objects.get(id=user_id)
-                    PostTagUser.objects.create(post=post, user=tagged_user)
+                    uid_int = int(user_id)
+                except (TypeError, ValueError):
+                    continue
+                if uid_int not in friend_ids:
+                    continue
+                try:
+                    tagged_user = User.objects.get(id=uid_int)
                 except User.DoesNotExist:
                     continue
+                PostTagUser.objects.get_or_create(post=post, user=tagged_user)
+                tagged_user_ids.add(uid_int)
 
         #check quyền user đăng nếu là admin | owner thì duyệt luôn, còn member thường thì để pending
         status = "approved" if GroupMemberService.is_group_admin_or_owner(user, group) else "pending"
@@ -435,6 +473,28 @@ class GroupPostService:
             is_pinned=False,
             is_deleted=False
         )
+
+        create_notification(
+            actor=user,
+            recipient=group.owner,
+            verb_code="post_in_group",
+            target=post,
+            link=f"/groups/{group.id}/",
+        )
+
+        for tagged_user_id in tagged_user_ids:
+            if tagged_user_id == user.id:
+                continue
+            tagged_user = User.objects.filter(id=tagged_user_id).first()
+            if not tagged_user:
+                continue
+            create_notification(
+                actor=user,
+                recipient=tagged_user,
+                verb_code="mention_in_post",
+                target=post,
+                link=f"/posts/{post.id}/",
+            )
 
         return post
     

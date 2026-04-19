@@ -7,7 +7,7 @@
         <div class="p-info">
             <h5><a href="{% url 'accounts:profile' post.author.username %}">{{ post.author.username }}</a></h5>
             <div class="p-time">
-                {{ post.created_at|timesince }} trước • 
+                <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span> • 
                 {% if post.privacy == 'public' %}<i class="fas fa-globe-americas"></i>
                 {% elif post.privacy == 'friends' %}<i class="fas fa-user-friends"></i>
                 {% else %}<i class="fas fa-lock"></i>{% endif %}
@@ -20,10 +20,12 @@
     {% if post.original_post_obj %}
     <div class="shared-box" onclick="window.location.href='{% url 'posts:post_detail' post.original_post_obj.id %}'">
         <div class="sb-header">
-            <img src="{{ post.original_post_obj.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="sb-avatar">
+            <a href="{% url 'accounts:profile' post.original_post_obj.author.username %}" onclick="event.stopPropagation();">
+                <img src="{{ post.original_post_obj.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="sb-avatar">
+            </a>
             <div>
-                <strong>{{ post.original_post_obj.author.username }}</strong>
-                <div class="small text-muted">{{ post.original_post_obj.created_at|timesince }} trước</div>
+                <strong><a href="{% url 'accounts:profile' post.original_post_obj.author.username %}" onclick="event.stopPropagation();">{{ post.original_post_obj.author.username }}</a></strong>
+                <div class="small text-muted js-relative-time" data-time-iso="{{ post.original_post_obj.created_at|date:'c' }}">{{ post.original_post_obj.created_at|timesince }} trước</div>
             </div>
         </div>
         <div class="p-3">
@@ -88,10 +90,15 @@
     <div class="p-stats">
         <div id="count-{{ post.id }}">
             {% if post.reaction_count > 0 %}
-            <i class="fas fa-thumbs-up text-primary"></i> {{ post.reaction_count }}
+            <i class="fas fa-thumbs-up text-primary"></i>
+            <span id="reaction-count-{{ post.id }}">{{ post.reaction_count }}</span>
             {% endif %}
         </div>
-        <div>{{ post.comment_count }} bình luận</div>
+        <div>
+            <span id="comment-count-{{ post.id }}">{{ post.comment_count }}</span> bình luận
+            <span aria-hidden="true"> · </span>
+            <span id="share-count-{{ post.id }}">{{ post.share_count|default:0 }}</span> chia sẻ
+        </div>
     </div>
 
     <div class="p-actions">

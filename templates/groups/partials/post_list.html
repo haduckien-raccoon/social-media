@@ -10,7 +10,7 @@
                     <a href="{% url 'accounts:profile' post.author.username %}">{{ post.author.username }}</a>
                 </h5>
                 <div class="p-time">
-                    {{ post.created_at|timesince }} trước • 
+                    <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span> • 
                     {% if post.is_pinned %}<i class="fa-solid fa-thumbtack text-danger"></i> Đã ghim • {% endif %}
                     <i class="fa-solid fa-users"></i>
                 </div>
