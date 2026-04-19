@@ -482,21 +482,36 @@ els.form.onsubmit = async e => {
     fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
 
     try {
-        const res = await fetch(location.href, {method:'POST', body:fd});
+        const res = await fetch(location.href, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: fd
+        });
         if(res.redirected) {
             location.href = res.url;
         } else if(res.ok) {
             // Sau khi post thành công thì chuyển hướng về lại trang chi tiết group
             location.href = "{% url 'groups:group_detail' group.id %}"; 
         } else {
-            throw new Error("Server trả về lỗi không xác định");
+            let errorMessage = "Có lỗi xảy ra, vui lòng thử lại sau!";
+            try {
+                const data = await res.json();
+                if (data && data.error) {
+                    errorMessage = data.error;
+                }
+            } catch (e) {
+                // ignore JSON parsing errors and fallback to default message
+            }
+            throw new Error(errorMessage);
         }
     } catch (err) {
         console.error(err);
         els.submit.disabled = false;
         els.submit.innerText = 'Đăng';
         
-        showToast('Có lỗi xảy ra, vui lòng thử lại sau!', 'error');
+        showToast(err.message || 'Có lỗi xảy ra, vui lòng thử lại sau!', 'error');
     }
 };
 });

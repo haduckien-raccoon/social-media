@@ -1,13 +1,11 @@
-# apps/accounts/middleware.py
 import jwt
 from django.conf import settings
 from django.shortcuts import redirect
-from django.utils.deprecation import MiddlewareMixin
 from django.utils import timezone
+from django.utils.deprecation import MiddlewareMixin
+
 from apps.accounts.models import RefreshToken, User
 from apps.middleware.utils import generate_access_token
-from django.contrib.auth import login
-
 
 
 PUBLIC_PATHS = [
@@ -18,47 +16,51 @@ PUBLIC_PATHS = [
     "/accounts/forgot-password/",
     "/accounts/reset-password/",
     "/accounts/reset-password",
-    "/admin"
+    "/admin",
 ]
+
 
 class JWTAuthMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        # Bỏ qua route public
-        if any(request.path.startswith(p) for p in PUBLIC_PATHS):
+        if any(request.path.startswith(path) for path in PUBLIC_PATHS):
             return None
 
         access = request.COOKIES.get("access")
         refresh = request.COOKIES.get("refresh")
 
-        # ❌ Không có token nào
         if not access and not refresh:
             return redirect("/accounts/login/")
 
-        # 🟡 Có refresh nhưng không có access
+        # Keep request flow intact (including POST): refresh token in-place instead of redirecting.
         if refresh and not access:
             return self._refresh_access_token(request, refresh)
 
-        # ✅ Có access nhưng không có refresh check db xem refresh có còn hợp lệ ko để yên tâm
         if access and not refresh:
             return self._authenticate_access(request, access)
 
-        # ✅ Có đủ cả hai
         return self._authenticate_access(request, access, refresh, require_refresh=True)
 
-    # ------------------------------------------------
+    def process_response(self, request, response):
+        new_access_token = getattr(request, "_new_access_token", None)
+        if not new_access_token:
+            return response
+
+        response.set_cookie(
+            "access",
+            new_access_token,
+            httponly=True,
+            max_age=15 * 60,
+            samesite="Lax",
+            secure=getattr(settings, "SESSION_COOKIE_SECURE", False),
+        )
+        return response
 
     def _authenticate_access(self, request, access, refresh=None, require_refresh=True):
         try:
-            payload = jwt.decode(
-                access,
-                settings.SECRET_KEY,
-                algorithms=["HS256"]
-            )
+            payload = jwt.decode(access, settings.SECRET_KEY, algorithms=["HS256"])
             user_id = payload.get("user_id")
-
             user = User.objects.get(id=user_id)
 
-            # Nếu yêu cầu kiểm tra refresh, đảm bảo refresh hợp lệ trong DB
             if require_refresh:
                 if not refresh:
                     return redirect("/accounts/login/")
@@ -66,7 +68,7 @@ class JWTAuthMiddleware(MiddlewareMixin):
                     user=user,
                     token=refresh,
                     is_revoked=False,
-                    expires_at__gt=timezone.now()
+                    expires_at__gt=timezone.now(),
                 ).exists():
                     return redirect("/accounts/login/")
 
@@ -81,32 +83,19 @@ class JWTAuthMiddleware(MiddlewareMixin):
         except Exception:
             return redirect("/accounts/login/")
 
-    # ------------------------------------------------
-
     def _refresh_access_token(self, request, refresh):
         try:
-            rt = RefreshToken.objects.get(
+            refresh_token = RefreshToken.objects.get(
                 token=refresh,
                 is_revoked=False,
-                expires_at__gt=timezone.now()
+                expires_at__gt=timezone.now(),
             )
 
-            user = rt.user
-            new_access = generate_access_token(user)
-
+            user = refresh_token.user
             request.user = user
             request._cached_user = user
-
-            response = redirect(request.path)
-            response.set_cookie(
-                "access",
-                new_access,
-                httponly=True,
-                max_age=5 * 60,
-                samesite="Lax"
-            )
-            request.user = user
-            return response
+            request._new_access_token = generate_access_token(user)
+            return None
 
         except RefreshToken.DoesNotExist:
             return redirect("/accounts/login/")

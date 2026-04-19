@@ -48,6 +48,7 @@ def login_view(request):
             "error": error or "Invalid credentials"
         })
 
+    create_user_profile(user)
     access_token, refresh_token = create_jwt_pair_for_user(user)
 
     response = redirect("home")  # đổi thành URL name của bạn
@@ -81,7 +82,7 @@ def forgot_password_view(request):
         user = User.objects.get(email=email)
         token = create_password_reset_token(user)
 
-        reset_url = f"http://127.0.0.1:8080/accounts/reset-password/?token={token.token}"
+        reset_url = build_absolute_url(f"/accounts/reset-password/?token={token.token}")
         send_mail(
             "Reset password",
             f"Click here: {reset_url}",
@@ -153,7 +154,7 @@ def profile_view(request, id=None, username=None):
 
     access_token = request.COOKIES.get("access")
     if not access_token:
-        return redirect("login")
+        return redirect("accounts:login")
 
     try:
         payload = jwt.decode(
@@ -220,13 +221,13 @@ def profile_view(request, id=None, username=None):
         })
 
     except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
-        return redirect("login")
+        return redirect("accounts:login")
 
 @csrf_exempt
 def edit_profile_view(request):
     access_token = request.COOKIES.get("access")
     if not access_token:
-        return redirect("login")
+        return redirect("accounts:login")
 
     try:
         payload = jwt.decode(
@@ -282,13 +283,13 @@ def edit_profile_view(request):
         return redirect("/accounts/profile/")  # chuyển về trang profile sau khi cập nhật
 
     except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
-        return redirect("login")
+        return redirect("accounts:login")
 
 @csrf_exempt
 def update_email_view(request):
     access_token = request.COOKIES.get("access")
     if not access_token:
-        return redirect("login")
+        return redirect("accounts:login")
 
     try:
         payload = jwt.decode(
@@ -328,13 +329,13 @@ def update_email_view(request):
             "error": "Please provide a valid email."
         })
     except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
-        return redirect("login")
+        return redirect("accounts:login")
     
 @csrf_exempt
 def update_username_view(request):
     access_token = request.COOKIES.get("access")
     if not access_token:
-        return redirect("login")
+        return redirect("accounts:login")
 
     try:
         payload = jwt.decode(
@@ -374,13 +375,13 @@ def update_username_view(request):
             "error": "Please provide a valid username."
         })
     except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
-        return redirect("login")
+        return redirect("accounts:login")
     
 @csrf_exempt
 def update_password_view(request):
     access_token = request.COOKIES.get("access")
     if not access_token:
-        return redirect("login")
+        return redirect("accounts:login")
 
     try:
         payload = jwt.decode(
@@ -422,4 +423,4 @@ def update_password_view(request):
             "messages": ["Please provide both old and new passwords."]
         })
     except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
-        return redirect("login")
+        return redirect("accounts:login")

@@ -15,6 +15,12 @@ from apps.friends.models import *
 JWT_SECRET = settings.SECRET_KEY
 JWT_ALGORITHM = 'HS256'
 
+
+def build_absolute_url(path):
+    base_url = getattr(settings, "APP_BASE_URL", "http://127.0.0.1:8080").rstrip("/")
+    normalized_path = path if path.startswith("/") else f"/{path}"
+    return f"{base_url}{normalized_path}"
+
 def create_jwt_pair_for_user(user):
     access_payload = {
         'user_id': user.id,
@@ -70,14 +76,15 @@ def register_user(username, email, password):
         print(f"[DEBUG] Username đã tồn tại: {username}")
         return None, "Username already exists"
 
-    user = User.objects.create(username=username, email=email, password=password)
+    user = User.objects.create_user(username=username, email=email, password=password)
+    create_user_profile(user)
     # Tạo token email
     token = EmailVerificationToken.objects.create(
         user=user,
         expires_at=timezone.now() + timedelta(hours=1)
     )
     # Gửi mail
-    verify_url = f"http://127.0.0.1:8080/accounts/verify-email?token={token.token}"
+    verify_url = build_absolute_url(f"/accounts/verify-email?token={token.token}")
     send_mail('Verify email', f'Click: {verify_url}', settings.EMAIL_HOST_USER, [user.email])
 
     return user, None
@@ -130,7 +137,12 @@ def login_user(email, password):
     except User.DoesNotExist:
         return None, "Invalid email or password"
     if not user.check_password(password):
-        return None, "Invalid email or password"
+        # Backward compatibility for legacy users created with plain-text password.
+        if user.password == password:
+            user.set_password(password)
+            user.save(update_fields=["password"])
+        else:
+            return None, "Invalid email or password"
     if not user.is_active:
         return None, "Account is not active"
     if user.is_banned:
@@ -239,7 +251,7 @@ def change_email(user, new_email):
         expires_at=timezone.now() + timedelta(hours=1)
     )
     # Gửi mail xác thực
-    verify_url = f"http://127.0.0.1:8080/accounts/verify-email/?token={token.token}"
+    verify_url = build_absolute_url(f"/accounts/verify-email/?token={token.token}")
     send_mail('Verify new email', f'Click: {verify_url}', settings.EMAIL_HOST_USER, [user.email])
     #đăng xuất user tất cả token
     RefreshToken.objects.filter(user=user).delete()

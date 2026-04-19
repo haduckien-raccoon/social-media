@@ -348,6 +348,44 @@
     }
     const csrftoken = getCookie('csrftoken');
 
+    function renderFeedReactionCount(postId, reactionCount) {
+        const countDiv = document.getElementById(`count-${postId}`);
+        if (!countDiv) return;
+
+        if (reactionCount > 0) {
+            countDiv.innerHTML = `<i class="fas fa-thumbs-up text-primary"></i> <span id="reaction-count-${postId}">${reactionCount}</span>`;
+        } else {
+            countDiv.innerHTML = '';
+        }
+    }
+
+    function updateFeedPostStats(postId, stats = {}) {
+        if (!Number.isFinite(postId) || postId <= 0) return;
+
+        if (stats.reaction_count !== undefined) {
+            const reactionCount = Number(stats.reaction_count);
+            if (Number.isFinite(reactionCount)) {
+                renderFeedReactionCount(postId, reactionCount);
+            }
+        }
+
+        if (stats.comment_count !== undefined) {
+            const commentCount = Number(stats.comment_count);
+            const commentCountEl = document.getElementById(`comment-count-${postId}`);
+            if (commentCountEl && Number.isFinite(commentCount)) {
+                commentCountEl.innerText = commentCount;
+            }
+        }
+
+        if (stats.share_count !== undefined) {
+            const shareCount = Number(stats.share_count);
+            const shareCountEl = document.getElementById(`share-count-${postId}`);
+            if (shareCountEl && Number.isFinite(shareCount)) {
+                shareCountEl.innerText = shareCount;
+            }
+        }
+    }
+
     // --- REACTION LOGIC (Updated to handle different types) ---
     function submitReact(postId, type) {
         fetch(`/posts/${postId}/reaction/`, {
@@ -358,7 +396,6 @@
         .then(res => res.json())
         .then(data => {
             const btn = document.getElementById(`btn-react-${postId}`);
-            const countDiv = document.getElementById(`count-${postId}`);
             
             // Reset base class
             btn.className = 'action-btn'; 
@@ -377,11 +414,7 @@
             }
 
             // Update Total Count
-            if(data.total_count > 0) {
-                countDiv.innerHTML = `<i class="fas fa-thumbs-up text-primary"></i> ${data.total_count}`;
-            } else {
-                countDiv.innerHTML = '';
-            }
+            updateFeedPostStats(postId, { reaction_count: data.total_count });
         });
     }
 
@@ -404,6 +437,42 @@
     }
 
     let currentPage = 1;
+    let isRealtimeRefreshing = false;
+    const feedContainer = document.getElementById('feed-post-container');
+    const loadedPostIds = new Set(
+        Array.from(document.querySelectorAll('.post-card[id^="post-"]'))
+            .map((node) => Number(node.id.replace('post-', '')))
+            .filter((postId) => Number.isFinite(postId) && postId > 0)
+    );
+
+    function parseAndCollectNewFeedNodes(html) {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html || '';
+        const fragment = document.createDocumentFragment();
+        let addedCount = 0;
+
+        const cards = Array.from(wrapper.querySelectorAll('.post-card[id^="post-"]'));
+        cards.forEach((card) => {
+            const postId = Number(card.id.replace('post-', ''));
+            if (!Number.isFinite(postId) || postId <= 0 || loadedPostIds.has(postId)) return;
+
+            loadedPostIds.add(postId);
+            fragment.appendChild(card);
+            addedCount += 1;
+
+            const modal = wrapper.querySelector(`#shareModal-${postId}`);
+            if (modal) {
+                fragment.appendChild(modal);
+            }
+        });
+
+        return { fragment, addedCount };
+    }
+
+    function removeEmptyPlaceholder() {
+        const placeholder = feedContainer.querySelector('.text-center.p-5.text-muted');
+        if (placeholder) placeholder.remove();
+    }
     let hasNext = {{ has_next|yesno:"true,false" }}; // Lấy cờ báo còn trang hay không từ Django
     let isLoading = false;
 
@@ -431,8 +500,12 @@
         .then(response => response.json())
         .then(data => {
             // Nối HTML mới lấy được (từ file partial) vào đuôi bảng tin
-            const feedContainer = document.getElementById('feed-post-container');
-            feedContainer.insertAdjacentHTML('beforeend', data.html);
+            const { fragment, addedCount } = parseAndCollectNewFeedNodes(data.html);
+            if (addedCount > 0) {
+                removeEmptyPlaceholder();
+                feedContainer.appendChild(fragment);
+                if (window.__relativeTimeRefresh) window.__relativeTimeRefresh();
+            }
             
             // Cập nhật lại cờ trạng thái
             hasNext = data.has_next;
@@ -445,5 +518,59 @@
             document.getElementById('feed-loading-spinner').style.display = 'none';
         });
     }
+
+    function refreshTopFeedRealtime() {
+        if (isRealtimeRefreshing) return;
+        isRealtimeRefreshing = true;
+
+        fetch(`?page=1&ajax=1`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const { fragment, addedCount } = parseAndCollectNewFeedNodes(data.html);
+            if (addedCount > 0) {
+                removeEmptyPlaceholder();
+                feedContainer.prepend(fragment);
+                if (window.__relativeTimeRefresh) window.__relativeTimeRefresh();
+            }
+        })
+        .catch((error) => {
+            console.error('Lỗi realtime feed:', error);
+        })
+        .finally(() => {
+            isRealtimeRefreshing = false;
+        });
+    }
+
+    (function initFeedRealtime() {
+        const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+        const feedSocket = new WebSocket(wsScheme + '://' + window.location.host + '/ws/feed/');
+
+        feedSocket.onmessage = function(event) {
+            try {
+                const payload = JSON.parse(event.data || '{}');
+                if (payload.action === 'new_post') {
+                    refreshTopFeedRealtime();
+                    return;
+                }
+
+                if (payload.action === 'post_stats') {
+                    const postId = Number(payload.post_id);
+                    updateFeedPostStats(postId, payload);
+                }
+            } catch (error) {
+                console.error('Feed websocket payload error:', error);
+            }
+        };
+
+        feedSocket.onerror = function() {
+            // Keep UI stable; websocket reconnect handled by navigation lifecycle.
+        };
+
+        window.addEventListener('beforeunload', () => {
+            feedSocket.close();
+        });
+    })();
 </script>
 {% endblock %}

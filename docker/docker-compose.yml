@@ -1,0 +1,91 @@
+services:
+  mysql:
+    image: mysql:8.0
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env.docker
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent || mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  redis:
+    image: redis:7
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    env_file:
+      - .env.docker
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    command: ["/app/docker/entrypoint.sh", "web"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; response=urllib.request.urlopen('http://127.0.0.1:8080/', timeout=5); sys.exit(0 if response.status < 500 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
+
+  test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    env_file:
+      - .env.docker
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-sudo_social}
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      APP_BASE_URL: http://web:8080
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,web
+    command: ["/app/docker/entrypoint.sh", "test"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - test
+    restart: "no"
+
+volumes:
+  mysql_data:
+  redis_data:

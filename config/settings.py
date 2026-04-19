@@ -16,9 +16,32 @@ if dotenv_path.exists():
 # SECRET KEY, DEBUG, ALLOWED HOSTS
 # ---------------------------
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-secret-key")
-# DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
-DEBUG = True
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
+ALLOWED_HOSTS = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
+
+
+def _env_int(name, default):
+    raw_value = os.getenv(name, str(default))
+    try:
+        return int(raw_value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _env_float(name, default):
+    raw_value = os.getenv(name, str(default))
+    try:
+        return float(raw_value)
+    except (TypeError, ValueError):
+        return default
+
+
+APP_BASE_URL = os.getenv("APP_BASE_URL", "http://127.0.0.1:8080").rstrip("/")
+REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = _env_int("REDIS_PORT", 6379)
+REDIS_DB = _env_int("REDIS_DB", 0)
+REDIS_SOCKET_TIMEOUT = _env_float("REDIS_SOCKET_TIMEOUT", 0.2)
+REDIS_SOCKET_CONNECT_TIMEOUT = _env_float("REDIS_SOCKET_CONNECT_TIMEOUT", 0.2)
 
 # ---------------------------
 # INSTALLED APPS
@@ -84,19 +107,22 @@ TEMPLATES = [
     },
 ]
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-        # "CONFIG": {
-        #     "hosts": [("127.0.0.1", 6379)],
-        # },
-    },
-}
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels.layers.InMemoryChannelLayer",
-#     },
-# }
+CHANNEL_LAYER_BACKEND = os.getenv("CHANNEL_LAYER_BACKEND", "inmemory").strip().lower()
+if CHANNEL_LAYER_BACKEND == "redis":
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [(REDIS_HOST, REDIS_PORT)],
+            },
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        },
+    }
 
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"

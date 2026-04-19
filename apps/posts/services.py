@@ -1,4 +1,4 @@
-from django.db import transaction
+﻿from django.db import transaction
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.utils import timezone
 from django.db.models import Q, Count
@@ -8,6 +8,7 @@ from channels.layers import get_channel_layer
 from apps.accounts.models import User
 from apps.friends.models import Friend
 from apps.posts.models import *
+from apps.notifications.services import create_notification
 
 # =====================================================
 # 1. WEBSOCKET HELPER - REALTIME BROADCAST
@@ -80,9 +81,34 @@ def get_user_feed(user, friends_ids):
 
 def get_avatar_url(user):
     """Lấy URL avatar của user"""
-    if hasattr(user, 'userprofile') and user.userprofile.avatar:
-        return user.userprofile.avatar.url
+    if hasattr(user, "profile") and user.profile.avatar:
+        return user.profile.avatar.url
     return f"https://ui-avatars.com/api/?name={user.username}"
+
+
+def _get_post_author_and_tagged_recipient_ids(post, actor_user):
+    recipient_ids = {post.author_id}
+    tagged_user_ids = set(
+        PostTagUser.objects.filter(post=post).values_list("user_id", flat=True)
+    )
+    recipient_ids.update(tagged_user_ids)
+    recipient_ids.discard(actor_user.id)
+    return recipient_ids, tagged_user_ids
+
+
+def _build_post_stats_payload(post, *, reaction_count=None, comment_count=None, share_count=None):
+    if reaction_count is None:
+        reaction_count = PostReaction.objects.filter(post=post).count()
+    if comment_count is None:
+        comment_count = Comment.objects.filter(post=post, is_deleted=False).count()
+    if share_count is None:
+        share_count = PostShare.objects.filter(original_post=post).count()
+
+    return {
+        "reaction_count": reaction_count,
+        "comment_count": comment_count,
+        "share_count": share_count,
+    }
 
 # =====================================================
 # 4. POST WRITE LOGIC (REALTIME)
@@ -102,28 +128,47 @@ def create_post(
     """
     Tạo bài viết mới và broadcast realtime
     """
+    normalized_content = content.strip() if content else ""
+    image_list = list(images or [])
+    file_list = list(files or [])
+    if not normalized_content and not image_list and not file_list:
+        raise ValidationError("Post must include content, images, or files.")
+
+    valid_privacies = {choice[0] for choice in PostPrivacy.choices}
+    if privacy not in valid_privacies:
+        raise ValidationError("Invalid privacy value.")
+
     # 1. Tạo Post (DB)
     post = Post.objects.create(
         author=user,
-        content=content.strip() if content else "",
+        content=normalized_content,
         privacy=privacy,
     )
 
     # 2. Xử lý Images
-    if images:
-        for order, image in enumerate(images):
+    if image_list:
+        for order, image in enumerate(image_list):
             PostImage.objects.create(post=post, image=image, order=order)
 
     # 3. Xử lý Files
-    if files:
-        for file in files:
+    if file_list:
+        for file in file_list:
             PostFile.objects.create(post=post, file=file, filename=file.name)
 
     # 4. Tagged users
+    tagged_user_ids = set()
     if tagged_users:
         for uid in tagged_users:
-            if Friend.objects.filter(Q(user=user, friend_id=uid) | Q(user_id=uid, friend=user)).exists():
-                PostTagUser.objects.create(post=post, user_id=uid)
+            try:
+                uid_int = int(uid)
+            except (TypeError, ValueError):
+                continue
+            is_friend = Friend.objects.filter(
+                Q(user=user, friend_id=uid_int) | Q(user_id=uid_int, friend=user)
+            ).exists()
+            if is_friend:
+                PostTagUser.objects.get_or_create(post=post, user_id=uid_int)
+                tagged_user_ids.add(uid_int)
 
     # 5. Hashtags
     if hashtags:
@@ -143,6 +188,21 @@ def create_post(
         "created_at": "Vừa xong"
     })
 
+    # 8. Notifications for tagged users
+    for tagged_user_id in tagged_user_ids:
+        if tagged_user_id == user.id:
+            continue
+        tagged_user = User.objects.filter(id=tagged_user_id).first()
+        if not tagged_user:
+            continue
+        create_notification(
+            actor=user,
+            recipient=tagged_user,
+            verb_code="mention_in_post",
+            target=post,
+            link=f"/posts/{post.id}/",
+        )
+
     return post
 
 @transaction.atomic
@@ -158,16 +218,22 @@ def update_post(
     delete_file_ids=None
 ):
     """Cập nhật bài viết"""
+    original_tagged_user_ids = set(
+        PostTagUser.objects.filter(post=post).values_list("user_id", flat=True)
+    )
     
     # 1. Update Basic Info
     if content is not None:
-        post.content = content
+        post.content = content.strip()
     if privacy is not None:
+        valid_privacies = {choice[0] for choice in PostPrivacy.choices}
+        if privacy not in valid_privacies:
+            raise ValidationError("Invalid privacy value.")
         post.privacy = privacy
     
-    # 2. Update Tags (ĐÃ FIX LỖI 1452 Ở ĐÂY)
+    # 2. Update Tags
+    final_tagged_user_ids = set()
     if tagged_users is not None:
-        # A. Lọc danh sách ID hợp lệ (tránh chuỗi rỗng hoặc ID không tồn tại)
         valid_user_ids = set()
         for uid in tagged_users:
             try:
@@ -175,16 +241,20 @@ def update_post(
                 valid_user_ids.add(uid_int)
             except (ValueError, TypeError):
                 continue
-        
-        # B. Kiểm tra user có thực sự tồn tại trong DB không
-        existing_user_ids = set(User.objects.filter(id__in=valid_user_ids).values_list('id', flat=True))
 
-        # C. Đồng bộ tags
-        # - Xóa những người không còn trong list tag mới
-        PostTagUser.objects.filter(post=post).exclude(user_id__in=existing_user_ids).delete()
-        
-        # - Thêm những người mới (dùng get_or_create để không bị duplicate)
+        existing_user_ids = set(
+            User.objects.filter(id__in=valid_user_ids).values_list("id", flat=True)
+        )
+
         for uid in existing_user_ids:
+            is_friend = Friend.objects.filter(
+                Q(user=post.author, friend_id=uid) | Q(user_id=uid, friend=post.author)
+            ).exists()
+            if is_friend:
+                final_tagged_user_ids.add(uid)
+
+        PostTagUser.objects.filter(post=post).exclude(user_id__in=final_tagged_user_ids).delete()
+        for uid in final_tagged_user_ids:
             PostTagUser.objects.get_or_create(post=post, user_id=uid)
 
     # 3. Update Images
@@ -215,17 +285,20 @@ def update_post(
     post.save()
 
     if tagged_users is not None:
-        # Xóa tag cũ
-        PostTagUser.objects.filter(post=post).delete()
-
-        # Lấy user mới
-        users = User.objects.filter(id__in=tagged_users)
-
-        # Tạo lại
-        PostTagUser.objects.bulk_create([
-            PostTagUser(post=post, user=user)
-            for user in users
-        ])
+        new_tagged_user_ids = final_tagged_user_ids - original_tagged_user_ids
+        for tagged_user_id in new_tagged_user_ids:
+            if tagged_user_id == post.author_id:
+                continue
+            tagged_user = User.objects.filter(id=tagged_user_id).first()
+            if not tagged_user:
+                continue
+            create_notification(
+                actor=post.author,
+                recipient=tagged_user,
+                verb_code="mention_in_post",
+                target=post,
+                link=f"/posts/{post.id}/",
+            )
     
     send_ws_message(f"post_{post.id}", "post_event", {
         "event": "post_updated",
@@ -279,6 +352,26 @@ def share_post(user, post_to_share, caption="", privacy="public"):
         privacy=privacy,
     )
 
+    create_notification(
+        actor=user,
+        recipient=original_post.author,
+        verb_code="share_post",
+        target=original_post,
+        link=f"/posts/{original_post.id}/",
+    )
+
+    post_stats = _build_post_stats_payload(original_post)
+    send_ws_message(f"post_{original_post.id}", "post_event", {
+        "event": "share_updated",
+        "post_id": original_post.id,
+        **post_stats,
+    })
+    send_ws_message("feed_global", "feed_update", {
+        "action": "post_stats",
+        "post_id": original_post.id,
+        **post_stats,
+    })
+
     return new_post
 
 
@@ -319,9 +412,12 @@ def create_comment(user, post, content, parent=None, images=None, files=None):
             obj = CommentFile.objects.create(comment=comment, file=f, filename=f.name)
             file_urls.append({"url": obj.file.url, "name": obj.filename})
 
+    post_stats = _build_post_stats_payload(post)
+
     # 4. 🚀 REALTIME BROADCAST
     send_ws_message(f"post_{post.id}", "post_event", {
         "event": "comment_new",
+        "post_id": post.id,
         "comment_id": comment.id,
         "content": comment.content,
         "user": user.username,
@@ -331,8 +427,47 @@ def create_comment(user, post, content, parent=None, images=None, files=None):
         "parent_id": parent.id if parent else None,
         "level": comment.level,
         "images": img_urls,
-        "files": file_urls
+        "files": file_urls,
+        "comment_count": post_stats["comment_count"],
     })
+    send_ws_message("feed_global", "feed_update", {
+        "action": "post_stats",
+        "post_id": post.id,
+        **post_stats,
+    })
+
+    recipient_ids, tagged_user_ids = _get_post_author_and_tagged_recipient_ids(post, user)
+    if recipient_ids:
+        recipients_by_id = User.objects.in_bulk(recipient_ids)
+        for recipient_id in recipient_ids:
+            recipient_user = recipients_by_id.get(recipient_id)
+            if not recipient_user:
+                continue
+
+            custom_verb_text = ""
+            if recipient_id in tagged_user_ids and recipient_id != post.author_id:
+                custom_verb_text = (
+                    f"{user.username} commented on a post that mentioned you: "
+                    f"'{comment.content[:80]}'"
+                )
+
+            create_notification(
+                actor=user,
+                recipient=recipient_user,
+                verb_code="comment_post",
+                target=post,
+                link=f"/posts/{post.id}/",
+                verb_text=custom_verb_text,
+            )
+
+    if parent and parent.user_id != user.id:
+        create_notification(
+            actor=user,
+            recipient=parent.user,
+            verb_code="reply_comment",
+            target=parent,
+            link=f"/posts/{post.id}/",
+        )
 
     return comment
 
@@ -381,12 +516,20 @@ def delete_comment(user, comment):
     with transaction.atomic():
         recursive_soft_delete(comment)
 
+    post_stats = _build_post_stats_payload(comment.post)
+
     # 4. 🚀 Realtime Delete
     # Gửi danh sách toàn bộ ID bị xóa để Frontend ẩn đi
     send_ws_message(f"post_{post_id}", "post_event", {
         "event": "comment_deleted",
         "comment_id": comment.id,         # ID chính bị click xóa
-        "deleted_ids": deleted_ids        # Danh sách tất cả ID bị ảnh hưởng (bao gồm con)
+        "deleted_ids": deleted_ids,       # Danh sách tất cả ID bị ảnh hưởng (bao gồm con)
+        "comment_count": post_stats["comment_count"],
+    })
+    send_ws_message("feed_global", "feed_update", {
+        "action": "post_stats",
+        "post_id": post_id,
+        **post_stats,
     })
 
 # =====================================================
@@ -397,6 +540,10 @@ def toggle_post_reaction(user, post, reaction_type):
     Toggle reaction cho bài viết (Like, Love, Haha, Sad, Angry)
     Trả về: status (added/removed/changed), current_type, total_count
     """
+    valid_reactions = {choice[0] for choice in ReactionType.choices}
+    if reaction_type not in valid_reactions:
+        raise ValidationError("Invalid reaction type.")
+
     with transaction.atomic():
         reaction = PostReaction.objects.filter(user=user, post=post).select_for_update().first()
         status = "added"
@@ -424,16 +571,52 @@ def toggle_post_reaction(user, post, reaction_type):
         reaction_counts = PostReaction.objects.filter(post=post).values('reaction_type').annotate(count=Count('id'))
         reaction_breakdown = {item['reaction_type']: item['count'] for item in reaction_counts}
 
+    post_stats = _build_post_stats_payload(post, reaction_count=total_count)
+
     # 🚀 REALTIME BROADCAST
     send_ws_message(f"post_{post.id}", "post_event", {
         "event": "reaction",
+        "post_id": post.id,
         "status": status,
         "user": user.username,
         "user_id": user.id,
         "reaction_type": current_type,
         "total_count": total_count,
-        "breakdown": reaction_breakdown
+        "breakdown": reaction_breakdown,
+        "comment_count": post_stats["comment_count"],
+        "share_count": post_stats["share_count"],
     })
+    send_ws_message("feed_global", "feed_update", {
+        "action": "post_stats",
+        "post_id": post.id,
+        **post_stats,
+    })
+
+    if current_type:
+        recipient_ids, tagged_user_ids = _get_post_author_and_tagged_recipient_ids(post, user)
+        if recipient_ids:
+            recipients_by_id = User.objects.in_bulk(recipient_ids)
+            for recipient_id in recipient_ids:
+                recipient_user = recipients_by_id.get(recipient_id)
+                if not recipient_user:
+                    continue
+
+                custom_verb_text = ""
+                if recipient_id in tagged_user_ids and recipient_id != post.author_id:
+                    custom_verb_text = (
+                        f"{user.username} reacted to a post that mentioned you "
+                        f"({current_type})."
+                    )
+
+                create_notification(
+                    actor=user,
+                    recipient=recipient_user,
+                    verb_code="react_post",
+                    target=post,
+                    reaction_type=current_type,
+                    link=f"/posts/{post.id}/",
+                    verb_text=custom_verb_text,
+                )
     
     return {"status": status, "total_count": total_count}
 
@@ -441,6 +624,10 @@ def toggle_comment_reaction(user, comment, reaction_type):
     """
     Toggle reaction cho bình luận
     """
+    valid_reactions = {choice[0] for choice in ReactionType.choices}
+    if reaction_type not in valid_reactions:
+        raise ValidationError("Invalid reaction type.")
+
     with transaction.atomic():
         reaction = CommentReaction.objects.filter(user=user, comment=comment).select_for_update().first()
         status = "added"
@@ -470,6 +657,16 @@ def toggle_comment_reaction(user, comment, reaction_type):
         "reaction_type": current_type,
         "count": count
     })
+
+    if current_type:
+        create_notification(
+            actor=user,
+            recipient=comment.user,
+            verb_code="react_comment",
+            target=comment,
+            reaction_type=current_type,
+            link=f"/posts/{comment.post.id}/",
+        )
     
     return {"status": status, "count": count}
 
@@ -549,8 +746,10 @@ def remove_location(post):
 
 def list_people_tag(user):
     """Liệt kê bạn bè để tag vào bài viết"""
-    friends = Friend.objects.filter(user=user).select_related('friend')
-    return [f.friend for f in friends]
+    friend_ids = get_friend_ids(user)
+    if not friend_ids:
+        return []
+    return list(User.objects.filter(id__in=friend_ids))
 
 #lấy  các user đã tag trong post
 def get_tagged_users(post):
@@ -596,3 +795,6 @@ def get_user_posts(viewer, profile_user, friends_ids):
         else:
             post.image = post.images.first().image if post.images.exists() else None
     return posts
+
+
+

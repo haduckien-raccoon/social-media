@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Thông báo{% endblock %}
+
+{% block extra_css %}
+<style>
+.notifications-page {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.notifications-card {
+    background: #fff;
+    border: 1px solid #dbdbdb;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.notifications-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid #ececec;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.notifications-title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.mark-all-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #e7f3ff;
+    color: #1877f2;
+    cursor: pointer;
+}
+
+.mark-all-btn:hover {
+    background: #d9ebff;
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.notification-item {
+    display: block;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f2f2f2;
+    text-decoration: none;
+    color: #1f1f1f;
+}
+
+.notification-item:hover {
+    background: #f6f9ff;
+}
+
+.notification-item.unread {
+    background: #eef5ff;
+}
+
+.notification-main {
+    font-size: 14px;
+    line-height: 1.45;
+    margin-bottom: 4px;
+}
+
+.notification-meta {
+    font-size: 12px;
+    color: #65676b;
+}
+
+.notifications-empty,
+.notifications-loading {
+    text-align: center;
+    padding: 28px 12px;
+    color: #65676b;
+    font-size: 14px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notifications-page">
+    <div class="notifications-card">
+        <div class="notifications-header">
+            <div class="notifications-title">Thông báo</div>
+            <button id="mark-all-read-btn" class="mark-all-btn" type="button">Đánh dấu đã đọc tất cả</button>
+        </div>
+        <div id="notifications-loading" class="notifications-loading">Đang tải thông báo...</div>
+        <div id="notifications-list" class="notifications-list" style="display:none;"></div>
+        <div id="notifications-empty" class="notifications-empty" style="display:none;">Chưa có thông báo nào.</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function initNotificationPage() {
+    const listEl = document.getElementById("notifications-list");
+    const loadingEl = document.getElementById("notifications-loading");
+    const emptyEl = document.getElementById("notifications-empty");
+    const markAllBtn = document.getElementById("mark-all-read-btn");
+    if (!listEl || !loadingEl || !emptyEl || !markAllBtn) return;
+
+    const getCookie = (name) => {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    };
+
+    const escapeHtml = (value) => {
+        return String(value || "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll("\"", "&quot;")
+            .replaceAll("'", "&#039;");
+    };
+
+    const formatRelativeTime = (isoValue) => {
+        const dateValue = new Date(isoValue);
+        if (Number.isNaN(dateValue.getTime())) return "Vừa xong";
+
+        const diffSeconds = Math.max(0, Math.floor((Date.now() - dateValue.getTime()) / 1000));
+        if (diffSeconds < 60) return "Vừa xong";
+
+        const diffMinutes = Math.floor(diffSeconds / 60);
+        if (diffMinutes < 60) return `${diffMinutes} phút trước`;
+
+        const diffHours = Math.floor(diffMinutes / 60);
+        if (diffHours < 24) return `${diffHours} giờ trước`;
+
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays < 30) return `${diffDays} ngày trước`;
+
+        const diffMonths = Math.floor(diffDays / 30);
+        if (diffMonths < 12) return `${diffMonths} tháng trước`;
+
+        return `${Math.floor(diffMonths / 12)} năm trước`;
+    };
+
+    const renderItem = (item) => {
+        const openUrl = item.open_url || `/notifications/${item.id}/open/`;
+        const isUnreadClass = item.is_read ? "" : " unread";
+        const text = escapeHtml(item.verb_text || "Bạn có thông báo mới");
+        const meta = formatRelativeTime(item.created_at);
+
+        return `
+            <a class="notification-item${isUnreadClass}" data-notification-id="${item.id}" href="${openUrl}">
+                <div class="notification-main">${text}</div>
+                <div class="notification-meta">${meta}</div>
+            </a>
+        `;
+    };
+
+    const setLoading = (isLoading) => {
+        loadingEl.style.display = isLoading ? "block" : "none";
+        listEl.style.display = isLoading ? "none" : "flex";
+    };
+
+    const loadNotifications = async () => {
+        setLoading(true);
+        emptyEl.style.display = "none";
+        try {
+            const response = await fetch("/notifications/?page=1&page_size=50", {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+            if (!response.ok) throw new Error("cannot_load_notifications");
+
+            const payload = await response.json();
+            const items = Array.isArray(payload.results) ? payload.results : [];
+
+            if (!items.length) {
+                listEl.innerHTML = "";
+                listEl.style.display = "none";
+                emptyEl.style.display = "block";
+                return;
+            }
+
+            listEl.innerHTML = items.map(renderItem).join("");
+            listEl.style.display = "flex";
+            emptyEl.style.display = "none";
+        } catch (error) {
+            listEl.innerHTML = "";
+            listEl.style.display = "none";
+            emptyEl.style.display = "block";
+            emptyEl.textContent = "Không thể tải thông báo. Vui lòng thử lại.";
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const parseBool = (value) => value === true || value === "true" || value === 1 || value === "1";
+
+    const upsertNotificationFromRealtime = (payload) => {
+        const notificationId = Number(payload.id);
+        if (!Number.isFinite(notificationId) || notificationId <= 0) return;
+
+        const item = {
+            id: notificationId,
+            verb_text: payload.verb_text || "Ban co thong bao moi",
+            is_read: parseBool(payload.is_read),
+            created_at: payload.created_at || new Date().toISOString(),
+            open_url: payload.open_url || `/notifications/${notificationId}/open/`,
+        };
+
+        const html = renderItem(item);
+        const existing = listEl.querySelector(`[data-notification-id="${notificationId}"]`);
+        if (existing) {
+            existing.outerHTML = html;
+        } else {
+            listEl.insertAdjacentHTML("afterbegin", html);
+        }
+
+        const maxItems = 100;
+        while (listEl.children.length > maxItems) {
+            listEl.removeChild(listEl.lastElementChild);
+        }
+
+        listEl.style.display = "flex";
+        emptyEl.style.display = "none";
+    };
+
+    markAllBtn.addEventListener("click", async () => {
+        markAllBtn.disabled = true;
+        try {
+            await fetch("/notifications/read-all/", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+            });
+        } catch (error) {
+            // keep page stable
+        } finally {
+            markAllBtn.disabled = false;
+            loadNotifications();
+        }
+    });
+
+    loadNotifications();
+
+    const fallbackTimer = window.setInterval(loadNotifications, 15000);
+
+    if (!window.EventSource) {
+        window.addEventListener("beforeunload", () => {
+            window.clearInterval(fallbackTimer);
+        });
+        return;
+    }
+
+    const eventSource = new EventSource("/notifications/sse/", { withCredentials: true });
+    eventSource.addEventListener("notification", (event) => {
+        try {
+            const payload = JSON.parse(event.data || "{}");
+            upsertNotificationFromRealtime(payload);
+        } catch (error) {
+            loadNotifications();
+        }
+    });
+    eventSource.addEventListener("connected", () => {
+        loadNotifications();
+    });
+    window.addEventListener("beforeunload", () => {
+        window.clearInterval(fallbackTimer);
+        eventSource.close();
+    });
+})();
+</script>
+{% endblock %}
