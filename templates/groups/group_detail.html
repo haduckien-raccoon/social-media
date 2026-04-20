@@ -317,17 +317,26 @@
         return cookieValue;
     }
 
+    function getActiveReactionType(button) {
+        if (!button) return null;
+        const hit = Array.from(button.classList).find((cls) => cls.startsWith('active-'));
+        return hit ? hit.slice('active-'.length) : null;
+    }
+
     function submitReact(postId, type) {
         const csrftoken = getCookie('csrftoken');
+        const btn = document.getElementById(`btn-react-${postId}`);
+        if (!btn) return;
+
+        const selectedType = type || getActiveReactionType(btn) || 'like';
 
         fetch(`/posts/${postId}/reaction/`, {
             method: 'POST',
             headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
-            body: `reaction=${type}`
+            body: `reaction=${encodeURIComponent(selectedType)}`
         })
         .then(res => res.json())
         .then(data => {
-            const btn = document.getElementById(`btn-react-${postId}`);
             const countDiv = document.getElementById(`count-${postId}`);
             
             btn.className = 'action-btn'; 
@@ -335,10 +344,10 @@
             if (data.status === 'removed') {
                 btn.innerHTML = `<i class="far fa-thumbs-up"></i> Thích`;
             } else {
-                btn.classList.add(`active-${type}`);
+                btn.classList.add(`active-${selectedType}`);
                 const map = { 'like':'Thích', 'love':'Yêu thích', 'haha':'Haha', 'wow':'Wow', 'sad':'Buồn', 'angry':'Phẫn nộ' };
                 const icons = { 'like':'thumbs-up', 'love':'heart', 'haha':'laugh-squint', 'wow':'surprise', 'sad':'sad-tear', 'angry':'angry' };
-                btn.innerHTML = `<i class="fas fa-${icons[type]}"></i> ${map[type]}`;
+                btn.innerHTML = `<i class="fas fa-${icons[selectedType]}"></i> ${map[selectedType]}`;
             }
 
             if(data.total_count > 0) {

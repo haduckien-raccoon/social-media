@@ -113,7 +113,7 @@
             </div>
             <div class="action-btn {% if post.current_user_reaction %}active-{{ post.current_user_reaction }}{% endif %}" 
                  id="btn-react-{{ post.id }}" 
-                 onclick="submitReact({{ post.id }}, 'like')"
+                  onclick="submitReact({{ post.id }})"
                  style="width: 100%;">
                 
                 {% if post.current_user_reaction == 'like' %} <i class="fas fa-thumbs-up"></i> Thích

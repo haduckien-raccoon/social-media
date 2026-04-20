@@ -681,7 +681,7 @@
                     {% comment %} <span class="emoji-btn" onclick="submitPostReaction('angry')"><i class="fas fa-angry" style="background-color: #e9710f; color: #fff; border-radius: 50%; padding: 4px; font-size: 18px;"></i></span> {% endcomment %}
                 </div>
                 <button class="action-btn {% if post.current_user_reaction %}active-{{ post.current_user_reaction }}{% endif %}" 
-                        id="main-like-btn" onclick="submitPostReaction('like')">
+                    id="main-like-btn" onclick="submitPostReaction()">
                     {% if post.current_user_reaction == 'like' %} <i class="fas fa-thumbs-up" style="background-color: #166fe5; color: #fff; border-radius: 50%; padding: 4px; font-size: 18px;"></i> Thích
                     {% elif post.current_user_reaction == 'love' %} <i class="fas fa-heart"></i> Yêu thích
                     {% elif post.current_user_reaction == 'haha' %} <i class="fas fa-laugh-squint"></i> Haha
@@ -759,7 +759,7 @@
                                             <span class="emoji-btn-small" onclick="submitCommentReaction({{ comment.id }}, 'sad')">😢</span>
                                             <span class="emoji-btn-small" onclick="submitCommentReaction({{ comment.id }}, 'angry')">😡</span>
                                         </div>
-                                        <a href="#" onclick="submitCommentReaction({{ comment.id }}, 'like'); return false;" 
+                                        <a href="#" onclick="submitCommentReaction({{ comment.id }}); return false;" 
                                            class="meta-action {% if comment.current_reaction %}text-{{ comment.current_reaction }}{% endif %}"
                                            id="btn-comment-txt-{{ comment.id }}">
                                            {% if comment.current_reaction == 'like' %}Thích
@@ -896,6 +896,7 @@
         {% endif %}
     ];
     const POST_ID = "{{ post.id }}";
+    const CURRENT_USER_ID = Number("{{ request.user.id|default_if_none:'0' }}") || 0;
     
     // CSRF Helper
     const getCookie = (name) => {
@@ -1008,14 +1009,27 @@
         });
     }
 
-    // Reaction & Comments Logic (Giữ nguyên)
+    // Reaction & Comments Logic
+    function getReactionTypeFromClass(element, prefix) {
+        if (!element) return null;
+        const hit = Array.from(element.classList).find((cls) => cls.startsWith(prefix));
+        return hit ? hit.slice(prefix.length) : null;
+    }
+
+    function resolveReactionType(element, prefix, explicitType) {
+        return explicitType || getReactionTypeFromClass(element, prefix) || 'like';
+    }
+
     function submitPostReaction(type) {
+        const btn = document.getElementById('main-like-btn');
+        const selectedType = resolveReactionType(btn, 'active-', type);
+
         fetch(`/posts/${POST_ID}/reaction/`, {
             method: 'POST',
             headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `reaction=${type}`
+            body: `reaction=${encodeURIComponent(selectedType)}`
         }).then(res => res.json()).then(data => {
-            updateReactionUI(data.status === 'removed' ? null : type, data.total_count);
+            updateReactionUI(data.status === 'removed' ? null : selectedType, data.total_count);
         });
     }
 
@@ -1078,13 +1092,23 @@
     }
 
     function submitCommentReaction(commentId, type) {
+        const btn = document.getElementById(`btn-comment-txt-${commentId}`);
+        const selectedType = resolveReactionType(btn, 'text-', type);
+
         fetch(`/posts/comment/${commentId}/reaction/`, {
             method: 'POST',
             headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `reaction=${type}`
+            body: `reaction=${encodeURIComponent(selectedType)}`
         }).then(res => res.json()).then(data => {
-            updateCommentReactionUI(commentId, data.status === 'removed' ? null : type, data.count);
+            updateCommentReactionUI(commentId, data.status === 'removed' ? null : selectedType, data.count);
         });
+    }
+
+    function updateCommentReactionCount(commentId, count) {
+        const badge = document.getElementById(`comment-badge-${commentId}`);
+        const cnt = document.getElementById(`comment-count-${commentId}`);
+        if(cnt) cnt.innerText = count;
+        if(badge) badge.style.display = count > 0 ? 'flex' : 'none';
     }
 
     function updateCommentReactionUI(commentId, type, count) {
@@ -1095,10 +1119,7 @@
             if(!type) btn.innerText = 'Thích';
             else { btn.classList.add(`text-${type}`); btn.innerText = map[type]; }
         }
-        const badge = document.getElementById(`comment-badge-${commentId}`);
-        const cnt = document.getElementById(`comment-count-${commentId}`);
-        if(cnt) cnt.innerText = count;
-        if(badge) badge.style.display = count > 0 ? 'flex' : 'none';
+        updateCommentReactionCount(commentId, count);
     }
 
     window.submitComment = function(postId, parentId = null) {
@@ -1163,16 +1184,24 @@
         } else if (data.event === 'comment_deleted') {
             updatePostStatsRealtime({ comment_count: data.comment_count });
             window.location.reload(); 
-        } else if (data.event === 'reaction' || data.event === 'comment_reaction') {
-            // Logic update reaction không cần reload
-             if (data.event === 'reaction') {
+        } else if (data.event === 'reaction') {
+            updatePostStatsRealtime({
+                reaction_count: data.total_count,
+                comment_count: data.comment_count,
+                share_count: data.share_count,
+            });
+
+            // Chỉ cập nhật nút reaction cá nhân khi event thuộc user hiện tại
+            if (Number(data.user_id) === CURRENT_USER_ID) {
                 updateReactionUI(data.status === 'removed' ? null : data.reaction_type, data.total_count);
-                updatePostStatsRealtime({
-                    comment_count: data.comment_count,
-                    share_count: data.share_count,
-                });
-             }
-             else updateCommentReactionUI(data.comment_id, data.status === 'removed' ? null : data.reaction_type, data.count);
+            }
+        } else if (data.event === 'comment_reaction') {
+            updateCommentReactionCount(data.comment_id, data.count);
+
+            // Chỉ cập nhật text reaction cá nhân khi event thuộc user hiện tại
+            if (Number(data.user_id) === CURRENT_USER_ID) {
+                updateCommentReactionUI(data.comment_id, data.status === 'removed' ? null : data.reaction_type, data.count);
+            }
         } else if (data.event === 'share_updated') {
             updatePostStatsRealtime({
                 reaction_count: data.reaction_count,

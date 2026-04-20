@@ -100,7 +100,7 @@
             </div>
             <div class="action-btn {% if post.current_user_reaction %}active-{{ post.current_user_reaction }}{% endif %}" 
                  id="btn-react-{{ post.id }}" 
-                 onclick="submitReact({{ post.id }}, 'like')" style="width: 100%;">
+                  onclick="submitReact({{ post.id }})" style="width: 100%;">
                 {% if post.current_user_reaction == 'like' %} <i class="fas fa-thumbs-up"></i> Thích
                 {% elif post.current_user_reaction == 'love' %} <i class="fas fa-heart"></i> Yêu thích
                 {% elif post.current_user_reaction == 'haha' %} <i class="fas fa-laugh-squint"></i> Haha

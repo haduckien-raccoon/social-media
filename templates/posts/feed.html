@@ -251,7 +251,7 @@
                         </div>
                         <div class="action-btn {% if post.current_user_reaction %}active-{{ post.current_user_reaction }}{% endif %}" 
                              id="btn-react-{{ post.id }}" 
-                             onclick="submitReact({{ post.id }}, 'like')"
+                             onclick="submitReact({{ post.id }})"
                              style="width: 100%;">
                             
                             {% if post.current_user_reaction == 'like' %} <i class="fas fa-thumbs-up"></i> Thích
@@ -387,16 +387,25 @@
     }
 
     // --- REACTION LOGIC (Updated to handle different types) ---
+    function getActiveReactionType(button) {
+        if (!button) return null;
+        const hit = Array.from(button.classList).find((cls) => cls.startsWith('active-'));
+        return hit ? hit.slice('active-'.length) : null;
+    }
+
     function submitReact(postId, type) {
+        const btn = document.getElementById(`btn-react-${postId}`);
+        if (!btn) return;
+
+        const selectedType = type || getActiveReactionType(btn) || 'like';
+
         fetch(`/posts/${postId}/reaction/`, {
             method: 'POST',
             headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
-            body: `reaction=${type}`
+            body: `reaction=${encodeURIComponent(selectedType)}`
         })
         .then(res => res.json())
         .then(data => {
-            const btn = document.getElementById(`btn-react-${postId}`);
-            
             // Reset base class
             btn.className = 'action-btn'; 
 
@@ -404,13 +413,13 @@
                 btn.innerHTML = `<i class="far fa-thumbs-up"></i> Thích`;
             } else {
                 // Add active class color (e.g., active-love)
-                btn.classList.add(`active-${type}`);
+                btn.classList.add(`active-${selectedType}`);
                 
                 // Update Icon & Text based on type
                 const map = { 'like':'Thích', 'love':'Yêu thích', 'haha':'Haha', 'wow':'Wow', 'sad':'Buồn', 'angry':'Phẫn nộ' };
                 const icons = { 'like':'thumbs-up', 'love':'heart', 'haha':'laugh-squint', 'wow':'surprise', 'sad':'sad-tear', 'angry':'angry' };
                 
-                btn.innerHTML = `<i class="fas fa-${icons[type]}"></i> ${map[type]}`;
+                btn.innerHTML = `<i class="fas fa-${icons[selectedType]}"></i> ${map[selectedType]}`;
             }
 
             // Update Total Count
