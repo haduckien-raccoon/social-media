@@ -1,5 +1,4 @@
 django>=3.2
-PyMySQL
 python-dotenv
 djangorestframework
 PyJWT
@@ -15,3 +14,6 @@ djangorestframework-simplejwt
 django-filter
 django-celery-beat
 django-celery-results
+daphne
+mysqlclient>=2.2.1
+whitenoise
