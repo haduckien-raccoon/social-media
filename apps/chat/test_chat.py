@@ -281,4 +281,6 @@ class ChatFriendDiscoveryTests(TestCase):
 
 		response = chat_page_view(request)
 		self.assertEqual(response.status_code, 200)
-		self.assertIn(b"Chat chung", response.content)
+		self.assertIn(b"Messenger", response.content)
+		self.assertIn(b"chat-initial-conversations", response.content)
+		self.assertIn(b"Tin nhan dau tien", response.content)

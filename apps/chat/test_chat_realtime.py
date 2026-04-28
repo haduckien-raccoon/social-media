@@ -4,7 +4,7 @@ import tempfile
 from unittest.mock import AsyncMock, patch
 
 from asgiref.sync import async_to_sync
-from django.test import TestCase, override_settings
+from django.test import TestCase, TransactionTestCase, override_settings
 
 from apps.accounts.models import User
 from apps.chat.consumer import ChatConsumer
@@ -108,7 +108,7 @@ class ChatConsumerContractTests(TestCase):
 
 
 @override_settings(MEDIA_ROOT=tempfile.gettempdir())
-class ChatConsumerActionTests(TestCase):
+class ChatConsumerActionTests(TransactionTestCase):
 	def setUp(self):
 		self.alice = User.objects.create_user(
 			email="alice_ws_action@example.com",
@@ -128,6 +128,7 @@ class ChatConsumerActionTests(TestCase):
 		consumer = ChatConsumer()
 		consumer.user = self.alice
 		consumer.conversation_id = self.conversation.id
+		consumer.group_name = f"chat_conversation_{self.conversation.id}"
 		return consumer
 
 	def _capture_send(self, consumer):
@@ -162,6 +163,7 @@ class ChatConsumerActionTests(TestCase):
 	@patch("apps.chat.consumer.ChatConsumer._create_message", new_callable=AsyncMock)
 	def test_receive_send_message_decodes_attachments(self, mocked_create_message):
 		consumer = self._build_consumer()
+		consumer.channel_layer = AsyncMock()
 		message = Message.objects.create(
 			conversation=self.conversation,
 			sender=self.alice,
@@ -182,6 +184,7 @@ class ChatConsumerActionTests(TestCase):
 
 		async_to_sync(consumer.receive)(text_data=json.dumps(payload))
 		mocked_create_message.assert_awaited_once()
+		consumer.channel_layer.group_send.assert_awaited_once()
 
 		content_arg, attachments = mocked_create_message.call_args.args
 		self.assertEqual(content_arg, "Hello websocket")
