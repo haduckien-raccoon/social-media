@@ -33,6 +33,7 @@ urlpatterns = [
     path("accounts/", include("apps.accounts.urls")),
     path('friends/', include('apps.friends.urls')),
     path("posts/", include("apps.posts.urls")),
+    path("chat/", include("apps.chat.urls")),
     path("search/", include("apps.search.urls")),
     path("groups/", include("apps.groups.urls")),
     path("notifications/", include("apps.notifications.urls")),

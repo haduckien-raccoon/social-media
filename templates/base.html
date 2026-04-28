@@ -126,9 +126,8 @@
             /* Cần xử lý main-content ở các trang con để margin-left khớp */
         }
 
-        /* --- BLOCK CHO CSS RIÊNG --- */
-        {% block extra_css %}{% endblock %}
     </style>
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
 
@@ -139,7 +138,7 @@
             <div class="nav-item" onclick="search()"><i class="fa-solid fa-magnifying-glass"></i> <span>Search</span></div>
             <div class="nav-item" onclick="friend()"><i class="fa-solid fa-user-group"></i><span>Friend</span></div>
             <div class="nav-item" onclick="group()"><i class="fa-solid fa-people-group"></i> <span>Group</span></div>
-            <div class="nav-item"><i class="fa-brands fa-facebook-messenger"></i> <span>Messages</span></div>
+            <div class="nav-item" onclick="goChat()"><i class="fa-brands fa-facebook-messenger"></i> <span>Messages</span></div>
             <div class="nav-item" onclick="goNotifications()">
                 <span class="nav-item-badge-wrap">
                     <i class="fa-regular fa-bell"></i>
@@ -170,6 +169,7 @@
         function createPost() { window.location.href = "/posts/create/"; }
         function search() { window.location.href = "/search/"; }
         function group() { window.location.href = "/groups/"; }
+        function goChat() { window.location.href = "/chat/"; }
         function goNotifications() { window.location.href = "/notifications/"; }
 
         (function initGlobalNotifications() {

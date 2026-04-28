@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chat | SUDO{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-page">
+    <div class="chat-topbar">
+        <div class="chat-brand">
+            <span class="chat-logo-dot"></span>
+            <div>
+                <h1>Messenger</h1>
+                <span class="chat-brand-sub">Realtime chat for SUDO</span>
+            </div>
+        </div>
+        <div class="chat-top-actions">
+            <button type="button" class="chat-ghost-btn">New chat</button>
+            <button type="button" class="chat-ghost-btn">Call</button>
+        </div>
+    </div>
+    <div class="chat-shell">
+        <aside class="chat-panel chat-conversations-panel">
+            <div class="chat-panel-header">
+                <h2>Inbox</h2>
+                <p>Tap trung cac cuoc tro chuyen quan trong nhat.</p>
+                <input id="conversation-filter-input" type="text" placeholder="Tim hoi thoai...">
+            </div>
+            <div id="conversation-list" class="chat-list"></div>
+        </aside>
+
+        <section class="chat-panel chat-main-panel">
+            <header id="chat-active-header" class="chat-active-header">
+                <h3>Chon mot hoi thoai</h3>
+                <span>Ban co the tim ban be o cot ben phai de nhan tin thu.</span>
+                <div class="chat-header-actions">
+                    <input id="chat-message-search-input" type="text" placeholder="Tim tin nhan...">
+                </div>
+            </header>
+
+            <div id="chat-message-list" class="chat-message-list"></div>
+
+            <form id="chat-compose-form" class="chat-compose-form">
+                <label for="chat-message-input">Tin nhan</label>
+                <textarea id="chat-message-input" rows="2" placeholder="Nhap tin nhan..."></textarea>
+
+                <div class="chat-compose-actions">
+                    <label class="chat-file-label" for="chat-attachments-input">Chon file</label>
+                    <input id="chat-attachments-input" type="file" multiple>
+                    <span class="chat-file-hint">Moi file phai nho hon 20MB.</span>
+                    <button type="submit" id="chat-send-button">Gui</button>
+                </div>
+
+                <ul id="chat-attachments-preview" class="chat-attachments-preview"></ul>
+            </form>
+        </section>
+
+        <aside class="chat-panel chat-friend-panel">
+            <div class="chat-panel-header">
+                <h3>Tim ban be</h3>
+                <p>Bat dau mot cuoc tro chuyen moi trong vai giay.</p>
+                <input id="friend-search-input" type="text" placeholder="Tim theo username, email...">
+            </div>
+            <div id="friend-search-results" class="chat-friend-results"></div>
+        </aside>
+    </div>
+</div>
+
+{{ initial_conversations|json_script:"chat-initial-conversations" }}
+{{ initial_messages|json_script:"chat-initial-messages" }}
+{{ initial_friend_candidates|json_script:"chat-initial-friends" }}
+
+<div
+    id="chat-config"
+    data-current-user-id="{{ request.user.id }}"
+    data-active-conversation-id="{% if initial_active_conversation_id %}{{ initial_active_conversation_id }}{% endif %}"
+    data-ws-token="{{ ws_token|default:"" }}"
+    data-list-conversations-url="{% url 'chat:list_conversations' %}"
+    data-list-messages-template="{% url 'chat:list_messages' conversation_id=0 %}"
+    data-send-message-template="{% url 'chat:send_message' conversation_id=0 %}"
+    data-mark-read-template="{% url 'chat:mark_read' conversation_id=0 %}"
+    data-toggle-reaction-template="{% url 'chat:toggle_message_reaction' message_id=0 %}"
+    data-search-friends-url="{% url 'chat:search_friends' %}"
+    data-start-friend-chat-template="{% url 'chat:start_chat_with_friend' friend_id=0 %}"
+></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/chat.js' %}"></script>
+{% endblock %}

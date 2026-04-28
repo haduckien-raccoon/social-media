@@ -47,6 +47,7 @@ REDIS_SOCKET_CONNECT_TIMEOUT = _env_float("REDIS_SOCKET_CONNECT_TIMEOUT", 0.2)
 # INSTALLED APPS
 # ---------------------------
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -191,7 +192,8 @@ USE_TZ = True
 # STATIC & MEDIA
 # ---------------------------
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "static"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/images/"
 MEDIA_ROOT = BASE_DIR / "images"
 IMAGES_URL = MEDIA_URL

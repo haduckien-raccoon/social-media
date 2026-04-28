@@ -9,6 +9,7 @@ tzdata
 channels
 channels-redis
 asgiref
+daphne
 redis
 django-cors-headers
 djangorestframework-simplejwt

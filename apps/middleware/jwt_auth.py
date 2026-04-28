@@ -1,11 +1,16 @@
 import jwt
+from http.cookies import SimpleCookie
+from urllib.parse import parse_qs
 from django.conf import settings
 from django.shortcuts import redirect
+from django.contrib.auth.models import AnonymousUser
 from django.utils import timezone
+from channels.db import database_sync_to_async
+from channels.middleware import BaseMiddleware
 from django.utils.deprecation import MiddlewareMixin
 
 from apps.accounts.models import RefreshToken, User
-from apps.middleware.utils import generate_access_token
+from apps.middleware.utils import decode_access_token, generate_access_token
 
 
 PUBLIC_PATHS = [
@@ -101,3 +106,59 @@ class JWTAuthMiddleware(MiddlewareMixin):
             return redirect("/accounts/login/")
         except Exception:
             return redirect("/accounts/login/")
+
+
+def _get_cookie_from_scope(scope):
+    headers = dict(scope.get("headers", []))
+    cookie_header = headers.get(b"cookie", b"").decode("utf-8")
+    cookie = SimpleCookie()
+    cookie.load(cookie_header)
+    return cookie
+
+
+@database_sync_to_async
+def _get_user_from_tokens(access_token, refresh_token):
+    if access_token:
+        payload = decode_access_token(access_token)
+        if payload and payload.get("user_id"):
+            user = User.objects.filter(id=payload["user_id"]).first()
+            if user:
+                return user
+
+    if refresh_token:
+        refresh = (
+            RefreshToken.objects.filter(
+                token=refresh_token,
+                is_revoked=False,
+                expires_at__gt=timezone.now(),
+            )
+            .select_related("user")
+            .first()
+        )
+        if refresh:
+            return refresh.user
+
+    return AnonymousUser()
+
+
+class JWTAuthMiddlewareStack(BaseMiddleware):
+    async def __call__(self, scope, receive, send):
+        cookie = _get_cookie_from_scope(scope)
+        access = cookie.get("access")
+        refresh = cookie.get("refresh")
+        query_string = scope.get("query_string", b"").decode("utf-8")
+        query_params = parse_qs(query_string)
+        token_param = query_params.get("token", [None])[0]
+
+        access_token_value = token_param or (access.value if access else None)
+        refresh_token_value = refresh.value if refresh else None
+
+        scope["user"] = await _get_user_from_tokens(
+            access_token_value,
+            refresh_token_value,
+        )
+        return await super().__call__(scope, receive, send)
+
+
+def jwt_auth_middleware_stack(inner):
+    return JWTAuthMiddlewareStack(inner)
