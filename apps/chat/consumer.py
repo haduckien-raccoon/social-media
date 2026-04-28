@@ -89,6 +89,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		content = payload.get("content", "")
 		attachments = self._decode_ws_attachments(payload.get("attachments") or [])
 		message = await self._create_message(content, attachments)
+		message_payload = await self._serialize_message(message.id)
 		await self.channel_layer.group_send(
 			self.group_name,
 			{
@@ -96,7 +97,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				"data": {
 					"event": "message_new",
 					"conversation_id": self.conversation_id,
-					"message": serialize_message(message),
+					"message": message_payload,
 				},
 			},
 		)
@@ -172,6 +173,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			attachments=attachments,
 			broadcast=False,
 		)
+
+	@database_sync_to_async
+	def _serialize_message(self, message_id):
+		message = (
+			Message.objects.select_related("conversation", "sender")
+			.prefetch_related("attachments")
+			.get(id=message_id)
+		)
+		return serialize_message(message, viewer=self.user)
 
 	@database_sync_to_async
 	def _mark_read(self):
