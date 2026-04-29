@@ -46,3 +46,17 @@ Các biến quan trọng:
 - `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`
 
 File mẫu Docker env: [`docker/.env.docker.example`](docker/.env.docker.example)
+
+
+- `pip install -r requirements.txt` 
+- `python manage.py migrate`
+- `python manage.py runserver 8080`
+
+Changed files: 
+- README.md
+- apps/groups/services.py
+- apps/groups/views.py
+- apps/groups/urls.py
+- templates/groups/partials/post_list.html
+- ... group_detail.html
+- ... manage_group.html

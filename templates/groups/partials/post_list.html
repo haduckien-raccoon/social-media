@@ -51,9 +51,12 @@
                 {% endif %}
 
                 {# BÁO CÁO (Chỉ Member thường thấy nút này, không tính tác giả) #}
-                {% if request.user != post.author %}
-                    <button onclick="alert('Đã mở form báo cáo!')" class="dropdown-item">
+                {% if request.user != post.author or post.author != group.owner %}
+                    <!-- <button onclick="alert('Đã mở form báo cáo!')" class="dropdown-item">
                         <i class="fa-solid fa-flag"></i> Báo cáo bài viết
+                    </button> -->
+                    <button class="dropdown-item" onclick="openReportModal('{{ post.id }}', 'post')">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo bài viết
                     </button>
                 {% endif %}
             </div>
@@ -91,16 +94,16 @@
     <div class="p-actions">
         <div class="reaction-wrapper">
             <div class="reaction-popup">
-                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'like')">👍</span>
-                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'love')">❤️</span>
-                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'haha')">😆</span>
-                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'wow')">😮</span>
-                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'sad')">😢</span>
-                <span class="emoji-btn" onclick="submitReact({{ post.id }}, 'angry')">😡</span>
+                <span class="emoji-btn" onclick="submitReact('{{ post.id }}', 'like')">👍</span>
+                <span class="emoji-btn" onclick="submitReact('{{ post.id }}', 'love')">❤️</span>
+                <span class="emoji-btn" onclick="submitReact('{{ post.id }}', 'haha')">😆</span>
+                <span class="emoji-btn" onclick="submitReact('{{ post.id }}', 'wow')">😮</span>
+                <span class="emoji-btn" onclick="submitReact('{{ post.id }}', 'sad')">😢</span>
+                <span class="emoji-btn" onclick="submitReact('{{ post.id }}', 'angry')">😡</span>
             </div>
             <div class="action-btn {% if post.current_user_reaction %}active-{{ post.current_user_reaction }}{% endif %}" 
                  id="btn-react-{{ post.id }}" 
-                 onclick="submitReact({{ post.id }}, 'like')" style="width: 100%;">
+                 onclick="submitReact('{{ post.id }}', 'like')" style="width: 100%;">
                 {% if post.current_user_reaction == 'like' %} <i class="fas fa-thumbs-up"></i> Thích
                 {% elif post.current_user_reaction == 'love' %} <i class="fas fa-heart"></i> Yêu thích
                 {% elif post.current_user_reaction == 'haha' %} <i class="fas fa-laugh-squint"></i> Haha

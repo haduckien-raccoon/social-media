@@ -242,6 +242,30 @@
         {% endif %}
     </div>
 </div>
+<div id="reportModal" class="modal" style="display:none; position:fixed; z-index:9999; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div style="background:white; padding:20px; border-radius:8px; width:400px;">
+        <h3>Báo cáo nội dung</h3>
+        <form action="{% url 'groups:report_item' group.id %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="post_id" id="report_post_id">
+            <input type="hidden" name="comment_id" id="report_comment_id">
+            
+            <label>Lý do báo cáo:</label>
+            <select name="reason" class="form-control" style="margin:10px 0;" required>
+                <option value="Spam">Spam / Quảng cáo</option>
+                <option value="Hate Speech">Ngôn từ gây thù ghét</option>
+                <option value="Harassment">Quấy rối</option>
+                <option value="False Information">Thông tin sai sự thật</option>
+                <option value="Other">Lý do khác...</option>
+            </select>
+            
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:15px;">
+                <button type="button" class="btn-sm btn-reject" onclick="document.getElementById('reportModal').style.display='none'">Hủy</button>
+                <button type="submit" class="btn-save">Gửi báo cáo</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -347,6 +371,11 @@
                 countDiv.innerHTML = '';
             }
         });
+    }
+    function openReportModal(id, type) {
+        document.getElementById('report_post_id').value = type === 'post' ? id : '';
+        document.getElementById('report_comment_id').value = type === 'comment' ? id : '';
+        document.getElementById('reportModal').style.display = 'flex';
     }
 </script>
 {% endblock %}
