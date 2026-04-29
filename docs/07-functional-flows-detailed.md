@@ -144,7 +144,7 @@ sequenceDiagram
     WS->>CL: group_send chat_event(message_reaction)
     CL-->>WS: fanout to members
     WS-->>UI: event=message_reaction
-
+```
 
 # Event & Action
 - Client -> WS action: send_message, mark_read, toggle_reaction.
