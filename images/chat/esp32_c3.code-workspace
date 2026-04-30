@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../../esp32_c3"
+		},
+		{
+			"name": "MicroROS2",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}

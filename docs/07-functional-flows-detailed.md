@@ -146,9 +146,8 @@ sequenceDiagram
     WS-->>UI: event=message_reaction
 ```
 
-# Event & Action
-- Client -> WS action: send_message, mark_read, toggle_reaction.
-- Server -> Client event: message_new, conversation_read, message_reaction, error.
-
-# Group naming
-- Mỗi conversation dùng group: chat_conversation_<conversation_id>.
+- Event & Action
+  - Client -> WS action: send_message, mark_read, toggle_reaction.
+  - Server -> Client event: message_new, conversation_read, message_reaction, error.
+- Group naming
+  - Mỗi conversation dùng group: chat_conversation_<conversation_id>.

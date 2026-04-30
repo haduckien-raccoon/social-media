@@ -76,8 +76,8 @@
         }
         .nav-item:hover { background-color: #f2f2f2; }
         .nav-item i { font-size: 24px; width: 24px; }
-        .nav-item span { font-size: 16px; }
-        .nav-item.active span { font-weight: 700; }
+        .nav-item-label { font-size: 16px; }
+        .nav-item.active .nav-item-label { font-weight: 700; }
         .nav-item-badge-wrap { position: relative; display: inline-flex; align-items: center; }
         .nav-notification-badge {
             position: absolute;
@@ -122,7 +122,9 @@
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar { width: 72px; padding: 20px 12px; }
-            .nav-item span, .logo { display: none; }
+            .nav-item-label, .logo { display: none; }
+            .nav-item { justify-content: center; }
+            .nav-item-badge-wrap { justify-content: center; }
             /* Cần xử lý main-content ở các trang con để margin-left khớp */
         }
 
@@ -134,25 +136,25 @@
     <aside class="sidebar">
         <a href="/" class="logo">SUDO</a>
         <nav class="nav-menu">
-            <div class="nav-item" onclick="goHome()"><i class="fa-solid fa-house"></i> <span>Home</span></div>
-            <div class="nav-item" onclick="search()"><i class="fa-solid fa-magnifying-glass"></i> <span>Search</span></div>
-            <div class="nav-item" onclick="friend()"><i class="fa-solid fa-user-group"></i><span>Friend</span></div>
-            <div class="nav-item" onclick="group()"><i class="fa-solid fa-people-group"></i> <span>Group</span></div>
-            <div class="nav-item" onclick="goChat()"><i class="fa-brands fa-facebook-messenger"></i> <span>Messages</span></div>
+            <div class="nav-item" onclick="goHome()"><i class="fa-solid fa-house"></i> <span class="nav-item-label">Home</span></div>
+            <div class="nav-item" onclick="search()"><i class="fa-solid fa-magnifying-glass"></i> <span class="nav-item-label">Search</span></div>
+            <div class="nav-item" onclick="friend()"><i class="fa-solid fa-user-group"></i><span class="nav-item-label">Friend</span></div>
+            <div class="nav-item" onclick="group()"><i class="fa-solid fa-people-group"></i> <span class="nav-item-label">Group</span></div>
+            <div class="nav-item" onclick="goChat()"><i class="fa-brands fa-facebook-messenger"></i> <span class="nav-item-label">Messages</span></div>
             <div class="nav-item" onclick="goNotifications()">
                 <span class="nav-item-badge-wrap">
                     <i class="fa-regular fa-bell"></i>
                     <span id="global-notification-badge" class="nav-notification-badge">0</span>
                 </span>
-                <span>Notifications</span>
+                <span class="nav-item-label">Notifications</span>
             </div>
-            <div class="nav-item" onclick="createPost()"><i class="fa-regular fa-square-plus"></i> <span>Create</span></div>
+            <div class="nav-item" onclick="createPost()"><i class="fa-regular fa-square-plus"></i> <span class="nav-item-label">Create</span></div>
             <div class="nav-item" onclick="profile()">
-                <i class="fa-solid fa-circle-user"></i> <span>{{ request.user.username }}</span>
+                <i class="fa-solid fa-circle-user"></i> <span class="nav-item-label">{{ request.user.username }}</span>
             </div>
         </nav>
-        <div class="nav-item"><i class="fa-solid fa-bars"></i> <span>More</span></div>
-        <div class="nav-item" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span></div>
+        <div class="nav-item"><i class="fa-solid fa-bars"></i> <span class="nav-item-label">More</span></div>
+        <div class="nav-item" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> <span class="nav-item-label">Logout</span></div>
     </aside>
 
     <main class="main-content">
