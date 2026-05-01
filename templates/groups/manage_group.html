@@ -62,6 +62,66 @@
     .btn-approve:hover { background: #dbe7f4; }
     .btn-reject { background: #e4e6eb; color: #050505; }
     .btn-danger-sm { background: #fbe9e9; color: #dc3545; }
+    .dropdown-menu-custom {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 5px);
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    width: 220px;
+    z-index: 100;
+    border-radius: 10px;
+    padding: 8px;
+    border: 1px solid #e4e6eb;
+    animation: fadeInDown 0.2s ease;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-menu-custom .dropdown-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: left;
+    transition: 0.2s;
+}
+
+.dropdown-menu-custom .dropdown-item:hover {
+    background: #f2f2f2;
+}
+
+.dropdown-menu-custom .dropdown-item.danger {
+    color: #dc3545;
+}
+
+.dropdown-menu-custom .dropdown-item.danger:hover {
+    background: #fff0f0;
+}
+
+/* Label thông báo quyền hạn */
+.badge-role-lock {
+    font-size: 12px;
+    background: #fff4e5;
+    color: #b76e00;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #ffe2b9;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
@@ -117,34 +177,58 @@
     <div class="manage-content">
         
         <div id="tab-reports" class="tab-pane">
-            <div class="tab-title">Nội dung bị báo cáo</div>
+            <div class="tab-title">Nội dung bị báo cáo ({{ reports_count }})</div>
             {% for report in reported_items %}
-                <div class="user-list-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
-                    <div style="width: 100%; display: flex; justify-content: space-between;">
+                {% with target_user=report.post.author|default:report.comment.user %}
+                <div class="user-list-item" style="flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 20px;">
+                    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
                         <div class="user-info">
-                            {% if report.post %}
-                                <img src="{{ report.post.author.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}">
-                                <div class="user-name">{{ report.post.author.username }} <span style="font-weight: normal; color: gray;">(Bài viết)</span></div>
+                            <img src="{{ target_user.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}">
+                            <div>
+                                <div class="user-name">
+                                    {{ target_user.username }}
+                                    <span style="font-weight: normal; color: gray;">
+                                        ({% if report.post %}Bài viết{% else %}Bình luận{% endif %})
+                                    </span>
+                                </div>
+                                <div style="font-size: 11px; font-weight: bold; color: {% if target_user == group.owner %}#d60000{% else %}#1877f2{% endif %};">
+                                    {% if target_user == group.owner %}Chủ sở hữu{% else %}Quản trị viên{% endif %}
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="action-btns">
+                            {% if target_user != group.owner and target_user.id in admins_ids and user_role != 'owner' %}
+                                <span class="badge-role-lock">
+                                    <i class="fa-solid fa-lock"></i> Chỉ Owner xử lý
+                                </span>
                             {% else %}
-                                <img src="{{ report.comment.user.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}">
-                                <div class="user-name">{{ report.comment.user.username }} <span style="font-weight: normal; color: gray;">(Bình luận)</span></div>
+                                <form action="{% url 'groups:handle_report_action' group.id %}" method="POST" style="position:relative;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="report_id" value="{{ report.id }}">
+                                    <button name="action_type" value="dismiss" class="btn-sm btn-reject">Bỏ qua</button>
+                                    
+                                    <button type="button" class="btn-sm btn-approve" onclick="toggleReportActions(this)">
+                                        Quyết định <i class="fa-solid fa-chevron-down"></i>
+                                    </button>
+        
+                                    <div class="dropdown-menu-custom">
+                                        <button name="action_type" value="delete_content" class="dropdown-item">
+                                            <i class="fa-solid fa-trash-can" style="margin-right:8px;"></i> Xóa nội dung
+                                        </button>
+                                        <button name="action_type" value="delete_and_remove" class="dropdown-item danger">
+                                            <i class="fa-solid fa-user-minus" style="margin-right:8px;"></i> Xóa + Kick khỏi nhóm
+                                        </button>
+                                        <button name="action_type" value="delete_and_ban" class="dropdown-item danger">
+                                            <i class="fa-solid fa-user-slash" style="margin-right:8px;"></i> Xóa + Chặn vĩnh viễn
+                                        </button>
+                                    </div>
+                                </form>
                             {% endif %}
                         </div>
-                        <div class="action-btns">
-                            <button class="btn-sm btn-reject">Bỏ qua</button>
-                            <button class="btn-sm btn-danger-sm">Xóa nội dung</button>
-                        </div>
                     </div>
-                    <div style="background: #f7f8fa; padding: 10px; border-radius: 6px; width: 100%; font-size: 14px;">
-                        <strong>Nội dung:</strong> 
-                        {% if report.post %}{{ report.post.content|truncatechars:100 }}
-                        {% else %}{{ report.comment.content|truncatechars:100 }}{% endif %}<br>
-                        <strong style="color: #dc3545;">Lý do báo cáo:</strong> {{ report.reason }}<br>
-                        <span style="font-size: 12px; color: gray;">Bởi: {{ report.reporter.username }}</span>
                     </div>
-                </div>
-            {% empty %}
-                <div style="color: var(--text-sub); text-align: center; padding: 20px;">Không có nội dung bị báo cáo.</div>
+                {% endwith %}
             {% endfor %}
         </div>
 
@@ -384,5 +468,21 @@
             subMenu.style.display = 'none';
         }
     }
+    function toggleReportActions(btn) {
+        // Đóng tất cả các dropdown khác đang mở
+        document.querySelectorAll('.dropdown-menu-custom').forEach(el => {
+            if (el !== btn.nextElementSibling) el.style.display = 'none';
+        });
+        // Toggle dropdown hiện tại
+        const menu = btn.nextElementSibling;
+        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+    }
+
+    // Đóng khi click ra ngoài
+    window.addEventListener('click', function(e) {
+        if (!e.target.matches('.btn-approve')) {
+            document.querySelectorAll('.dropdown-menu-custom').forEach(el => el.style.display = 'none');
+        }
+    });
 </script>
 {% endblock %}

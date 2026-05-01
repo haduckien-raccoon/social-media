@@ -150,7 +150,7 @@
     }
 
     // Bỏ qua lấy tin nhắn ban đầu từ DOM để ép lazy load qua API
-    var initMsgs = []; 
+    var initMsgs = parseScriptJSON("chat-initial-messages", []); 
     if (state.activeConvId && Array.isArray(initMsgs) && initMsgs.length) {
         var sorted = initMsgs.slice().sort(function (a, b) {
             return new Date(a.created_at || 0) - new Date(b.created_at || 0);
@@ -456,24 +456,23 @@
 
         elMsgList.innerHTML = topHtml + html;
 
-        setTimeout(function () {
-            var newScrollH = elMsgList.scrollHeight;
-            if (forceBottom || state.stickToBottom || nearBottom) {
-                elMsgList.scrollTop = elMsgList.scrollHeight;
-                state.stickToBottom = true;
-                
-                // Xử lý chống trượt khi ảnh đính kèm render chậm
-                var images = elMsgList.querySelectorAll('img');
-                images.forEach(function(img) {
-                    img.addEventListener('load', function() {
-                        elMsgList.scrollTop = elMsgList.scrollHeight;
-                    });
+        // Xử lý scroll đồng bộ ngay sau khi cập nhật DOM
+        var newScrollH = elMsgList.scrollHeight;
+        if (forceBottom || state.stickToBottom || nearBottom) {
+            elMsgList.scrollTop = elMsgList.scrollHeight;
+            state.stickToBottom = true;
+            
+            var images = elMsgList.querySelectorAll('img');
+            images.forEach(function(img) {
+                img.addEventListener('load', function() {
+                    elMsgList.scrollTop = elMsgList.scrollHeight;
                 });
-            } else {
-                elMsgList.scrollTop = prevScrollTop + (newScrollH - prevScrollH);
-                state.stickToBottom = false;
-            }
-        }, 50);
+            });
+        } else {
+            // Giữ nguyên vị trí cuộn mượt mà khi chèn thêm tin nhắn cũ lên đầu
+            elMsgList.scrollTop = prevScrollTop + (newScrollH - prevScrollH);
+            state.stickToBottom = false;
+        }
     }
 
     // ─── Render: Friend results ───────────────────────────────────────────────

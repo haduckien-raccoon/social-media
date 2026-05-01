@@ -126,36 +126,78 @@ def _search_friends_payload(user: User, query: str = "", limit: int = 20) -> lis
 	return results
 
 
+# @login_required
+# @require_GET
+# def chat_page_view(request):
+# 	conversations = list_conversations_for_user(request.user)
+# 	conversation_ids = {conversation["id"] for conversation in conversations}
+
+# 	active_conversation_id = None
+# 	requested_conversation_id = request.GET.get("conversation_id")
+# 	if requested_conversation_id:
+# 		try:
+# 			candidate_id = int(requested_conversation_id)
+# 			if candidate_id in conversation_ids:
+# 				active_conversation_id = candidate_id
+# 		except (TypeError, ValueError):
+# 			active_conversation_id = None
+
+# 	if active_conversation_id is None and conversations:
+# 		active_conversation_id = conversations[0]["id"]
+
+# 	# Bỏ qua hoàn toàn logic query get_messages_for_conversation để giảm tải DB
+# 	initial_messages = []
+
+# 	context = {
+# 		"initial_conversations": conversations,
+# 		"initial_active_conversation_id": active_conversation_id,
+# 		"initial_messages": initial_messages,
+# 		"initial_friend_candidates": _search_friends_payload(request.user, limit=20),
+# 		"ws_token": getattr(request, "_new_access_token", None) or request.COOKIES.get("access", ""),
+# 	}
+# 	return render(request, "chat/room.html", context)
 @login_required
 @require_GET
 def chat_page_view(request):
-	conversations = list_conversations_for_user(request.user)
-	conversation_ids = {conversation["id"] for conversation in conversations}
+    conversations = list_conversations_for_user(request.user)
+    conversation_ids = {conversation["id"] for conversation in conversations}
 
-	active_conversation_id = None
-	requested_conversation_id = request.GET.get("conversation_id")
-	if requested_conversation_id:
-		try:
-			candidate_id = int(requested_conversation_id)
-			if candidate_id in conversation_ids:
-				active_conversation_id = candidate_id
-		except (TypeError, ValueError):
-			active_conversation_id = None
+    active_conversation_id = None
+    requested_conversation_id = request.GET.get("conversation_id")
+    if requested_conversation_id:
+        try:
+            candidate_id = int(requested_conversation_id)
+            if candidate_id in conversation_ids:
+                active_conversation_id = candidate_id
+        except (TypeError, ValueError):
+            active_conversation_id = None
 
-	if active_conversation_id is None and conversations:
-		active_conversation_id = conversations[0]["id"]
+    if active_conversation_id is None and conversations:
+        active_conversation_id = conversations[0]["id"]
 
-	# Bỏ qua hoàn toàn logic query get_messages_for_conversation để giảm tải DB
-	initial_messages = []
+    # Tải tin nhắn mới nhất cho cuộc trò chuyện đang active
+    initial_messages = []
+    if active_conversation_id:
+        try:
+            conversation = Conversation.objects.get(id=active_conversation_id)
+            # Lấy 30 tin nhắn gần nhất, sắp xếp cũ -> mới
+            messages, _ = get_messages_for_conversation(
+                request.user,
+                conversation,
+                limit=INITIAL_MESSAGE_LIMIT,  # đã định nghĩa là 30
+            )
+            initial_messages = messages
+        except (Conversation.DoesNotExist, PermissionDenied):
+            pass
 
-	context = {
-		"initial_conversations": conversations,
-		"initial_active_conversation_id": active_conversation_id,
-		"initial_messages": initial_messages,
-		"initial_friend_candidates": _search_friends_payload(request.user, limit=20),
-		"ws_token": getattr(request, "_new_access_token", None) or request.COOKIES.get("access", ""),
-	}
-	return render(request, "chat/room.html", context)
+    context = {
+        "initial_conversations": conversations,
+        "initial_active_conversation_id": active_conversation_id,
+        "initial_messages": initial_messages,
+        "initial_friend_candidates": _search_friends_payload(request.user, limit=20),
+        "ws_token": getattr(request, "_new_access_token", None) or request.COOKIES.get("access", ""),
+    }
+    return render(request, "chat/room.html", context)
 
 
 @login_required

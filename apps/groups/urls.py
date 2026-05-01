@@ -24,4 +24,7 @@ urlpatterns = [
     #Kiểm duyệt
     path("<int:group_id>/post/<int:post_id>/approve/", views.approve_post_in_group, name="approve_post"),
     path("<int:group_id>/post/<int:post_id>/reject/", views.reject_post_in_group, name="reject_post"),
+    # report
+    path("<int:group_id>/report/", views.report_item, name="report_item"),
+    path("<int:group_id>/manage/report-action/", views.handle_report_action, name="handle_report_action"),
 ]

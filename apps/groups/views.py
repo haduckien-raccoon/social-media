@@ -270,7 +270,8 @@ def manage_group(request, group_id):
         'reports_count': dashboard_data['reports_count'],
         'pending_posts': dashboard_data['pending_posts'],
         'pending_posts_count': dashboard_data['pending_posts_count'],
-        'cover_image': dashboard_data['cover_image']
+        'cover_image': dashboard_data['cover_image'],
+        'admins_ids': group.members.filter(role=GroupRole.ADMIN).values_list('user_id', flat=True)
     }
 
     print("Dashboard Data:", dashboard_data)  # Debug: In ra dữ liệu dashboard để kiểm tra
@@ -331,3 +332,30 @@ def reject_post_in_group(request, group_id, post_id):
     GroupPostService.reject_group_post(post, request.user)
     messages.success(request, "Post rejected successfully!")
     return redirect("groups:manage_group", group_id=group.id)
+
+def report_item(request, group_id):
+    """View xử lý gửi báo cáo từ thành viên"""
+    group = GroupService.get_group_by_id(group_id)
+    if request.method == "POST":
+        reason = request.POST.get("reason")
+        post_id = request.POST.get("post_id")
+        comment_id = request.POST.get("comment_id")
+        
+        success, msg = GroupService.report_content(group, request.user, reason, post_id, comment_id)
+        if success: messages.success(request, msg)
+        else: messages.error(request, msg)
+        
+    return redirect('groups:group_detail', group_id=group.id)
+
+def handle_report_action(request, group_id):
+    """View xử lý các nút bấm Quyết định của Admin trong trang Manage"""
+    group = GroupService.get_group_by_id(group_id)
+    if request.method == "POST":
+        report_id = request.POST.get("report_id")
+        action_type = request.POST.get("action_type") # dismiss, delete_content, delete_and_remove, delete_and_ban
+        
+        success, msg = GroupService.resolve_report(request.user, group, report_id, action_type)
+        if success: messages.success(request, msg)
+        else: messages.error(request, msg)
+        
+    return redirect('groups:manage_group', group_id=group.id)
