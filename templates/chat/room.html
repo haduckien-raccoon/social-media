@@ -39,6 +39,9 @@
                         </div>
                     </div>
                 </div>
+                <div class="chat-inline-friends">
+                    <div id="friend-search-inline-results" class="chat-friend-results inline"></div>
+                </div>
             </div>
             <div id="conversation-list" class="chat-list"></div>
         </aside>
@@ -50,6 +53,7 @@
             <div id="chat-message-list" class="chat-message-list"></div>
 
             <form id="chat-compose-form" class="chat-compose-form">
+                {% csrf_token %}
                 <label for="chat-message-input">Tin nhắn</label>
 
                 <div class="chat-compose-actions">

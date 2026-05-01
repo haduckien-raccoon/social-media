@@ -92,6 +92,7 @@
 
     var elConvList      = document.getElementById("conversation-list");
     var elFriendResults = document.getElementById("friend-search-results");
+    var elFriendResultsInline = document.getElementById("friend-search-inline-results");
     var elFriendSearch  = document.getElementById("friend-search-input");
     var elConvFilter    = document.getElementById("conversation-filter-input");
     var elMsgList       = document.getElementById("chat-message-list");
@@ -139,6 +140,14 @@
         isTyping:           false,
         typingDebounce:     null
     };
+
+    var friendResultsTarget = null;
+
+    function pickFriendResultsTarget() {
+        var useInline = window.matchMedia("(max-width: 1100px)").matches;
+        friendResultsTarget = (useInline && elFriendResultsInline) ? elFriendResultsInline : elFriendResults;
+        return friendResultsTarget;
+    }
 
     // Bỏ qua lấy tin nhắn ban đầu từ DOM để ép lazy load qua API
     var initMsgs = []; 
@@ -469,12 +478,17 @@
 
     // ─── Render: Friend results ───────────────────────────────────────────────
     function renderFriends() {
-        if (!elFriendResults) return;
-        if (!state.friendCandidates.length) {
-            elFriendResults.innerHTML = '<div class="chat-empty-state">Chưa có bạn bè nào.</div>';
+        var target = friendResultsTarget || pickFriendResultsTarget();
+        if (!target) return;
+        if (!(state.friendSearch || "").trim()) {
+            target.innerHTML = "";
             return;
         }
-        elFriendResults.innerHTML = state.friendCandidates.map(function (f) {
+        if (!state.friendCandidates.length) {
+            target.innerHTML = '<div class="chat-empty-state">Chưa có bạn bè nào.</div>';
+            return;
+        }
+        target.innerHTML = state.friendCandidates.map(function (f) {
             var sub = f.conversation_id ? "Đã có hội thoại" : "@" + (f.username || "");
             return '<article class="chat-friend-item" data-id="' + f.id + '">' +
                 '<img class="chat-avatar" src="' + escapeHtml(f.avatar || "") + '" alt="">' +
@@ -755,6 +769,11 @@
 
     async function searchFriends() {
         var q = state.friendSearch.trim();
+        if (!q) {
+            state.friendCandidates = [];
+            renderFriends();
+            return;
+        }
         var endpoint = urls.searchFriends + (q ? "?q=" + encodeURIComponent(q) : "");
         try {
             var res = await fetch(endpoint, { headers: { "X-Requested-With": "XMLHttpRequest" } });
@@ -948,14 +967,18 @@
             });
         }
 
-        if (elFriendResults) {
-            elFriendResults.addEventListener("click", function (e) {
+        function bindFriendResultsClick(target) {
+            if (!target) return;
+            target.addEventListener("click", function (e) {
                 var btn = e.target.closest(".chat-start-btn");
                 if (!btn) return;
                 var friendId = toInt(btn.dataset.friendId, null);
                 if (friendId) startChatWithFriend(friendId, btn);
             });
         }
+
+        bindFriendResultsClick(elFriendResults);
+        bindFriendResultsClick(elFriendResultsInline);
 
         document.addEventListener("click", function (e) {
             if (!e.target.closest(".chat-rxn-actions")) {
@@ -964,15 +987,24 @@
         });
 
         window.addEventListener("beforeunload", closeSocket);
+        window.addEventListener("resize", function () {
+            var prev = friendResultsTarget;
+            pickFriendResultsTarget();
+            if (prev !== friendResultsTarget) renderFriends();
+        });
     }
 
     // ─── Init ─────────────────────────────────────────────────────────────────
     function init() {
         requestNotificationPermission();
+        pickFriendResultsTarget();
         renderConvList();
         renderFriends();
         renderFilesPreview();
         bindEvents();
+
+        // Refresh friend list to keep results current.
+        searchFriends();
 
         if (state.activeConvId) {
             var cached = state.msgsByConv[state.activeConvId];
