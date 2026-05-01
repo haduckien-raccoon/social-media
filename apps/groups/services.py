@@ -280,7 +280,7 @@ class GroupService:
 
         # QUY TẮC 1: Không thể báo cáo Owner
         if target_user == group.owner:
-            return False, "Không thể báo cáo nội dung của Chủ sở hữu nhóm."
+            return False, "Bạn không thể báo cáo Chủ sở hữu nhóm."
         
         # Đảm bảo tuân thủ CheckConstraint (chỉ post hoặc comment)
         report = GroupReport.objects.create(

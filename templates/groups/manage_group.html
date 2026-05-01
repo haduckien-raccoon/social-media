@@ -124,6 +124,66 @@
 }
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    /* Form báo cáo và Dropdown Quyết định */
+.report-item-box {
+    background: #fff;
+    border: 1px solid #e4e6eb;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 15px;
+    transition: box-shadow 0.3s;
+}
+.report-item-box:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.dropdown-menu-custom {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    background: white;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+    width: 240px;
+    z-index: 1000;
+    border-radius: 10px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.dropdown-item:hover { background: #f2f2f2; }
+.dropdown-item.danger { color: #dc3545; }
+.dropdown-item.danger:hover { background: #fff0f0; }
+
+.badge-admin-only {
+    background: #fff4e5;
+    color: #b76e00;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid #ffe2b9;
+}
 </style>
 {% endblock %}
 
@@ -179,28 +239,29 @@
         <div id="tab-reports" class="tab-pane">
             <div class="tab-title">Nội dung bị báo cáo ({{ reports_count }})</div>
             {% for report in reported_items %}
-                {% with target_user=report.post.author|default:report.comment.user %}
-                <div class="user-list-item" style="flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 20px;">
-                    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                {% with reported_user=report.target_user %}
+                <div class="report-item-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                         <div class="user-info">
-                            <img src="{{ target_user.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}">
+                            <img src="{{ reported_user.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}" class="p-avatar">
                             <div>
                                 <div class="user-name">
-                                    {{ target_user.username }}
-                                    <span style="font-weight: normal; color: gray;">
+                                    {{ reported_user.username }} 
+                                    <small style="color:var(--text-sub); font-weight:normal;">
                                         ({% if report.post %}Bài viết{% else %}Bình luận{% endif %})
-                                    </span>
+                                    </small>
                                 </div>
-                                <div style="font-size: 11px; font-weight: bold; color: {% if target_user == group.owner %}#d60000{% else %}#1877f2{% endif %};">
-                                    {% if target_user == group.owner %}Chủ sở hữu{% else %}Quản trị viên{% endif %}
+                                <div style="font-size: 11px; font-weight: 800; color: #1877f2;">
+                                    QUẢN TRỊ VIÊN
                                 </div>
                             </div>
                         </div>
         
                         <div class="action-btns">
-                            {% if target_user != group.owner and target_user.id in admins_ids and user_role != 'owner' %}
-                                <span class="badge-role-lock">
-                                    <i class="fa-solid fa-lock"></i> Chỉ Owner xử lý
+                            <!-- QUY TẮC: Nếu bị báo cáo là Admin và người xem là Admin (không phải Owner) -->
+                            {% if reported_user.id in admins_ids and user_role != 'owner' %}
+                                <span class="badge-admin-only">
+                                    <i class="fa-solid fa-lock"></i> CHỈ OWNER XỬ LÝ
                                 </span>
                             {% else %}
                                 <form action="{% url 'groups:handle_report_action' group.id %}" method="POST" style="position:relative;">
@@ -209,26 +270,37 @@
                                     <button name="action_type" value="dismiss" class="btn-sm btn-reject">Bỏ qua</button>
                                     
                                     <button type="button" class="btn-sm btn-approve" onclick="toggleReportActions(this)">
-                                        Quyết định <i class="fa-solid fa-chevron-down"></i>
+                                        Quyết định <i class="fa-solid fa-caret-down"></i>
                                     </button>
         
                                     <div class="dropdown-menu-custom">
                                         <button name="action_type" value="delete_content" class="dropdown-item">
-                                            <i class="fa-solid fa-trash-can" style="margin-right:8px;"></i> Xóa nội dung
+                                            <i class="fa-solid fa-eraser"></i> Xóa nội dung
                                         </button>
                                         <button name="action_type" value="delete_and_remove" class="dropdown-item danger">
-                                            <i class="fa-solid fa-user-minus" style="margin-right:8px;"></i> Xóa + Kick khỏi nhóm
+                                            <i class="fa-solid fa-user-minus"></i> Xóa + Xóa khỏi nhóm
                                         </button>
                                         <button name="action_type" value="delete_and_ban" class="dropdown-item danger">
-                                            <i class="fa-solid fa-user-slash" style="margin-right:8px;"></i> Xóa + Chặn vĩnh viễn
+                                            <i class="fa-solid fa-user-slash"></i> Xóa + Chặn vĩnh viễn
                                         </button>
                                     </div>
                                 </form>
                             {% endif %}
                         </div>
                     </div>
+        
+                    <div style="background: #f0f2f5; padding: 12px; border-radius: 8px; font-size: 14px;">
+                        <div style="margin-bottom: 5px;">
+                            <strong style="color:#dc3545;">Lý do:</strong> {{ report.reason }}
+                        </div>
+                        <div style="color: #444; font-style: italic;">
+                            "{% if report.post %}{{ report.post.content|truncatechars:150 }}{% else %}{{ report.comment.content|truncatechars:150 }}{% endif %}"
+                        </div>
                     </div>
+                </div>
                 {% endwith %}
+            {% empty %}
+                <div style="text-align:center; color:var(--text-sub); padding:40px;">Không có báo cáo nào.</div>
             {% endfor %}
         </div>
 

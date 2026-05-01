@@ -206,6 +206,15 @@ class GroupReport(models.Model):
                 name="group_report_post_xor_comment"
             )
         ]
+    
+    @property
+    def target_user(self):
+        """Trả về User bị báo cáo (từ post hoặc comment)"""
+        if self.post:
+            return self.post.author
+        if self.comment:
+            return self.comment.user
+        return None
 
     def __str__(self):
         return f"Report by {self.reporter.username} in {self.group.name} - Status: {self.status}"
@@ -239,4 +248,3 @@ class GroupActivityLog(models.Model):
         indexes = [
             models.Index(fields=["group", "created_at"]),
         ]
-
