@@ -1,1119 +1,1028 @@
 (function () {
     "use strict";
 
+    // ─── Constants ────────────────────────────────────────────────────────────
     var MAX_ATTACHMENT_SIZE_BYTES = 20 * 1024 * 1024;
+    var MESSAGE_PAGE_SIZE = 30;
+    var SCROLL_LOAD_THRESHOLD = 200;
+    var REACTION_EMOJI = { like: "👍", love: "❤️", haha: "😆", wow: "😮", sad: "😢", angry: "😡" };
 
-    function parseScriptJSON(elementId, fallbackValue) {
-        var element = document.getElementById(elementId);
-        if (!element || !element.textContent) {
-            return fallbackValue;
-        }
-        try {
-            return JSON.parse(element.textContent);
-        } catch (error) {
-            return fallbackValue;
-        }
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+    function parseScriptJSON(id, fallback) {
+        var el = document.getElementById(id);
+        if (!el || !el.textContent) return fallback;
+        try { return JSON.parse(el.textContent); } catch (e) { return fallback; }
     }
 
-    function toInteger(value, fallbackValue) {
-        var parsed = Number.parseInt(value, 10);
-        return Number.isFinite(parsed) ? parsed : fallbackValue;
+    function toInt(val, fb) {
+        var n = Number.parseInt(val, 10);
+        return Number.isFinite(n) ? n : fb;
     }
 
-    function formatRelativeTime(isoValue) {
-        if (!isoValue) {
-            return "Vua xong";
-        }
-        var dateValue = new Date(isoValue);
-        if (Number.isNaN(dateValue.getTime())) {
-            return "Vua xong";
-        }
-
-        var diffSeconds = Math.max(0, Math.floor((Date.now() - dateValue.getTime()) / 1000));
-        if (diffSeconds < 60) {
-            return "Vua xong";
-        }
-        var diffMinutes = Math.floor(diffSeconds / 60);
-        if (diffMinutes < 60) {
-            return String(diffMinutes) + " phut truoc";
-        }
-        var diffHours = Math.floor(diffMinutes / 60);
-        if (diffHours < 24) {
-            return String(diffHours) + " gio truoc";
-        }
-        var diffDays = Math.floor(diffHours / 24);
-        return String(diffDays) + " ngay truoc";
-    }
-
-    function escapeHtml(value) {
-        var div = document.createElement("div");
-        div.textContent = value == null ? "" : String(value);
-        return div.innerHTML;
+    function escapeHtml(val) {
+        var d = document.createElement("div");
+        d.textContent = val == null ? "" : String(val);
+        return d.innerHTML;
     }
 
     function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== "") {
-            var cookies = document.cookie.split(";");
-            for (var index = 0; index < cookies.length; index += 1) {
-                var cookie = cookies[index].trim();
-                if (cookie.substring(0, name.length + 1) === name + "=") {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
+        var match = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+        return match ? decodeURIComponent(match[1]) : null;
     }
 
-    function buildUrl(urlTemplate, idValue) {
-        return String(urlTemplate || "").replace("/0/", "/" + String(idValue) + "/");
+    function buildUrl(tpl, id) {
+        return String(tpl || "").replace("/0/", "/" + String(id) + "/");
     }
 
-    function fileSizeLabel(fileSize) {
-        if (fileSize < 1024) {
-            return String(fileSize) + " B";
-        }
-        if (fileSize < 1024 * 1024) {
-            return (fileSize / 1024).toFixed(1) + " KB";
-        }
-        return (fileSize / (1024 * 1024)).toFixed(1) + " MB";
+    function fileSizeLabel(n) {
+        if (n < 1024) return n + " B";
+        if (n < 1048576) return (n / 1024).toFixed(1) + " KB";
+        return (n / 1048576).toFixed(1) + " MB";
     }
 
-    function isSocketOpen(socket) {
-        return socket && socket.readyState === WebSocket.OPEN;
+    function formatTime(iso) {
+        if (!iso) return "";
+        var d = new Date(iso);
+        if (isNaN(d)) return "";
+        var now = Date.now();
+        var diff = Math.floor((now - d.getTime()) / 1000);
+        if (diff < 60) return "Vừa xong";
+        if (diff < 3600) return Math.floor(diff / 60) + " phút";
+        if (diff < 86400) return Math.floor(diff / 3600) + " giờ";
+        var dd = Math.floor(diff / 86400);
+        if (dd < 7) return dd + " ngày";
+        return d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+    }
+
+    function formatFullTime(iso) {
+        if (!iso) return "";
+        var d = new Date(iso);
+        if (isNaN(d)) return "";
+        return d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
     }
 
     function readFileAsBase64(file) {
         return new Promise(function (resolve, reject) {
-            var reader = new FileReader();
-            reader.onload = function () {
-                var result = reader.result || "";
-                var base64Value = String(result);
-                var commaIndex = base64Value.indexOf(",");
-                resolve(commaIndex >= 0 ? base64Value.slice(commaIndex + 1) : base64Value);
+            var r = new FileReader();
+            r.onload = function () {
+                var s = String(r.result || "");
+                var i = s.indexOf(",");
+                resolve(i >= 0 ? s.slice(i + 1) : s);
             };
-            reader.onerror = function () {
-                reject(reader.error || new Error("File read failed"));
-            };
-            reader.readAsDataURL(file);
+            r.onerror = function () { reject(r.error || new Error("Read failed")); };
+            r.readAsDataURL(file);
         });
     }
 
     async function buildWsAttachments(files) {
-        var attachments = await Promise.all(files.map(async function (file) {
-            var base64Content = await readFileAsBase64(file);
+        return Promise.all(files.map(async function (f) {
             return {
-                name: file.name,
-                content_type: file.type || "application/octet-stream",
-                content_base64: base64Content
+                name: f.name,
+                content_type: f.type || "application/octet-stream",
+                content_base64: await readFileAsBase64(f)
             };
         }));
-        return attachments;
     }
 
-    var REACTION_EMOJI = {
-        like: "👍",
-        love: "❤️",
-        haha: "😆",
-        wow: "😮",
-        sad: "😢",
-        angry: "😡"
-    };
+    function isSocketOpen(ws) { return ws && ws.readyState === WebSocket.OPEN; }
 
-    var configElement = document.getElementById("chat-config");
-    if (!configElement) {
-        return;
-    }
+    // ─── DOM refs ─────────────────────────────────────────────────────────────
+    var cfg = document.getElementById("chat-config");
+    if (!cfg) return;
 
-    var conversationListElement = document.getElementById("conversation-list");
-    var friendSearchResultElement = document.getElementById("friend-search-results");
-    var friendSearchInputElement = document.getElementById("friend-search-input");
-    var conversationFilterInputElement = document.getElementById("conversation-filter-input");
-    var messageListElement = document.getElementById("chat-message-list");
-    var activeHeaderElement = document.getElementById("chat-active-header");
-    var messageSearchInputElement = document.getElementById("chat-message-search-input");
-    var composeFormElement = document.getElementById("chat-compose-form");
-    var messageInputElement = document.getElementById("chat-message-input");
-    var attachmentsInputElement = document.getElementById("chat-attachments-input");
-    var attachmentsPreviewElement = document.getElementById("chat-attachments-preview");
-    var sendButtonElement = document.getElementById("chat-send-button");
+    var elConvList      = document.getElementById("conversation-list");
+    var elFriendResults = document.getElementById("friend-search-results");
+    var elFriendResultsInline = document.getElementById("friend-search-inline-results");
+    var elFriendSearch  = document.getElementById("friend-search-input");
+    var elConvFilter    = document.getElementById("conversation-filter-input");
+    var elMsgList       = document.getElementById("chat-message-list");
+    var elHeader        = document.getElementById("chat-active-header");
+    var elMsgSearch     = document.getElementById("chat-message-search-input");
+    var elForm          = document.getElementById("chat-compose-form");
+    var elInput         = document.getElementById("chat-message-input");
+    var elFiles         = document.getElementById("chat-attachments-input");
+    var elFilesPreview  = document.getElementById("chat-attachments-preview");
+    var elSendBtn       = document.getElementById("chat-send-button");
 
-    var state = {
-        currentUserId: toInteger(configElement.dataset.currentUserId, 0),
-        activeConversationId: toInteger(configElement.dataset.activeConversationId, null),
-        conversations: parseScriptJSON("chat-initial-conversations", []),
-        friendCandidates: parseScriptJSON("chat-initial-friends", []),
-        messagesByConversation: {},
-        ws: null,
-        wsConversationId: null,
-        wsConnected: false,
-        wsQueue: [],
-        wsReconnectTimer: null,
-        wsReconnectAttempts: 0,
-        sending: false,
-        conversationFilterTerm: "",
-        friendSearchTerm: "",
-        messageSearchTerm: ""
-    };
-
-    var initialMessages = parseScriptJSON("chat-initial-messages", []);
-    if (state.activeConversationId && Array.isArray(initialMessages)) {
-        state.messagesByConversation[state.activeConversationId] = initialMessages;
-    }
-
+    // ─── URLs ─────────────────────────────────────────────────────────────────
     var urls = {
-        listConversations: configElement.dataset.listConversationsUrl,
-        listMessagesTemplate: configElement.dataset.listMessagesTemplate,
-        sendMessageTemplate: configElement.dataset.sendMessageTemplate,
-        markReadTemplate: configElement.dataset.markReadTemplate,
-        toggleReactionTemplate: configElement.dataset.toggleReactionTemplate,
-        searchFriends: configElement.dataset.searchFriendsUrl,
-        startFriendChatTemplate: configElement.dataset.startFriendChatTemplate
+        listConversations:   cfg.dataset.listConversationsUrl,
+        listMsgsTpl:         cfg.dataset.listMessagesTemplate,
+        sendMsgTpl:          cfg.dataset.sendMessageTemplate,
+        markReadTpl:         cfg.dataset.markReadTemplate,
+        toggleReactionTpl:   cfg.dataset.toggleReactionTemplate,
+        searchFriends:       cfg.dataset.searchFriendsUrl,
+        startFriendChatTpl:  cfg.dataset.startFriendChatTemplate
     };
 
-    var wsToken = configElement.dataset.wsToken || "";
+    var wsToken = cfg.dataset.wsToken || "";
 
-    function getConversationTitle(conversation) {
-        var participants = Array.isArray(conversation.participants) ? conversation.participants : [];
-        if (!participants.length) {
-            return "Hoi thoai";
-        }
-        return participants.map(function (participant) {
-            return participant.full_name || participant.username;
-        }).join(", ");
+    // ─── State ────────────────────────────────────────────────────────────────
+    var state = {
+        currentUserId:      toInt(cfg.dataset.currentUserId, 0),
+        activeConvId:       toInt(cfg.dataset.activeConversationId, null),
+        conversations:      parseScriptJSON("chat-initial-conversations", []),
+        friendCandidates:   parseScriptJSON("chat-initial-friends", []),
+        msgsByConv:         {},
+        paging:             {},
+        ws:                 null,
+        wsConvId:           null,
+        wsConnected:        false,
+        wsQueue:            [],
+        wsReconnectTimer:   null,
+        wsReconnectAttempts:0,
+        sending:            false,
+        stickToBottom:      true,
+        convFilter:         "",
+        friendSearch:       "",
+        msgSearch:          "",
+        typingTimers:       {},
+        isTyping:           false,
+        typingDebounce:     null
+    };
+
+    var friendResultsTarget = null;
+
+    function pickFriendResultsTarget() {
+        var useInline = window.matchMedia("(max-width: 1100px)").matches;
+        friendResultsTarget = (useInline && elFriendResultsInline) ? elFriendResultsInline : elFriendResults;
+        return friendResultsTarget;
     }
 
-    function getConversationSubtitle(conversation) {
-        var lastMessage = conversation.last_message;
-        if (!lastMessage) {
-            return "Chua co tin nhan";
-        }
-        var preview = lastMessage.preview || "Tin nhan moi";
+    // Bỏ qua lấy tin nhắn ban đầu từ DOM để ép lazy load qua API
+    var initMsgs = parseScriptJSON("chat-initial-messages", []); 
+    if (state.activeConvId && Array.isArray(initMsgs) && initMsgs.length) {
+        var sorted = initMsgs.slice().sort(function (a, b) {
+            return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+        });
+        state.msgsByConv[state.activeConvId] = sorted;
+        _setPaging(state.activeConvId, sorted, MESSAGE_PAGE_SIZE, false, sorted.length);
+    }
+
+    // ─── Paging helpers ───────────────────────────────────────────────────────
+    function _getPaging(convId) {
+        if (!convId) return { oldestId: null, hasMore: true, loading: false };
+        if (!state.paging[convId]) state.paging[convId] = { oldestId: null, hasMore: true, loading: false };
+        return state.paging[convId];
+    }
+
+    function _setPaging(convId, msgs, pageSize, isOlder, count) {
+        var p = _getPaging(convId);
+        if (Array.isArray(msgs) && msgs.length) p.oldestId = msgs[0].id;
+        var c = Number.isFinite(count) ? count : (Array.isArray(msgs) ? msgs.length : 0);
+        if (isOlder) { if (c < pageSize) p.hasMore = false; }
+        else { p.hasMore = c >= pageSize; }
+        return p;
+    }
+
+    // ─── Conversation helpers ─────────────────────────────────────────────────
+    function convTitle(conv) {
+        var ps = Array.isArray(conv.participants) ? conv.participants : [];
+        if (!ps.length) return "Hội thoại";
+        return ps.map(function (p) { return p.full_name || p.username; }).join(", ");
+    }
+
+    function convAvatar(conv) {
+        var ps = Array.isArray(conv.participants) ? conv.participants : [];
+        if (!ps.length) return "https://ui-avatars.com/api/?name=Chat";
+        var p = ps[0];
+        return p.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(p.username || "U");
+    }
+
+    function convSubtitle(conv) {
+        var lm = conv.last_message;
+        if (!lm) return "Chưa có tin nhắn";
+        var preview = lm.preview || "Tin nhắn mới";
+        if (lm.sender_id === state.currentUserId) preview = "Bạn: " + preview;
         return preview;
     }
 
-    function conversationAvatar(conversation) {
-        var participants = Array.isArray(conversation.participants) ? conversation.participants : [];
-        if (!participants.length) {
-            return "https://ui-avatars.com/api/?name=Chat";
-        }
-        return participants[0].avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(participants[0].username || "Chat");
-    }
-
-    function sortConversationsInPlace() {
-        state.conversations.sort(function (left, right) {
-            var leftTime = new Date(left.updated_at || left.created_at || 0).getTime();
-            var rightTime = new Date(right.updated_at || right.created_at || 0).getTime();
-            return rightTime - leftTime;
+    function sortConvs() {
+        state.conversations.sort(function (a, b) {
+            return new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0);
         });
     }
 
-    function renderConversationList() {
-        if (!conversationListElement) {
-            return;
-        }
-
-        sortConversationsInPlace();
-        var filterTerm = (state.conversationFilterTerm || "").trim().toLowerCase();
-        var filteredConversations = state.conversations.filter(function (conversation) {
-            if (!filterTerm) {
-                return true;
-            }
-            var title = getConversationTitle(conversation).toLowerCase();
-            var subtitle = getConversationSubtitle(conversation).toLowerCase();
-            return title.indexOf(filterTerm) >= 0 || subtitle.indexOf(filterTerm) >= 0;
+    // ─── Render: Conversation List ────────────────────────────────────────────
+    function renderConvList() {
+        if (!elConvList) return;
+        sortConvs();
+        var term = state.convFilter.trim().toLowerCase();
+        var filtered = state.conversations.filter(function (c) {
+            if (!term) return true;
+            return convTitle(c).toLowerCase().includes(term) || convSubtitle(c).toLowerCase().includes(term);
         });
 
-        if (!filteredConversations.length) {
-            conversationListElement.innerHTML = '<div class="chat-empty-state">Khong tim thay hoi thoai phu hop.</div>';
+        if (!filtered.length) {
+            elConvList.innerHTML = '<div class="chat-empty-state">Không tìm thấy hội thoại.</div>';
             return;
         }
 
-        conversationListElement.innerHTML = filteredConversations.map(function (conversation) {
-            var isActive = state.activeConversationId === conversation.id;
-            var unreadCount = toInteger(conversation.unread_count, 0);
-            var unreadBadge = unreadCount > 0
-                ? '<span class="chat-unread-badge">' + escapeHtml(unreadCount > 99 ? "99+" : String(unreadCount)) + "</span>"
-                : "";
+        elConvList.innerHTML = filtered.map(function (c) {
+            var isActive = state.activeConvId === c.id;
+            var unread = toInt(c.unread_count, 0);
+            var lm = c.last_message;
+            var isUnread = unread > 0;
 
-            return '' +
-                '<article class="chat-conversation-item' + (isActive ? " active" : "") + '" data-conversation-id="' + escapeHtml(conversation.id) + '">' +
-                    '<div class="chat-user-summary">' +
-                        '<img class="chat-avatar" src="' + escapeHtml(conversationAvatar(conversation)) + '" alt="avatar">' +
-                        '<div class="chat-user-text">' +
-                            '<div class="chat-user-name">' + escapeHtml(getConversationTitle(conversation)) + '</div>' +
-                            '<div class="chat-user-sub">' + escapeHtml(getConversationSubtitle(conversation)) + '</div>' +
-                        '</div>' +
+            return '<article class="chat-conv-item' + (isActive ? " active" : "") + (isUnread ? " unread" : "") + '" data-id="' + c.id + '">' +
+                '<div class="chat-conv-avatar-wrap">' +
+                    '<img class="chat-avatar" src="' + escapeHtml(convAvatar(c)) + '" alt="">' +
+                    '<span class="chat-online-dot"></span>' +
+                '</div>' +
+                '<div class="chat-conv-text">' +
+                    '<div class="chat-conv-row">' +
+                        '<span class="chat-conv-name' + (isUnread ? " fw-bold" : "") + '">' + escapeHtml(convTitle(c)) + '</span>' +
+                        '<span class="chat-conv-time">' + escapeHtml(lm ? formatTime(lm.created_at) : "") + '</span>' +
                     '</div>' +
-                    unreadBadge +
-                '</article>';
+                    '<div class="chat-conv-row">' +
+                        '<span class="chat-conv-preview' + (isUnread ? " fw-bold" : "") + '">' + escapeHtml(convSubtitle(c)) + '</span>' +
+                        (isUnread ? '<span class="chat-unread-dot"></span>' : '') +
+                    '</div>' +
+                '</div>' +
+            '</article>';
         }).join("");
     }
 
-    function renderActiveHeader() {
-        if (!activeHeaderElement) {
+    // ─── Render: Active Header ────────────────────────────────────────────────
+    function renderHeader() {
+        if (!elHeader) return;
+        if (!state.activeConvId) {
+            elHeader.innerHTML =
+                '<div class="chat-header-empty">' +
+                    '<span class="chat-header-logo-dot"></span>' +
+                    '<div><h3>Messenger</h3><p>Chọn một cuộc trò chuyện để bắt đầu</p></div>' +
+                '</div>' +
+                '<div class="chat-header-actions"><input id="chat-message-search-input" type="text" placeholder="🔍 Tìm tin nhắn..."></div>';
+            rebindMsgSearch();
             return;
         }
+        var conv = state.conversations.find(function (c) { return c.id === state.activeConvId; });
+        if (!conv) return;
+        var avatarSrc = convAvatar(conv);
+        var title = convTitle(conv);
 
-        if (!state.activeConversationId) {
-            activeHeaderElement.innerHTML = "<h3>Chon mot hoi thoai</h3><span>Ban co the tim ban be o cot ben phai de nhan tin thu.</span>";
-            return;
-        }
-
-        var conversation = state.conversations.find(function (item) {
-            return item.id === state.activeConversationId;
-        });
-
-        if (!conversation) {
-            activeHeaderElement.innerHTML = "<h3>Khong tim thay hoi thoai</h3><span>Vui long thu lai.</span>";
-            return;
-        }
-
-        var subtitle = "Dang ket noi realtime";
-        if (conversation.last_message && conversation.last_message.created_at) {
-            subtitle = "Cap nhat " + formatRelativeTime(conversation.last_message.created_at);
-        }
-
-        activeHeaderElement.innerHTML = "<h3>" + escapeHtml(getConversationTitle(conversation)) + "</h3><span>" + escapeHtml(subtitle) + "</span>";
+        elHeader.innerHTML =
+            '<div class="chat-header-info">' +
+                '<div class="chat-header-avatar-wrap">' +
+                    '<img class="chat-header-avatar" src="' + escapeHtml(avatarSrc) + '" alt="">' +
+                    '<span class="chat-online-dot"></span>' +
+                '</div>' +
+                '<div class="chat-header-text">' +
+                    '<h3>' + escapeHtml(title) + '</h3>' +
+                    '<span class="chat-header-status">' + (state.wsConnected ? '🟢 Đang hoạt động' : '⚪ Đang kết nối...') + '</span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="chat-header-actions">' +
+                '<input id="chat-message-search-input" type="text" placeholder="🔍 Tìm tin nhắn...">' +
+            '</div>';
+        rebindMsgSearch();
     }
 
-    function reactionSummaryText(message) {
-        var summary = message.reaction_summary || {};
-        var keys = Object.keys(summary);
-        if (!keys.length) {
-            return "";
+    function rebindMsgSearch() {
+        var el = document.getElementById("chat-message-search-input");
+        if (el) {
+            el.value = state.msgSearch;
+            el.addEventListener("input", function (e) {
+                state.msgSearch = e.target.value || "";
+                renderMsgList(false);
+            });
         }
-
-        return keys.map(function (reactionKey) {
-            var emoji = REACTION_EMOJI[reactionKey] || reactionKey;
-            return emoji + " " + summary[reactionKey];
-        }).join("  ");
     }
 
-    function attachmentHtml(message) {
-        var attachments = Array.isArray(message.attachments) ? message.attachments : [];
-        if (!attachments.length) {
-            return "";
-        }
+    // ─── Render: Messages ─────────────────────────────────────────────────────
+    function msgMatchesSearch(msg, term) {
+        if (!term) return true;
+        if ((msg.content || "").toLowerCase().includes(term)) return true;
+        if ((msg.sender_full_name || msg.sender_username || "").toLowerCase().includes(term)) return true;
+        return (msg.attachments || []).some(function (a) { return (a.name || "").toLowerCase().includes(term); });
+    }
 
-        return '<div class="chat-attachments">' + attachments.map(function (attachment) {
-            var contentType = attachment.content_type || "";
-            if (contentType.indexOf("image/") === 0) {
-                return '<a href="' + escapeHtml(attachment.url || "#") + '" target="_blank" rel="noopener noreferrer">' +
-                    '<img class="chat-attachment-image" src="' + escapeHtml(attachment.url || "") + '" alt="attachment image">' +
-                '</a>';
+    function attachmentHtml(msg) {
+        var atts = Array.isArray(msg.attachments) ? msg.attachments : [];
+        if (!atts.length) return "";
+        return '<div class="chat-attachments">' + atts.map(function (a) {
+            var ct = a.content_type || "";
+            if (ct.startsWith("image/")) {
+                return '<a href="' + escapeHtml(a.url || "#") + '" target="_blank" rel="noopener noreferrer">' +
+                    '<img class="chat-att-img" src="' + escapeHtml(a.url || "") + '" alt="ảnh">' +
+                    '</a>';
             }
-
-            return '<a class="chat-attachment-file" href="' + escapeHtml(attachment.url || "#") + '" target="_blank" rel="noopener noreferrer">' +
-                '<span>📎</span>' +
-                '<span>' + escapeHtml(attachment.name || "tep dinh kem") + '</span>' +
-                '<span>(' + escapeHtml(fileSizeLabel(toInteger(attachment.size, 0))) + ')</span>' +
-            '</a>';
+            return '<a class="chat-att-file" href="' + escapeHtml(a.url || "#") + '" target="_blank" rel="noopener noreferrer">' +
+                '<span class="chat-att-icon">📎</span>' +
+                '<span class="chat-att-name">' + escapeHtml(a.name || "tệp") + '</span>' +
+                '<span class="chat-att-size">(' + escapeHtml(fileSizeLabel(toInt(a.size, 0))) + ')</span>' +
+                '</a>';
         }).join("") + '</div>';
     }
 
-    function messageMatchesSearch(message, searchTerm) {
-        if (!searchTerm) {
-            return true;
-        }
-
-        var content = (message.content || "").toLowerCase();
-        if (content.indexOf(searchTerm) >= 0) {
-            return true;
-        }
-
-        var senderName = (message.sender_full_name || message.sender_username || "").toLowerCase();
-        if (senderName.indexOf(searchTerm) >= 0) {
-            return true;
-        }
-
-        var attachments = Array.isArray(message.attachments) ? message.attachments : [];
-        return attachments.some(function (attachment) {
-            var name = (attachment.name || "").toLowerCase();
-            return name.indexOf(searchTerm) >= 0;
-        });
+    function reactionBar(msg) {
+        var summary = msg.reaction_summary || {};
+        var keys = Object.keys(summary);
+        if (!keys.length) return "";
+        var parts = keys.map(function (k) {
+            return '<span class="chat-rxn-chip" title="' + escapeHtml(k) + '">' +
+                escapeHtml(REACTION_EMOJI[k] || k) + ' ' +
+                escapeHtml(String(summary[k])) +
+            '</span>';
+        }).join("");
+        return '<div class="chat-rxn-bar">' + parts + '</div>';
     }
 
-    function renderMessageList(scrollToBottom) {
-        if (!messageListElement) {
+    function reactionPicker(msg) {
+        var myRxn = msg.current_user_reaction || "";
+        return '<div class="chat-rxn-actions" data-msg-id="' + escapeHtml(msg.id) + '">' +
+            '<button type="button" class="chat-rxn-toggle" title="Cảm xúc">🙂</button>' +
+            '<div class="chat-rxn-picker">' +
+                Object.keys(REACTION_EMOJI).map(function (k) {
+                    return '<button type="button" class="chat-rxn-opt' + (myRxn === k ? " active" : "") + '" data-rxn="' + k + '" title="' + k + '">' +
+                        REACTION_EMOJI[k] +
+                    '</button>';
+                }).join("") +
+            '</div>' +
+        '</div>';
+    }
+
+    function shouldShowAvatar(msgs, idx) {
+        var msg = msgs[idx];
+        if (msg.sender_id === state.currentUserId) return false;
+        var next = msgs[idx + 1];
+        if (!next) return true;
+        return next.sender_id !== msg.sender_id;
+    }
+
+    function shouldShowTime(msgs, idx) {
+        var msg = msgs[idx];
+        var prev = msgs[idx - 1];
+        if (!prev) return true;
+        var diff = new Date(msg.created_at || 0) - new Date(prev.created_at || 0);
+        return diff > 5 * 60 * 1000;
+    }
+
+    function renderMsgList(forceBottom) {
+        if (!elMsgList) return;
+
+        var prevScrollTop = elMsgList.scrollTop;
+        var prevScrollH   = elMsgList.scrollHeight;
+        var clientH       = elMsgList.clientHeight;
+        var nearBottom    = (prevScrollH - prevScrollTop - clientH) < 80;
+
+        if (!state.activeConvId) {
+            elMsgList.innerHTML = '<div class="chat-empty-state">Chọn hội thoại để bắt đầu nhắn tin 💬</div>';
             return;
         }
 
-        var previousScrollTop = messageListElement.scrollTop;
-        var previousScrollHeight = messageListElement.scrollHeight;
-        var nearBottom = previousScrollHeight - (previousScrollTop + messageListElement.clientHeight) < 40;
-
-        if (!state.activeConversationId) {
-            messageListElement.innerHTML = '<div class="chat-empty-state">Chon hoi thoai de bat dau chat.</div>';
+        var msgs = state.msgsByConv[state.activeConvId] || [];
+        if (!msgs.length) {
+            elMsgList.innerHTML = '<div class="chat-empty-state">Chưa có tin nhắn nào. Hãy gửi tin nhắn đầu tiên! 👋</div>';
             return;
         }
 
-        var messages = state.messagesByConversation[state.activeConversationId] || [];
-        if (!messages.length) {
-            messageListElement.innerHTML = '<div class="chat-empty-state">Hoi thoai nay chua co tin nhan.</div>';
+        var paging = _getPaging(state.activeConvId);
+        var term   = (state.msgSearch || "").trim().toLowerCase();
+        var filtered = msgs.filter(function (m) { return msgMatchesSearch(m, term); });
+
+        if (!filtered.length) {
+            elMsgList.innerHTML = '<div class="chat-empty-state">Không tìm thấy tin nhắn phù hợp.</div>';
             return;
         }
 
-        var searchTerm = (state.messageSearchTerm || "").trim().toLowerCase();
-        var filteredMessages = messages.filter(function (message) {
-            return messageMatchesSearch(message, searchTerm);
-        });
-
-        if (!filteredMessages.length) {
-            messageListElement.innerHTML = '<div class="chat-empty-state">Khong tim thay tin nhan phu hop.</div>';
-            return;
+        var topHtml = "";
+        if (!term) {
+            if (paging.loading) {
+                topHtml = '<div class="chat-history-loader loading"><span class="chat-spinner"></span> Đang tải...</div>';
+            } else if (paging.hasMore) {
+                topHtml = '<div class="chat-history-loader hint">Kéo lên để xem tin nhắn cũ hơn ↑</div>';
+            } else {
+                topHtml = '<div class="chat-history-loader end">— Đầu cuộc hội thoại —</div>';
+            }
         }
 
-        messageListElement.innerHTML = filteredMessages.map(function (message) {
-            var isMine = message.sender_id === state.currentUserId;
-            var rowClass = isMine ? "me" : "other";
-            var seenByOthers = Array.isArray(message.seen_by_user_ids) && message.seen_by_user_ids.some(function (readerId) {
-                return toInteger(readerId, 0) !== state.currentUserId;
+        var html = "";
+        var lastDate = "";
+        filtered.forEach(function (msg, idx) {
+            var isMine = msg.sender_id === state.currentUserId;
+            var msgDate = msg.created_at ? new Date(msg.created_at).toLocaleDateString("vi-VN") : "";
+
+            if (msgDate && msgDate !== lastDate) {
+                lastDate = msgDate;
+                html += '<div class="chat-date-sep"><span>' + escapeHtml(msgDate) + '</span></div>';
+            }
+
+            var showTime = shouldShowTime(filtered, idx);
+            var showAvatar = shouldShowAvatar(filtered, idx);
+            var seenByOthers = isMine && Array.isArray(msg.seen_by_user_ids) && msg.seen_by_user_ids.some(function (id) {
+                return toInt(id, 0) !== state.currentUserId;
             });
-            var readState = isMine && seenByOthers ? '<span class="chat-read-status">Da xem</span>' : "";
-            var reactionSummary = reactionSummaryText(message);
 
-            return '' +
-                '<article class="chat-message-row ' + rowClass + '" data-message-id="' + escapeHtml(message.id) + '">' +
-                    '<div class="chat-bubble">' +
-                        '<div>' + escapeHtml(message.content || "") + '</div>' +
-                        attachmentHtml(message) +
-                    '</div>' +
-                    '<div class="chat-meta">' +
-                        '<span>' + escapeHtml(message.sender_full_name || message.sender_username || "User") + '</span>' +
-                        '<span>' + escapeHtml(formatRelativeTime(message.created_at)) + '</span>' +
-                        readState +
-                    '</div>' +
-                    '<div class="chat-reaction-line">' + escapeHtml(reactionSummary) + '</div>' +
-                    '<div class="chat-reaction-actions" data-message-id="' + escapeHtml(message.id) + '">' +
-                        '<button type="button" class="chat-reaction-toggle">Cam xuc</button>' +
-                        '<div class="chat-reaction-picker">' +
-                            '<button type="button" class="chat-reaction-option" data-reaction="like">👍</button>' +
-                            '<button type="button" class="chat-reaction-option" data-reaction="love">❤️</button>' +
-                            '<button type="button" class="chat-reaction-option" data-reaction="haha">😆</button>' +
-                            '<button type="button" class="chat-reaction-option" data-reaction="wow">😮</button>' +
-                            '<button type="button" class="chat-reaction-option" data-reaction="sad">😢</button>' +
-                            '<button type="button" class="chat-reaction-option" data-reaction="angry">😡</button>' +
+            var nextMsg = filtered[idx + 1];
+            var prevMsg = filtered[idx - 1];
+            var sameAsPrev = prevMsg && prevMsg.sender_id === msg.sender_id;
+            var sameAsNext = nextMsg && nextMsg.sender_id === msg.sender_id;
+            var bubblePos = "";
+            if (!sameAsPrev && !sameAsNext) bubblePos = "solo";
+            else if (!sameAsPrev) bubblePos = "top";
+            else if (!sameAsNext) bubblePos = "bottom";
+            else bubblePos = "mid";
+
+            var avatarHtml = "";
+            if (!isMine) {
+                avatarHtml = showAvatar
+                    ? '<img class="chat-msg-avatar" src="' + escapeHtml(msg.sender_avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(msg.sender_username || "U")) + '" alt="">'
+                    : '<span class="chat-msg-avatar-spacer"></span>';
+            }
+
+            var contentHtml = escapeHtml(msg.content || "");
+            contentHtml = contentHtml.replace(/(https?:\/\/[^\s<>"]+)/g, function (url) {
+                return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" class="chat-link">' + escapeHtml(url) + '</a>';
+            });
+
+            html +=
+                '<div class="chat-msg-row ' + (isMine ? "me" : "other") + ' pos-' + bubblePos + '" data-msg-id="' + escapeHtml(msg.id) + '">' +
+                    avatarHtml +
+                    '<div class="chat-msg-body">' +
+                        (showTime ? '<div class="chat-msg-time-label">' + escapeHtml(formatFullTime(msg.created_at)) + '</div>' : '') +
+                        '<div class="chat-bubble pos-' + bubblePos + '">' +
+                            '<div class="chat-bubble-content">' + contentHtml + '</div>' +
+                            attachmentHtml(msg) +
                         '</div>' +
+                        reactionBar(msg) +
+                        '<div class="chat-msg-meta">' +
+                            (seenByOthers ? '<span class="chat-seen">✓✓ Đã xem</span>' : '') +
+                        '</div>' +
+                        reactionPicker(msg) +
                     '</div>' +
-                '</article>';
-        }).join("");
+                '</div>';
+        });
 
-        if (scrollToBottom || nearBottom) {
-            messageListElement.scrollTop = messageListElement.scrollHeight;
+        elMsgList.innerHTML = topHtml + html;
+
+        // Xử lý scroll đồng bộ ngay sau khi cập nhật DOM
+        var newScrollH = elMsgList.scrollHeight;
+        if (forceBottom || state.stickToBottom || nearBottom) {
+            elMsgList.scrollTop = elMsgList.scrollHeight;
+            state.stickToBottom = true;
+            
+            var images = elMsgList.querySelectorAll('img');
+            images.forEach(function(img) {
+                img.addEventListener('load', function() {
+                    elMsgList.scrollTop = elMsgList.scrollHeight;
+                });
+            });
         } else {
-            var nextScrollHeight = messageListElement.scrollHeight;
-            messageListElement.scrollTop = previousScrollTop + (nextScrollHeight - previousScrollHeight);
+            // Giữ nguyên vị trí cuộn mượt mà khi chèn thêm tin nhắn cũ lên đầu
+            elMsgList.scrollTop = prevScrollTop + (newScrollH - prevScrollH);
+            state.stickToBottom = false;
         }
     }
 
-    function messagesChanged(conversationId, incoming) {
-        var existing = state.messagesByConversation[conversationId] || [];
-        if (existing.length !== incoming.length) {
-            return true;
-        }
-        if (!existing.length) {
-            return false;
-        }
-        return existing[existing.length - 1].id !== incoming[incoming.length - 1].id;
-    }
-
-    function renderAttachmentPreview() {
-        if (!attachmentsPreviewElement || !attachmentsInputElement) {
+    // ─── Render: Friend results ───────────────────────────────────────────────
+    function renderFriends() {
+        var target = friendResultsTarget || pickFriendResultsTarget();
+        if (!target) return;
+        if (!(state.friendSearch || "").trim()) {
+            target.innerHTML = "";
             return;
         }
-
-        var selectedFiles = Array.from(attachmentsInputElement.files || []);
-        if (!selectedFiles.length) {
-            attachmentsPreviewElement.innerHTML = "";
-            return;
-        }
-
-        attachmentsPreviewElement.innerHTML = selectedFiles.map(function (file) {
-            return "<li>" + escapeHtml(file.name) + " (" + escapeHtml(fileSizeLabel(file.size)) + ")</li>";
-        }).join("");
-    }
-
-    function renderFriendResults() {
-        if (!friendSearchResultElement) {
-            return;
-        }
-
         if (!state.friendCandidates.length) {
-            friendSearchResultElement.innerHTML = '<div class="chat-empty-state">Khong tim thay ban be.</div>';
+            target.innerHTML = '<div class="chat-empty-state">Chưa có bạn bè nào.</div>';
             return;
         }
-
-        friendSearchResultElement.innerHTML = state.friendCandidates.map(function (friend) {
-            var subtitle = friend.username || "";
-            if (friend.conversation_id) {
-                subtitle += " - Da co hoi thoai";
-            }
-
-            return '' +
-                '<article class="chat-friend-item" data-friend-id="' + escapeHtml(friend.id) + '">' +
-                    '<div class="chat-user-summary">' +
-                        '<img class="chat-avatar" src="' + escapeHtml(friend.avatar || "") + '" alt="friend avatar">' +
-                        '<div class="chat-user-text">' +
-                            '<div class="chat-user-name">' + escapeHtml(friend.full_name || friend.username) + '</div>' +
-                            '<div class="chat-user-sub">' + escapeHtml(subtitle) + '</div>' +
-                        '</div>' +
-                    '</div>' +
-                    '<button type="button" class="chat-start-btn" data-friend-id="' + escapeHtml(friend.id) + '">Nhan tin</button>' +
-                '</article>';
+        target.innerHTML = state.friendCandidates.map(function (f) {
+            var sub = f.conversation_id ? "Đã có hội thoại" : "@" + (f.username || "");
+            return '<article class="chat-friend-item" data-id="' + f.id + '">' +
+                '<img class="chat-avatar" src="' + escapeHtml(f.avatar || "") + '" alt="">' +
+                '<div class="chat-user-text">' +
+                    '<div class="chat-user-name">' + escapeHtml(f.full_name || f.username) + '</div>' +
+                    '<div class="chat-user-sub">' + escapeHtml(sub) + '</div>' +
+                '</div>' +
+                '<button type="button" class="chat-start-btn" data-friend-id="' + f.id + '">Nhắn tin</button>' +
+            '</article>';
         }).join("");
     }
 
-    function mergeConversation(conversation) {
-        var index = state.conversations.findIndex(function (item) {
-            return item.id === conversation.id;
-        });
-        if (index >= 0) {
-            state.conversations[index] = conversation;
-        } else {
-            state.conversations.push(conversation);
-        }
+    // ─── Render: Attachment preview ───────────────────────────────────────────
+    function renderFilesPreview() {
+        if (!elFilesPreview || !elFiles) return;
+        var files = Array.from(elFiles.files || []);
+        if (!files.length) { elFilesPreview.innerHTML = ""; return; }
+        elFilesPreview.innerHTML = files.map(function (f) {
+            return '<li><span class="chat-file-chip">📎 ' + escapeHtml(f.name) + ' <em>(' + escapeHtml(fileSizeLabel(f.size)) + ')</em></span></li>';
+        }).join("");
     }
 
-    function upsertMessage(conversationId, message) {
-        if (!state.messagesByConversation[conversationId]) {
-            state.messagesByConversation[conversationId] = [];
-        }
-
-        var messages = state.messagesByConversation[conversationId];
-        var existingIndex = messages.findIndex(function (item) {
-            return item.id === message.id;
-        });
-
-        if (existingIndex >= 0) {
-            messages[existingIndex] = Object.assign({}, messages[existingIndex], message);
-        } else {
-            messages.push(message);
-        }
-
-        messages.sort(function (left, right) {
-            return new Date(left.created_at || 0).getTime() - new Date(right.created_at || 0).getTime();
-        });
+    // ─── Data mutations ───────────────────────────────────────────────────────
+    function upsertMsg(convId, msg) {
+        if (!state.msgsByConv[convId]) state.msgsByConv[convId] = [];
+        var msgs = state.msgsByConv[convId];
+        var idx = msgs.findIndex(function (m) { return m.id === msg.id; });
+        if (idx >= 0) msgs[idx] = Object.assign({}, msgs[idx], msg);
+        else msgs.push(msg);
+        msgs.sort(function (a, b) { return new Date(a.created_at || 0) - new Date(b.created_at || 0); });
     }
 
-    async function refreshConversations() {
-        try {
-            var response = await fetch(urls.listConversations, {
-                headers: { "X-Requested-With": "XMLHttpRequest" }
-            });
-            if (!response.ok) {
-                return;
-            }
-
-            var payload = await response.json();
-            state.conversations = Array.isArray(payload.results) ? payload.results : [];
-            renderConversationList();
-            renderActiveHeader();
-        } catch (error) {
-            // keep the current state when refresh fails
-        }
+    function mergeConv(conv) {
+        var idx = state.conversations.findIndex(function (c) { return c.id === conv.id; });
+        if (idx >= 0) state.conversations[idx] = conv;
+        else state.conversations.unshift(conv);
     }
 
-    async function loadMessages(conversationId, options) {
-        if (!conversationId) {
-            return;
-        }
-
-        var opts = options || {};
-
-        var endpoint = buildUrl(urls.listMessagesTemplate, conversationId) + "?all=1";
-        try {
-            var response = await fetch(endpoint, {
-                headers: { "X-Requested-With": "XMLHttpRequest" }
-            });
-            if (!response.ok) {
-                return;
-            }
-
-            var payload = await response.json();
-            var incomingMessages = Array.isArray(payload.results) ? payload.results : [];
-            var hasChanges = messagesChanged(conversationId, incomingMessages);
-            if (hasChanges) {
-                state.messagesByConversation[conversationId] = incomingMessages;
-            }
-
-            var conversation = state.conversations.find(function (item) {
-                return item.id === conversationId;
-            });
-            if (conversation && Number.isFinite(payload.unread_count)) {
-                conversation.unread_count = payload.unread_count;
-            }
-
-            if (hasChanges || opts.forceRender) {
-                renderMessageList(Boolean(opts.scrollToBottom));
-            }
-
-            if (hasChanges) {
-                renderConversationList();
-                renderActiveHeader();
-            }
-
-            if (!opts.skipMarkRead) {
-                markConversationRead(conversationId);
-            }
-        } catch (error) {
-            // ignore temporary errors
-        }
+    function touchConvWithMsg(convId, msg, increaseUnread) {
+        var conv = state.conversations.find(function (c) { return c.id === convId; });
+        if (!conv) { refreshConvs(); return; }
+        var preview = msg.content || (msg.attachments && msg.attachments.length ? "[Tệp đính kèm]" : "");
+        conv.updated_at = msg.created_at || new Date().toISOString();
+        conv.last_message = {
+            id: msg.id, sender_id: msg.sender_id, sender_username: msg.sender_username,
+            sender_full_name: msg.sender_full_name, sender_avatar: msg.sender_avatar,
+            preview: preview, message_type: msg.message_type,
+            created_at: msg.created_at,
+            is_read_by_me: msg.sender_id === state.currentUserId
+        };
+        if (increaseUnread) conv.unread_count = toInt(conv.unread_count, 0) + 1;
     }
 
-    async function markConversationRead(conversationId) {
-        if (!conversationId) {
-            return;
-        }
-        sendWsAction({ action: "mark_read" }, conversationId);
-    }
-
-    function closeSocket() {
-        if (state.ws) {
-            try {
-                state.ws.close();
-            } catch (error) {
-                // noop
-            }
-        }
-        state.ws = null;
-        state.wsConversationId = null;
-        state.wsConnected = false;
-    }
-
-    function scheduleReconnect(conversationId) {
-        if (state.wsReconnectTimer) {
-            return;
-        }
-
-        state.wsReconnectAttempts += 1;
-        var delayMs = Math.min(1000 * Math.pow(2, state.wsReconnectAttempts), 10000);
-        state.wsReconnectTimer = window.setTimeout(function () {
-            state.wsReconnectTimer = null;
-            if (state.activeConversationId === conversationId) {
-                openSocket(conversationId);
-            }
-        }, delayMs);
-    }
-
-    function flushWsQueue() {
-        if (!isSocketOpen(state.ws)) {
-            return;
-        }
-
-        var pending = state.wsQueue.slice();
-        state.wsQueue = [];
-        pending.forEach(function (entry) {
-            if (entry.conversationId && entry.conversationId !== state.wsConversationId) {
-                state.wsQueue.push(entry);
-                return;
-            }
-            try {
-                state.ws.send(JSON.stringify(entry.payload));
-            } catch (error) {
-                // keep going even if one payload fails
-            }
-        });
-    }
-
-    function sendWsAction(payload, conversationId) {
-        var targetConversationId = conversationId || state.activeConversationId;
-        if (isSocketOpen(state.ws) && state.wsConversationId === targetConversationId) {
+    // ─── WebSocket ────────────────────────────────────────────────────────────
+    function sendWs(payload, convId) {
+        var target = convId || state.activeConvId;
+        if (isSocketOpen(state.ws) && state.wsConvId === target) {
             state.ws.send(JSON.stringify(payload));
             return true;
         }
-
-        state.wsQueue.push({ conversationId: targetConversationId, payload: payload });
-        if (targetConversationId) {
-            openSocket(targetConversationId);
-        }
+        state.wsQueue.push({ convId: target, payload: payload });
+        if (target) openSocket(target);
         return false;
     }
 
-    function openSocket(conversationId) {
-        if (!conversationId) {
-            closeSocket();
-            return;
-        }
+    function flushWsQueue() {
+        if (!isSocketOpen(state.ws)) return;
+        var pending = state.wsQueue.slice();
+        state.wsQueue = [];
+        pending.forEach(function (entry) {
+            if (entry.convId && entry.convId !== state.wsConvId) { state.wsQueue.push(entry); return; }
+            try { state.ws.send(JSON.stringify(entry.payload)); } catch (e) { /* noop */ }
+        });
+    }
 
-        if (state.ws && state.wsConversationId === conversationId) {
-            return;
-        }
+    function scheduleReconnect(convId) {
+        if (state.wsReconnectTimer) return;
+        state.wsReconnectAttempts += 1;
+        var delay = Math.min(1000 * Math.pow(2, state.wsReconnectAttempts), 10000);
+        state.wsReconnectTimer = setTimeout(function () {
+            state.wsReconnectTimer = null;
+            if (state.activeConvId === convId) openSocket(convId);
+        }, delay);
+    }
 
+    function closeSocket() {
+        if (state.ws) { try { state.ws.close(); } catch (e) { /* noop */ } }
+        state.ws = null; state.wsConvId = null; state.wsConnected = false;
+    }
+
+    function openSocket(convId) {
+        if (!convId) { closeSocket(); return; }
+        if (state.ws && state.wsConvId === convId) return;
         closeSocket();
-        if (!window.WebSocket) {
-            return;
-        }
-
-        var wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-        var wsUrl = wsProtocol + "://" + window.location.host + "/ws/chat/" + String(conversationId) + "/";
-        if (wsToken) {
-            wsUrl += "?token=" + encodeURIComponent(wsToken);
-        }
-        state.ws = new WebSocket(wsUrl);
-        state.wsConversationId = conversationId;
+        if (!window.WebSocket) return;
+        var proto = location.protocol === "https:" ? "wss" : "ws";
+        var url = proto + "://" + location.host + "/ws/chat/" + convId + "/";
+        if (wsToken) url += "?token=" + encodeURIComponent(wsToken);
+        state.ws = new WebSocket(url);
+        state.wsConvId = convId;
         state.wsConnected = false;
 
         state.ws.onopen = function () {
             state.wsConnected = true;
             state.wsReconnectAttempts = 0;
-            if (state.wsReconnectTimer) {
-                window.clearTimeout(state.wsReconnectTimer);
-                state.wsReconnectTimer = null;
-            }
+            if (state.wsReconnectTimer) { clearTimeout(state.wsReconnectTimer); state.wsReconnectTimer = null; }
             flushWsQueue();
+            renderHeader();
         };
 
-        state.ws.onmessage = function (event) {
-            var payload = {};
-            try {
-                payload = JSON.parse(event.data || "{}");
-            } catch (error) {
-                return;
-            }
-            handleSocketEvent(payload);
+        state.ws.onmessage = function (e) {
+            var payload;
+            try { payload = JSON.parse(e.data || "{}"); } catch (err) { return; }
+            handleWsEvent(payload);
         };
 
         state.ws.onclose = function () {
             state.wsConnected = false;
-            if (state.activeConversationId === state.wsConversationId) {
-                window.setTimeout(function () {
-                    if (state.activeConversationId === conversationId) {
-                        openSocket(conversationId);
-                    }
-                }, 1200);
+            renderHeader();
+            if (state.activeConvId === state.wsConvId) {
+                setTimeout(function () {
+                    if (state.activeConvId === convId) openSocket(convId);
+                }, 1500);
             }
-            scheduleReconnect(conversationId);
+            scheduleReconnect(convId);
         };
 
         state.ws.onerror = function () {
             state.wsConnected = false;
-            scheduleReconnect(conversationId);
+            scheduleReconnect(convId);
         };
     }
 
-    function touchConversationWithMessage(conversationId, message, shouldIncreaseUnread) {
-        var conversation = state.conversations.find(function (item) {
-            return item.id === conversationId;
-        });
-
-        if (!conversation) {
-            refreshConversations();
-            return;
-        }
-
-        var previewText = message.content || "";
-        if (!previewText && Array.isArray(message.attachments) && message.attachments.length) {
-            previewText = "[Tin nhan dinh kem]";
-        }
-
-        conversation.updated_at = message.created_at || new Date().toISOString();
-        conversation.last_message = {
-            id: message.id,
-            sender_id: message.sender_id,
-            sender_username: message.sender_username,
-            sender_full_name: message.sender_full_name,
-            sender_avatar: message.sender_avatar,
-            preview: previewText,
-            message_type: message.message_type,
-            created_at: message.created_at,
-            is_read_by_me: message.sender_id === state.currentUserId
-        };
-
-        if (shouldIncreaseUnread) {
-            conversation.unread_count = toInteger(conversation.unread_count, 0) + 1;
-        }
-    }
-
-    function handleSocketEvent(payload) {
-        if (!payload || !payload.event) {
-            return;
-        }
+    function handleWsEvent(payload) {
+        if (!payload || !payload.event) return;
 
         if (payload.event === "error") {
-            if (payload.detail) {
-                window.alert(payload.detail);
-            }
+            console.warn("[chat ws error]", payload.detail);
             return;
         }
 
         if (payload.event === "message_new") {
-            var conversationId = toInteger(payload.conversation_id, null);
-            var message = payload.message;
-            if (!conversationId || !message) {
-                return;
-            }
-
-            upsertMessage(conversationId, message);
-            var increaseUnread = state.activeConversationId !== conversationId && message.sender_id !== state.currentUserId;
-            touchConversationWithMessage(conversationId, message, increaseUnread);
-
-            renderConversationList();
-            renderActiveHeader();
-
-            if (state.activeConversationId === conversationId) {
-                renderMessageList(true);
-                markConversationRead(conversationId);
+            var convId = toInt(payload.conversation_id, null);
+            var msg = payload.message;
+            if (!convId || !msg) return;
+            upsertMsg(convId, msg);
+            var increaseUnread = state.activeConvId !== convId && msg.sender_id !== state.currentUserId;
+            touchConvWithMsg(convId, msg, increaseUnread);
+            renderConvList();
+            renderHeader();
+            if (state.activeConvId === convId) {
+                renderMsgList(true);
+                markRead(convId);
+                showNotification(msg);
             }
             return;
         }
 
         if (payload.event === "conversation_read") {
-            var readConversationId = toInteger(payload.conversation_id, null);
-            var readerId = toInteger(payload.reader_id, 0);
+            var rConvId = toInt(payload.conversation_id, null);
+            var readerId = toInt(payload.reader_id, 0);
             var readAt = payload.last_read_at;
-            if (!readConversationId || !readAt) {
-                return;
-            }
-
-            var readAtTime = new Date(readAt).getTime();
-            var messages = state.messagesByConversation[readConversationId] || [];
-            messages.forEach(function (message) {
-                var messageTime = new Date(message.created_at || 0).getTime();
-                if (messageTime <= readAtTime) {
-                    if (!Array.isArray(message.seen_by_user_ids)) {
-                        message.seen_by_user_ids = [];
-                    }
-                    if (message.seen_by_user_ids.indexOf(readerId) < 0) {
-                        message.seen_by_user_ids.push(readerId);
-                    }
+            if (!rConvId || !readAt) return;
+            var readAtMs = new Date(readAt).getTime();
+            (state.msgsByConv[rConvId] || []).forEach(function (m) {
+                var mMs = new Date(m.created_at || 0).getTime();
+                if (mMs <= readAtMs) {
+                    if (!Array.isArray(m.seen_by_user_ids)) m.seen_by_user_ids = [];
+                    if (!m.seen_by_user_ids.includes(readerId)) m.seen_by_user_ids.push(readerId);
                 }
             });
-
-            var conversation = state.conversations.find(function (item) {
-                return item.id === readConversationId;
-            });
-            if (conversation && readerId === state.currentUserId && Number.isFinite(payload.unread_count)) {
-                conversation.unread_count = payload.unread_count;
-                if (conversation.last_message) {
-                    conversation.last_message.is_read_by_me = true;
-                }
+            var conv = state.conversations.find(function (c) { return c.id === rConvId; });
+            if (conv && readerId === state.currentUserId && Number.isFinite(payload.unread_count)) {
+                conv.unread_count = payload.unread_count;
+                if (conv.last_message) conv.last_message.is_read_by_me = true;
             }
-
-            renderConversationList();
-            if (state.activeConversationId === readConversationId) {
-                renderMessageList(false);
-            }
+            renderConvList();
+            if (state.activeConvId === rConvId) renderMsgList(false);
             return;
         }
 
         if (payload.event === "message_reaction") {
-            var reactionConversationId = toInteger(payload.conversation_id, null);
-            var messageId = toInteger(payload.message_id, null);
-            if (!reactionConversationId || !messageId) {
-                return;
-            }
-
-            var reactionMessages = state.messagesByConversation[reactionConversationId] || [];
-            var reactionMessage = reactionMessages.find(function (item) {
-                return item.id === messageId;
-            });
-            if (!reactionMessage) {
-                return;
-            }
-
-            reactionMessage.reaction_summary = payload.reaction_summary || {};
-            if (toInteger(payload.user_id, 0) === state.currentUserId) {
-                reactionMessage.current_user_reaction = payload.reaction_type || null;
-            }
-
-            if (state.activeConversationId === reactionConversationId) {
-                renderMessageList(false);
-            }
+            var rxConvId = toInt(payload.conversation_id, null);
+            var msgId = toInt(payload.message_id, null);
+            if (!rxConvId || !msgId) return;
+            var m = (state.msgsByConv[rxConvId] || []).find(function (x) { return x.id === msgId; });
+            if (!m) return;
+            m.reaction_summary = payload.reaction_summary || {};
+            if (toInt(payload.user_id, 0) === state.currentUserId) m.current_user_reaction = payload.reaction_type || null;
+            if (state.activeConvId === rxConvId) renderMsgList(false);
         }
     }
 
-    function setActiveConversation(conversationId, options) {
-        var opts = options || {};
-        state.activeConversationId = conversationId;
+    // ─── Notification ─────────────────────────────────────────────────────────
+    function showNotification(msg) {
+        if (document.hasFocus()) return;
+        if (!("Notification" in window) || Notification.permission !== "granted") return;
+        var sender = msg.sender_full_name || msg.sender_username || "Tin nhắn mới";
+        var body = msg.content || (msg.attachments && msg.attachments.length ? "Đã gửi tệp đính kèm" : "");
+        var n = new Notification(sender, { body: body, icon: msg.sender_avatar || "" });
+        setTimeout(function () { n.close(); }, 4000);
+    }
 
-        renderConversationList();
-        renderActiveHeader();
+    function requestNotificationPermission() {
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+    }
+
+    // ─── API calls ────────────────────────────────────────────────────────────
+    async function refreshConvs() {
+        try {
+            var res = await fetch(urls.listConversations, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+            if (!res.ok) return;
+            var data = await res.json();
+            state.conversations = Array.isArray(data.results) ? data.results : [];
+            renderConvList();
+            renderHeader();
+        } catch (e) { /* noop */ }
+    }
+
+    async function loadMessages(convId, opts) {
+        opts = opts || {};
+        var limit = toInt(opts.limit, MESSAGE_PAGE_SIZE) || MESSAGE_PAGE_SIZE;
+        var endpoint = buildUrl(urls.listMsgsTpl, convId) + "?limit=" + limit;
+        if (opts.beforeId) endpoint += "&before_id=" + encodeURIComponent(opts.beforeId);
+        try {
+            var res = await fetch(endpoint, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+            if (!res.ok) return;
+            var data = await res.json();
+            var incoming = Array.isArray(data.results) ? data.results : [];
+            var isOlder = Boolean(opts.beforeId);
+            var changed = false;
+
+            if (isOlder) {
+                var existing = state.msgsByConv[convId] || [];
+                var existIds = new Set(existing.map(function (m) { return m.id; }));
+                var older = incoming.filter(function (m) { return !existIds.has(m.id); });
+                if (older.length) {
+                    state.msgsByConv[convId] = older.concat(existing);
+                    changed = true;
+                }
+            } else {
+                var cur = state.msgsByConv[convId] || [];
+                var incoming_sorted = incoming.slice().sort(function (a, b) { return new Date(a.created_at || 0) - new Date(b.created_at || 0); });
+                if (!cur.length || cur[cur.length - 1].id !== incoming_sorted[incoming_sorted.length - 1]?.id) {
+                    state.msgsByConv[convId] = incoming_sorted;
+                    changed = true;
+                }
+            }
+
+            var final = state.msgsByConv[convId] || incoming;
+            _setPaging(convId, final, limit, isOlder, incoming.length);
+
+            var conv = state.conversations.find(function (c) { return c.id === convId; });
+            if (conv && Number.isFinite(data.unread_count)) conv.unread_count = data.unread_count;
+
+            if (changed || opts.forceRender) renderMsgList(Boolean(opts.scrollToBottom));
+            if (changed) { renderConvList(); renderHeader(); }
+            if (!opts.skipMarkRead && !isOlder) markRead(convId);
+        } catch (e) { /* noop */ }
+    }
+
+    async function loadOlderMessages(convId) {
+        var paging = _getPaging(convId);
+        if (!paging.hasMore || paging.loading || !paging.oldestId) return;
+        paging.loading = true;
+        renderMsgList(false);
+        await loadMessages(convId, { beforeId: paging.oldestId, limit: MESSAGE_PAGE_SIZE, forceRender: true, scrollToBottom: false, skipMarkRead: true });
+        paging.loading = false;
+        renderMsgList(false);
+    }
+
+    async function markRead(convId) {
+        if (!convId) return;
+        sendWs({ action: "mark_read" }, convId);
+    }
+
+    async function searchFriends() {
+        var q = state.friendSearch.trim();
+        if (!q) {
+            state.friendCandidates = [];
+            renderFriends();
+            return;
+        }
+        var endpoint = urls.searchFriends + (q ? "?q=" + encodeURIComponent(q) : "");
+        try {
+            var res = await fetch(endpoint, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+            if (!res.ok) return;
+            var data = await res.json();
+            state.friendCandidates = Array.isArray(data.results) ? data.results : [];
+            renderFriends();
+        } catch (e) { /* noop */ }
+    }
+
+    async function startChatWithFriend(friendId, btn) {
+        if (!friendId) return;
+        if (btn) btn.disabled = true;
+        try {
+            var res = await fetch(buildUrl(urls.startFriendChatTpl, friendId), {
+                method: "POST",
+                headers: { "X-CSRFToken": getCookie("csrftoken"), "X-Requested-With": "XMLHttpRequest" }
+            });
+            var data = await res.json();
+            if (!res.ok) { alert(data.error || "Không thể bắt đầu hội thoại."); return; }
+            if (data.conversation) mergeConv(data.conversation);
+            if (data.conversation && Array.isArray(data.messages)) {
+                var sorted = data.messages.slice().sort(function (a, b) { return new Date(a.created_at || 0) - new Date(b.created_at || 0); });
+                state.msgsByConv[data.conversation.id] = sorted;
+                _setPaging(data.conversation.id, sorted, MESSAGE_PAGE_SIZE, false, sorted.length);
+                setActiveConv(data.conversation.id, { messages: sorted });
+            }
+            var cand = state.friendCandidates.find(function (f) { return f.id === friendId; });
+            if (cand && data.conversation) cand.conversation_id = data.conversation.id;
+            renderFriends();
+        } catch (e) { alert("Không thể bắt đầu hội thoại."); }
+        finally { if (btn) btn.disabled = false; }
+    }
+
+    // ─── Active conversation ──────────────────────────────────────────────────
+    function setActiveConv(convId, opts) {
+        opts = opts || {};
+        state.activeConvId = convId;
+        state.stickToBottom = true;
+        state.msgSearch = "";
+        _getPaging(convId);
+        renderConvList();
+        renderHeader();
 
         if (Array.isArray(opts.messages)) {
-            state.messagesByConversation[conversationId] = opts.messages;
-            renderMessageList(true);
+            state.msgsByConv[convId] = opts.messages;
+            _setPaging(convId, opts.messages, MESSAGE_PAGE_SIZE, false, opts.messages.length);
+            renderMsgList(true);
         } else {
-            renderMessageList(false);
-            loadMessages(conversationId, { scrollToBottom: true, forceRender: true });
+            renderMsgList(false);
+            loadMessages(convId, { scrollToBottom: true, forceRender: true });
         }
 
-        openSocket(conversationId);
-        markConversationRead(conversationId);
+        openSocket(convId);
+        markRead(convId);
+        if (elInput) { elInput.focus(); }
     }
 
-    async function sendMessage(event) {
-        event.preventDefault();
-
-        if (!state.activeConversationId || state.sending) {
+    // ─── Send message ─────────────────────────────────────────────────────────
+    async function sendMessage(e) {
+        e.preventDefault();
+        if (!state.activeConvId || state.sending) return;
+        if (!isSocketOpen(state.ws) || state.wsConvId !== state.activeConvId) {
+            openSocket(state.activeConvId);
             return;
         }
 
-        if (!isSocketOpen(state.ws) || state.wsConversationId !== state.activeConversationId) {
-            window.alert("Mat ket noi realtime. Vui long tai lai trang.");
-            return;
-        }
+        var content = (elInput.value || "").trim();
+        var files = Array.from(elFiles ? elFiles.files || [] : []);
+        if (!content && !files.length) return;
 
-        var content = (messageInputElement.value || "").trim();
-        var selectedFiles = Array.from(attachmentsInputElement.files || []);
-
-        if (!content && !selectedFiles.length) {
-            return;
-        }
-
-        for (var index = 0; index < selectedFiles.length; index += 1) {
-            if (selectedFiles[index].size >= MAX_ATTACHMENT_SIZE_BYTES) {
-                window.alert("Moi file phai nho hon 20MB.");
+        for (var i = 0; i < files.length; i++) {
+            if (files[i].size >= MAX_ATTACHMENT_SIZE_BYTES) {
+                alert("Mỗi file phải nhỏ hơn 20MB.");
                 return;
             }
         }
 
         state.sending = true;
-        sendButtonElement.disabled = true;
+        if (elSendBtn) elSendBtn.disabled = true;
 
         try {
-            var wsAttachments = [];
-            if (selectedFiles.length) {
-                try {
-                    wsAttachments = await buildWsAttachments(selectedFiles);
-                } catch (error) {
-                    window.alert("Khong the doc file dinh kem.");
-                    return;
-                }
+            var attachments = [];
+            if (files.length) {
+                try { attachments = await buildWsAttachments(files); }
+                catch (err) { alert("Không thể đọc file đính kèm."); return; }
             }
-
-            sendWsAction({
-                action: "send_message",
-                content: content,
-                attachments: wsAttachments
-            }, state.activeConversationId);
-
-            messageInputElement.value = "";
-            attachmentsInputElement.value = "";
-            renderAttachmentPreview();
-        } catch (error) {
-            window.alert("Khong the gui tin nhan. Vui long thu lai.");
+            sendWs({ action: "send_message", content: content, attachments: attachments }, state.activeConvId);
+            elInput.value = "";
+            if (elFiles) elFiles.value = "";
+            renderFilesPreview();
+            state.stickToBottom = true;
+            renderMsgList(true);
+        } catch (err) {
+            alert("Không thể gửi tin nhắn. Vui lòng thử lại.");
         } finally {
             state.sending = false;
-            sendButtonElement.disabled = false;
+            if (elSendBtn) elSendBtn.disabled = false;
+            if (elInput) elInput.focus();
         }
     }
 
-    async function toggleReaction(messageId, reactionType) {
-        sendWsAction({
-            action: "toggle_reaction",
-            message_id: messageId,
-            reaction: reactionType
-        }, state.activeConversationId);
+    // ─── Scroll management ────────────────────────────────────────────────────
+    function updateStickToBottom() {
+        if (!elMsgList) return;
+        state.stickToBottom = (elMsgList.scrollHeight - elMsgList.scrollTop - elMsgList.clientHeight) < 80;
     }
 
-    async function searchFriends() {
-        var query = (state.friendSearchTerm || "").trim();
-        var endpoint = urls.searchFriends;
-        if (query) {
-            endpoint += "?q=" + encodeURIComponent(query);
-        }
-
-        try {
-            var response = await fetch(endpoint, {
-                headers: { "X-Requested-With": "XMLHttpRequest" }
-            });
-            if (!response.ok) {
-                return;
-            }
-            var payload = await response.json();
-            state.friendCandidates = Array.isArray(payload.results) ? payload.results : [];
-            renderFriendResults();
-        } catch (error) {
-            // keep current friend list
-        }
+    function maybeLoadOlder() {
+        if (!elMsgList || !state.activeConvId) return;
+        if ((state.msgSearch || "").trim()) return;
+        var paging = _getPaging(state.activeConvId);
+        if (!paging.hasMore || paging.loading) return;
+        if (elMsgList.scrollHeight <= elMsgList.clientHeight) return;
+        if (elMsgList.scrollTop <= SCROLL_LOAD_THRESHOLD) loadOlderMessages(state.activeConvId);
     }
 
-    async function startChatWithFriend(friendId, triggerButton) {
-        if (!friendId) {
-            return;
-        }
-
-        if (triggerButton) {
-            triggerButton.disabled = true;
-        }
-
-        try {
-            var response = await fetch(buildUrl(urls.startFriendChatTemplate, friendId), {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": getCookie("csrftoken"),
-                    "X-Requested-With": "XMLHttpRequest"
-                }
-            });
-            var payload = await response.json();
-
-            if (!response.ok) {
-                window.alert(payload.error || "Khong the bat dau hoi thoai.");
-                return;
-            }
-
-            if (payload.conversation) {
-                mergeConversation(payload.conversation);
-            }
-
-            if (payload.conversation && Array.isArray(payload.messages)) {
-                state.messagesByConversation[payload.conversation.id] = payload.messages;
-                setActiveConversation(payload.conversation.id, { messages: payload.messages });
-            }
-
-            var candidate = state.friendCandidates.find(function (item) {
-                return item.id === friendId;
-            });
-            if (candidate && payload.conversation) {
-                candidate.conversation_id = payload.conversation.id;
-            }
-
-            renderFriendResults();
-        } catch (error) {
-            window.alert("Khong the bat dau hoi thoai.");
-        } finally {
-            if (triggerButton) {
-                triggerButton.disabled = false;
-            }
-        }
-    }
-
+    // ─── Event binding ────────────────────────────────────────────────────────
     function bindEvents() {
-        if (conversationFilterInputElement) {
-            conversationFilterInputElement.addEventListener("input", function (event) {
-                state.conversationFilterTerm = event.target.value || "";
-                renderConversationList();
+        if (elConvFilter) {
+            elConvFilter.addEventListener("input", function (e) {
+                state.convFilter = e.target.value || "";
+                renderConvList();
             });
         }
 
-        if (messageSearchInputElement) {
-            messageSearchInputElement.addEventListener("input", function (event) {
-                state.messageSearchTerm = event.target.value || "";
-                renderMessageList(false);
+        if (elFriendSearch) {
+            var friendTimer = null;
+            elFriendSearch.addEventListener("input", function (e) {
+                state.friendSearch = e.target.value || "";
+                clearTimeout(friendTimer);
+                friendTimer = setTimeout(searchFriends, 300);
             });
         }
 
-        if (friendSearchInputElement) {
-            var friendSearchTimer = null;
-            friendSearchInputElement.addEventListener("input", function (event) {
-                state.friendSearchTerm = event.target.value || "";
-                window.clearTimeout(friendSearchTimer);
-                friendSearchTimer = window.setTimeout(searchFriends, 250);
+        if (elConvList) {
+            elConvList.addEventListener("click", function (e) {
+                var item = e.target.closest(".chat-conv-item");
+                if (!item) return;
+                var id = toInt(item.dataset.id, null);
+                if (id) setActiveConv(id);
             });
         }
 
-        if (conversationListElement) {
-            conversationListElement.addEventListener("click", function (event) {
-                var item = event.target.closest(".chat-conversation-item");
-                if (!item) {
-                    return;
+        if (elForm) elForm.addEventListener("submit", sendMessage);
+
+        if (elInput) {
+            elInput.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    elForm && elForm.dispatchEvent(new Event("submit", { cancelable: true }));
                 }
-                var conversationId = toInteger(item.dataset.conversationId, null);
-                if (!conversationId) {
-                    return;
-                }
-                setActiveConversation(conversationId);
+            });
+            elInput.addEventListener("input", function () {
+                elInput.style.height = "auto";
+                elInput.style.height = Math.min(elInput.scrollHeight, 120) + "px";
             });
         }
 
-        if (composeFormElement) {
-            composeFormElement.addEventListener("submit", sendMessage);
-        }
+        if (elFiles) elFiles.addEventListener("change", renderFilesPreview);
 
-        if (attachmentsInputElement) {
-            attachmentsInputElement.addEventListener("change", renderAttachmentPreview);
-        }
+        if (elMsgList) {
+            elMsgList.addEventListener("scroll", function () {
+                updateStickToBottom();
+                maybeLoadOlder();
+            });
 
-        if (messageListElement) {
-            messageListElement.addEventListener("click", function (event) {
-                var toggleButton = event.target.closest(".chat-reaction-toggle");
-                if (toggleButton) {
-                    var parent = toggleButton.closest(".chat-reaction-actions");
-                    if (!parent) {
-                        return;
-                    }
-                    var picker = parent.querySelector(".chat-reaction-picker");
-                    if (!picker) {
-                        return;
-                    }
-
-                    var isVisible = picker.classList.contains("show");
-                    document.querySelectorAll(".chat-reaction-picker.show").forEach(function (item) {
-                        item.classList.remove("show");
+            elMsgList.addEventListener("click", function (e) {
+                var toggleBtn = e.target.closest(".chat-rxn-toggle");
+                if (toggleBtn) {
+                    var actions = toggleBtn.closest(".chat-rxn-actions");
+                    var picker = actions && actions.querySelector(".chat-rxn-picker");
+                    if (!picker) return;
+                    document.querySelectorAll(".chat-rxn-picker.show").forEach(function (p) {
+                        if (p !== picker) p.classList.remove("show");
                     });
-                    if (!isVisible) {
-                        picker.classList.add("show");
-                    }
+                    picker.classList.toggle("show");
+                    e.stopPropagation();
                     return;
                 }
 
-                var reactionButton = event.target.closest(".chat-reaction-option");
-                if (reactionButton) {
-                    var actions = reactionButton.closest(".chat-reaction-actions");
-                    var messageId = actions ? toInteger(actions.dataset.messageId, null) : null;
-                    var reactionType = reactionButton.dataset.reaction;
-                    if (messageId && reactionType) {
-                        toggleReaction(messageId, reactionType);
-                    }
-
-                    document.querySelectorAll(".chat-reaction-picker.show").forEach(function (item) {
-                        item.classList.remove("show");
-                    });
+                var rxnOpt = e.target.closest(".chat-rxn-opt");
+                if (rxnOpt) {
+                    var actions2 = rxnOpt.closest(".chat-rxn-actions");
+                    var msgId = actions2 ? toInt(actions2.dataset.msgId, null) : null;
+                    var rxn = rxnOpt.dataset.rxn;
+                    if (msgId && rxn) sendWs({ action: "toggle_reaction", message_id: msgId, reaction: rxn }, state.activeConvId);
+                    document.querySelectorAll(".chat-rxn-picker.show").forEach(function (p) { p.classList.remove("show"); });
+                    return;
                 }
             });
         }
 
-        if (friendSearchResultElement) {
-            friendSearchResultElement.addEventListener("click", function (event) {
-                var startButton = event.target.closest(".chat-start-btn");
-                if (!startButton) {
-                    return;
-                }
-                var friendId = toInteger(startButton.dataset.friendId, null);
-                if (!friendId) {
-                    return;
-                }
-                startChatWithFriend(friendId, startButton);
+        function bindFriendResultsClick(target) {
+            if (!target) return;
+            target.addEventListener("click", function (e) {
+                var btn = e.target.closest(".chat-start-btn");
+                if (!btn) return;
+                var friendId = toInt(btn.dataset.friendId, null);
+                if (friendId) startChatWithFriend(friendId, btn);
             });
         }
 
-        document.addEventListener("click", function (event) {
-            if (!event.target.closest(".chat-reaction-actions")) {
-                document.querySelectorAll(".chat-reaction-picker.show").forEach(function (item) {
-                    item.classList.remove("show");
-                });
+        bindFriendResultsClick(elFriendResults);
+        bindFriendResultsClick(elFriendResultsInline);
+
+        document.addEventListener("click", function (e) {
+            if (!e.target.closest(".chat-rxn-actions")) {
+                document.querySelectorAll(".chat-rxn-picker.show").forEach(function (p) { p.classList.remove("show"); });
             }
         });
 
         window.addEventListener("beforeunload", closeSocket);
+        window.addEventListener("resize", function () {
+            var prev = friendResultsTarget;
+            pickFriendResultsTarget();
+            if (prev !== friendResultsTarget) renderFriends();
+        });
     }
 
-    function initialize() {
-        renderConversationList();
-        renderFriendResults();
-        renderAttachmentPreview();
+    // ─── Init ─────────────────────────────────────────────────────────────────
+    function init() {
+        requestNotificationPermission();
+        pickFriendResultsTarget();
+        renderConvList();
+        renderFriends();
+        renderFilesPreview();
         bindEvents();
 
-        if (state.activeConversationId) {
-            var cachedMessages = state.messagesByConversation[state.activeConversationId];
-            if (Array.isArray(cachedMessages) && cachedMessages.length) {
-                setActiveConversation(state.activeConversationId, { messages: cachedMessages });
-                return;
+        // Refresh friend list to keep results current.
+        searchFriends();
+
+        if (state.activeConvId) {
+            var cached = state.msgsByConv[state.activeConvId];
+            if (Array.isArray(cached) && cached.length) {
+                setActiveConv(state.activeConvId, { messages: cached });
+            } else {
+                setActiveConv(state.activeConvId);
             }
-            setActiveConversation(state.activeConversationId);
             return;
         }
 
         if (state.conversations.length) {
-            setActiveConversation(state.conversations[0].id);
+            setActiveConv(state.conversations[0].id);
             return;
         }
 
-        renderActiveHeader();
-        renderMessageList(false);
+        renderHeader();
+        renderMsgList(false);
     }
 
-    initialize();
+    init();
 })();

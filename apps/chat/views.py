@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -22,6 +23,10 @@ from apps.chat.service import (
 	toggle_message_reaction,
 )
 from apps.friends.models import Friend
+
+
+INITIAL_MESSAGE_LIMIT = 30
+logger = logging.getLogger(__name__)
 
 
 def _validation_error_message(exc: ValidationError) -> str:
@@ -82,18 +87,30 @@ def _direct_conversation_map(user: User) -> dict[int, int]:
 
 
 def _search_friends_payload(user: User, query: str = "", limit: int = 20) -> list[dict]:
-	friend_query = Friend.objects.filter(user=user).select_related("friend", "friend__profile")
+	friend_query = Friend.objects.filter(Q(user=user) | Q(friend=user)).select_related(
+		"friend",
+		"friend__profile",
+		"user",
+		"user__profile",
+	)
 	if query:
 		friend_query = friend_query.filter(
-			Q(friend__username__icontains=query)
-			| Q(friend__email__icontains=query)
-			| Q(friend__profile__full_name__icontains=query)
+			Q(user=user, friend__username__icontains=query)
+			| Q(user=user, friend__email__icontains=query)
+			| Q(user=user, friend__profile__full_name__icontains=query)
+			| Q(friend=user, user__username__icontains=query)
+			| Q(friend=user, user__email__icontains=query)
+			| Q(friend=user, user__profile__full_name__icontains=query)
 		)
 
 	conversation_map = _direct_conversation_map(user)
 	results = []
-	for relation in friend_query.order_by("friend__username")[:limit]:
-		friend_user = relation.friend
+	seen_ids = set()
+	for relation in friend_query.order_by("id"):
+		friend_user = relation.friend if relation.user_id == user.id else relation.user
+		if not friend_user or friend_user.id in seen_ids:
+			continue
+		seen_ids.add(friend_user.id)
 		results.append(
 			{
 				"id": friend_user.id,
@@ -103,50 +120,84 @@ def _search_friends_payload(user: User, query: str = "", limit: int = 20) -> lis
 				"conversation_id": conversation_map.get(friend_user.id),
 			}
 		)
+		if limit and len(results) >= limit:
+			break
 
 	return results
 
 
+# @login_required
+# @require_GET
+# def chat_page_view(request):
+# 	conversations = list_conversations_for_user(request.user)
+# 	conversation_ids = {conversation["id"] for conversation in conversations}
+
+# 	active_conversation_id = None
+# 	requested_conversation_id = request.GET.get("conversation_id")
+# 	if requested_conversation_id:
+# 		try:
+# 			candidate_id = int(requested_conversation_id)
+# 			if candidate_id in conversation_ids:
+# 				active_conversation_id = candidate_id
+# 		except (TypeError, ValueError):
+# 			active_conversation_id = None
+
+# 	if active_conversation_id is None and conversations:
+# 		active_conversation_id = conversations[0]["id"]
+
+# 	# Bỏ qua hoàn toàn logic query get_messages_for_conversation để giảm tải DB
+# 	initial_messages = []
+
+# 	context = {
+# 		"initial_conversations": conversations,
+# 		"initial_active_conversation_id": active_conversation_id,
+# 		"initial_messages": initial_messages,
+# 		"initial_friend_candidates": _search_friends_payload(request.user, limit=20),
+# 		"ws_token": getattr(request, "_new_access_token", None) or request.COOKIES.get("access", ""),
+# 	}
+# 	return render(request, "chat/room.html", context)
 @login_required
 @require_GET
 def chat_page_view(request):
-	conversations = list_conversations_for_user(request.user)
-	conversation_ids = {conversation["id"] for conversation in conversations}
+    conversations = list_conversations_for_user(request.user)
+    conversation_ids = {conversation["id"] for conversation in conversations}
 
-	active_conversation_id = None
-	requested_conversation_id = request.GET.get("conversation_id")
-	if requested_conversation_id:
-		try:
-			candidate_id = int(requested_conversation_id)
-			if candidate_id in conversation_ids:
-				active_conversation_id = candidate_id
-		except (TypeError, ValueError):
-			active_conversation_id = None
+    active_conversation_id = None
+    requested_conversation_id = request.GET.get("conversation_id")
+    if requested_conversation_id:
+        try:
+            candidate_id = int(requested_conversation_id)
+            if candidate_id in conversation_ids:
+                active_conversation_id = candidate_id
+        except (TypeError, ValueError):
+            active_conversation_id = None
 
-	if active_conversation_id is None and conversations:
-		active_conversation_id = conversations[0]["id"]
+    if active_conversation_id is None and conversations:
+        active_conversation_id = conversations[0]["id"]
 
-	initial_messages = []
-	if active_conversation_id is not None:
-		conversation = Conversation.objects.filter(id=active_conversation_id).first()
-		if conversation:
-			try:
-				initial_messages, _ = get_messages_for_conversation(
-					request.user,
-					conversation,
-					limit=None,
-				)
-			except PermissionDenied:
-				initial_messages = []
+    # Tải tin nhắn mới nhất cho cuộc trò chuyện đang active
+    initial_messages = []
+    if active_conversation_id:
+        try:
+            conversation = Conversation.objects.get(id=active_conversation_id)
+            # Lấy 30 tin nhắn gần nhất, sắp xếp cũ -> mới
+            messages, _ = get_messages_for_conversation(
+                request.user,
+                conversation,
+                limit=INITIAL_MESSAGE_LIMIT,  # đã định nghĩa là 30
+            )
+            initial_messages = messages
+        except (Conversation.DoesNotExist, PermissionDenied):
+            pass
 
-	context = {
-		"initial_conversations": conversations,
-		"initial_active_conversation_id": active_conversation_id,
-		"initial_messages": initial_messages,
-		"initial_friend_candidates": _search_friends_payload(request.user, limit=20),
-		"ws_token": getattr(request, "_new_access_token", None) or request.COOKIES.get("access", ""),
-	}
-	return render(request, "chat/room.html", context)
+    context = {
+        "initial_conversations": conversations,
+        "initial_active_conversation_id": active_conversation_id,
+        "initial_messages": initial_messages,
+        "initial_friend_candidates": _search_friends_payload(request.user, limit=20),
+        "ws_token": getattr(request, "_new_access_token", None) or request.COOKIES.get("access", ""),
+    }
+    return render(request, "chat/room.html", context)
 
 
 @login_required
@@ -205,6 +256,25 @@ def list_messages_view(request, conversation_id):
 def search_friends_view(request):
 	query = (request.GET.get("q") or "").strip()
 	results = _search_friends_payload(request.user, query=query, limit=20)
+	# Debug output to help trace friend search behavior.
+	try:
+		total_friends = (
+			Friend.objects.filter(Q(user=request.user) | Q(friend=request.user))
+			.values_list("user_id", "friend_id")
+			.distinct()
+			.count()
+		)
+		matched_usernames = [item.get("username") for item in results]
+		logger.info(
+			"chat.search_friends user_id=%s query=%s total_friends=%s matches=%s usernames=%s",
+			request.user.id,
+			query,
+			total_friends,
+			len(results),
+			matched_usernames,
+		)
+	except Exception:
+		logger.exception("chat.search_friends debug logging failed")
 	return JsonResponse({"results": results}, status=200)
 
 
@@ -215,7 +285,10 @@ def start_chat_with_friend_view(request, friend_id):
 	if friend_user.pk == request.user.pk:
 		return JsonResponse({"error": "Cannot create chat with yourself."}, status=400)
 
-	is_friend = Friend.objects.filter(user=request.user, friend=friend_user).exists()
+	is_friend = Friend.objects.filter(
+		Q(user=request.user, friend=friend_user)
+		| Q(user=friend_user, friend=request.user)
+	).exists()
 	if not is_friend:
 		return JsonResponse({"error": "You can only start chat with your friends."}, status=403)
 
@@ -223,7 +296,7 @@ def start_chat_with_friend_view(request, friend_id):
 	messages, unread_count = get_messages_for_conversation(
 		request.user,
 		conversation,
-		limit=None,
+		limit=INITIAL_MESSAGE_LIMIT,
 	)
 
 	conversation_payload = None
@@ -248,7 +321,7 @@ def start_chat_with_friend_view(request, friend_id):
 			"unread_count": unread_count,
 			"last_message": None,
 		}
-
+	
 	return JsonResponse(
 		{
 			"conversation": conversation_payload,

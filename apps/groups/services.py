@@ -260,6 +260,89 @@ class GroupService:
             return True, "Xử lý thành công."
         except GroupMember.DoesNotExist:
             return False, "Không tìm thấy yêu cầu này."
+        
+    @staticmethod
+    def report_content(group, reporter, reason, post_id=None, comment_id=None):
+        """Hàm tạo báo cáo mới cho Post hoặc Comment"""
+        if not post_id and not comment_id:
+            return False, "Phải báo cáo một bài viết hoặc bình luận cụ thể."
+        
+        """Hàm tạo báo cáo với kiểm tra bảo vệ Owner"""
+        target_user = None
+        if post_id:
+            from apps.posts.models import Post
+            post = get_object_or_404(Post, id=post_id)
+            target_user = post.author
+        elif comment_id:
+            from apps.posts.models import Comment
+            comment = get_object_or_404(Comment, id=comment_id)
+            target_user = comment.user
+
+        # QUY TẮC 1: Không thể báo cáo Owner
+        if target_user == group.owner:
+            return False, "Bạn không thể báo cáo Chủ sở hữu nhóm."
+        
+        # Đảm bảo tuân thủ CheckConstraint (chỉ post hoặc comment)
+        report = GroupReport.objects.create(
+            group=group,
+            reporter=reporter,
+            post_id=post_id,
+            comment_id=comment_id,
+            reason=reason,
+            status='pending'
+        )
+        return True, "Cảm ơn bạn! Báo cáo đã được gửi tới quản trị viên."
+    
+    @staticmethod
+    def resolve_report(request_user, group, report_id, action_type):
+        """
+        Xử lý báo cáo với các hành động:
+        - 'dismiss': Bỏ qua báo cáo
+        - 'delete_content': Xóa nội dung bị báo cáo
+        - 'delete_and_remove': Xóa nội dung + Xóa thành viên khỏi nhóm
+        - 'delete_and_ban': Xóa nội dung + Chặn thành viên vĩnh viễn
+        """
+        if not GroupService.can_manage_group(request_user, group):
+            return False, "Bạn không có quyền xử lý báo cáo."
+
+        report = get_object_or_404(GroupReport, id=report_id, group=group)
+        # Lấy vai trò của người bị báo cáo
+        target_user = report.post.author if report.post else report.comment.user
+        target_role = GroupService.get_user_role(target_user, group)
+        request_role = GroupService.get_user_role(request_user, group)
+        
+        if target_role == GroupRole.ADMIN and request_role != GroupRole.OWNER:
+            return False, "Chỉ Chủ sở hữu mới có quyền xử lý báo cáo nhắm vào Quản trị viên."
+        # Xác định đối tượng bị báo cáo (Post hoặc Comment)
+        if report.post:
+            target_author = report.post.author
+        elif report.comment:
+            target_author = report.comment.user
+
+        # 1. Thực hiện hành động xóa nội dung nếu yêu cầu
+        if action_type in ['delete_content', 'delete_and_remove', 'delete_and_ban']:
+            if report.post:
+                # Gọi service xóa bài viết (đã có trong code của bạn)
+                report.post.is_deleted = True 
+                report.post.save()
+            elif report.comment:
+                report.comment.is_deleted = True
+                report.comment.save()
+
+        # 2. Thực hiện hành động với thành viên
+        if action_type == 'delete_and_remove' and target_author:
+            GroupMemberService.remove_member(request_user, group, target_author.id)
+        
+        elif action_type == 'delete_and_ban' and target_author:
+            membership = GroupMember.objects.filter(group=group, user=target_author).first()
+            if membership:
+                GroupMemberService.ban_member(request_user, membership)
+
+        # 3. Cập nhật trạng thái báo cáo
+        report.status = 'resolved' if action_type != 'dismiss' else 'rejected'
+        report.save()
+        
+        return True, "Đã xử lý báo cáo thành công."
     
 class GroupMemberService:
     @staticmethod

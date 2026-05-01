@@ -103,3 +103,51 @@ sequenceDiagram
 ## 8. Relative time realtime (UI)
 - Các timestamp có `data-time-iso` + class `js-relative-time`.
 - Script global cập nhật định kỳ 60 giây để thời gian tự tăng.
+
+## 9. Chat realtime (WebSocket)
+
+### Endpoint & Auth
+- WebSocket: `/ws/chat/<conversation_id>/`
+- Auth: JWT từ cookie `access/refresh` hoặc `?token=` (client lấy từ `data-ws-token`).
+
+### Luồng tổng quan
+```mermaid
+sequenceDiagram
+    participant UI as Browser (Chat UI)
+    participant HTTP as Django HTTP View
+    participant WS as ChatConsumer (WebSocket)
+    participant CL as Channel Layer (Redis/InMemory)
+    participant DB as MySQL
+
+    UI->>HTTP: GET /chat/
+    HTTP->>DB: load conversations + messages ban đầu
+    HTTP-->>UI: render chat page + wsToken
+
+    UI->>WS: WS connect /ws/chat/<conversation_id>/?token=...
+    WS->>DB: verify participant & auth
+    WS-->>UI: accept connection
+
+    UI->>WS: action=send_message (content, attachments_base64)
+    WS->>DB: create message
+    WS->>CL: group_send chat_event(message_new)
+    CL-->>WS: fanout to members
+    WS-->>UI: event=message_new
+
+    UI->>WS: action=mark_read
+    WS->>DB: update last_read_at
+    WS->>CL: group_send chat_event(conversation_read)
+    CL-->>WS: fanout to members
+    WS-->>UI: event=conversation_read
+
+    UI->>WS: action=toggle_reaction
+    WS->>DB: upsert/remove reaction
+    WS->>CL: group_send chat_event(message_reaction)
+    CL-->>WS: fanout to members
+    WS-->>UI: event=message_reaction
+```
+
+- Event & Action
+  - Client -> WS action: send_message, mark_read, toggle_reaction.
+  - Server -> Client event: message_new, conversation_read, message_reaction, error.
+- Group naming
+  - Mỗi conversation dùng group: chat_conversation_<conversation_id>.
