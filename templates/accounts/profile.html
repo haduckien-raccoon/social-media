@@ -585,7 +585,7 @@ function blockUser(){
 
     const userId = blockBtn.dataset.user;
 
-        fetch(`/friends/block/${userId}/`, {
+        fetch(`/accounts/block/${userId}/`, {
             method: "POST",
             headers: {
                 "X-CSRFToken": getCSRFToken()

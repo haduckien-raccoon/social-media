@@ -497,6 +497,55 @@
         color:#1877f2;
         font-size:18px;
     }
+
+    /* =========================================
+       7. RESPONSIVE (MOBILE)
+       ========================================= */
+    @media (max-width: 768px) {
+        .main-content { margin-left: 72px !important; padding: 16px 10px; }
+        .detail-container { max-width: 100%; margin: 12px auto; padding: 0 8px 60px; }
+        .fb-card { border-radius: 10px; }
+        .post-header { padding: 12px; gap: 10px; }
+        .post-content { padding: 6px 12px 12px; font-size: 15px; }
+        .post-stats { padding: 8px 12px; font-size: 13px; flex-direction: column; gap: 6px; align-items: flex-start; }
+        .post-actions { padding: 4px 8px; gap: 6px; flex-wrap: wrap; }
+        .action-btn { height: 40px; font-size: 13px; gap: 6px; }
+        .reaction-popup { left: 0; }
+
+        .grid-1 { max-height: 360px; }
+        .grid-2, .grid-3, .grid-4 { height: auto; }
+        .grid-2 .img-wrapper, .grid-3 .img-wrapper, .grid-4 .img-wrapper { aspect-ratio: 1 / 1; }
+
+        .shared-post-container { margin: 0 12px 12px; }
+        .comments-wrapper { padding: 10px 12px; }
+        .comment-input-area { gap: 8px; }
+        .input-bubble { padding: 6px 12px; }
+        .input-actions { gap: 10px; }
+        .comment-meta { flex-wrap: wrap; gap: 8px; }
+        .comment-text-content { font-size: 14px; }
+        .comment-item { padding-left: clamp(0px, 4vw, 16px) !important; }
+
+        .file-item { padding: 10px 12px; gap: 10px; }
+        .file-name { white-space: normal; }
+
+        .modal-box { max-width: 94vw; border-radius: 12px; }
+        .lightbox-nav { width: 42px; height: 42px; font-size: 20px; }
+        .nav-prev { left: 12px; }
+        .nav-next { right: 12px; }
+        .lightbox-close { right: 16px; font-size: 34px; }
+    }
+
+    @media (max-width: 480px) {
+        .main-content { margin-left: 0 !important; padding: 12px 8px; }
+        .detail-container { padding: 0 4px 56px; }
+        .post-header { flex-direction: column; align-items: flex-start; }
+        .btn-options { align-self: flex-end; }
+        .post-stats { gap: 4px; }
+        .action-btn { flex: 1 1 calc(50% - 6px); }
+        .reaction-popup { left: 0; transform: translateY(-6px); }
+        .comment-meta { font-size: 11px; }
+        .thread-line { left: -10px; }
+    }
 </style>
 {% endblock %}
 
@@ -507,11 +556,11 @@
         
         <div class="post-header">
             <div class="header-left">
-                <a href="{% url 'accounts:profile' post.author.username %}">
+                <a href="{% url 'accounts:profile-username' post.author.username %}">
                     <img src="{{ post.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="post-avatar">
                 </a>
                 <div class="post-info">
-                    <h4><a href="{% url 'accounts:profile' post.author.username %}">{{ post.author.username }}</a></h4>
+                    <h4><a href="{% url 'accounts:profile-username' post.author.username %}">{{ post.author.username }}</a></h4>
                     <div class="post-time">
                         <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span> • 
                         {% if post.privacy == 'public' %}<i class="fas fa-globe-americas"></i>
@@ -548,12 +597,12 @@
         {% if original_post %}
         <div class="shared-post-container" onclick="window.location.href='{% url 'posts:post_detail' original_post.id %}'">
             <div class="shared-header">
-                <a href="{% url 'accounts:profile' original_post.author.username %}" onclick="event.stopPropagation();">
+                <a href="{% url 'accounts:profile-username' original_post.author.username %}" onclick="event.stopPropagation();">
                     <img src="{{ original_post.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="shared-avatar">
                 </a>
                 <div>
                     <div class="shared-info">
-                        <a href="{% url 'accounts:profile' original_post.author.username %}" onclick="event.stopPropagation();">{{ original_post.author.username }}</a>
+                        <a href="{% url 'accounts:profile-username' original_post.author.username %}" onclick="event.stopPropagation();">{{ original_post.author.username }}</a>
                     </div>
                     <div class="shared-time js-relative-time" data-time-iso="{{ original_post.created_at|date:'c' }}" style="font-size: 12px; color: #65676b;">{{ original_post.created_at|timesince }} trước</div>
                 </div>
@@ -728,13 +777,13 @@
                         <div class="d-flex position-relative w-100">
                             {% if comment.level > 1 %}<div class="thread-line"></div>{% endif %}
                             
-                            <a href="{% url 'accounts:profile' comment.user.username %}">
+                            <a href="{% url 'accounts:profile-username' comment.user.username %}">
                                 <img src="https://ui-avatars.com/api/?name={{ comment.user.username }}&background=random" class="my-avatar" style="width: 32px; height: 32px;">
                             </a>
                             
                             <div style="flex: 1;">
                                 <div class="comment-bubble">
-                                    <a href="{% url 'accounts:profile' comment.user.username %}" class="comment-author-name">{{ comment.user.username }}</a>
+                                    <a href="{% url 'accounts:profile-username' comment.user.username %}" class="comment-author-name">{{ comment.user.username }}</a>
                                     <div class="comment-text-content">{{ comment.content }}</div>
                                     {% if comment.images.all %}
                                         {% for img in comment.images.all %}<img src="{{ img.image.url }}" class="comment-img-preview" style="max-height: 120px; display: block; margin-top: 8px; border-radius: 8px;">{% endfor %}

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings • SUDO</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --gradient-start: #f58529; --gradient-end: #dd2a7b;
+    --bg-light: #fafafa; --text-dark: #262626; --text-grey: #8e8e8e;
+    --border-color: #dbdbdb; --btn-primary: #e1306c; --shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+html, body { height:100%; width:100%; overflow-x:hidden; background:var(--bg-light); display:flex; }
+
+/* Sidebar icons */
+.icon-sidebar { width:60px; background:linear-gradient(180deg,var(--gradient-start),var(--gradient-end)); display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:20px 0; flex-shrink:0; }
+.logo-circle { width:45px; height:45px; border-radius:50%; background:#fff; color:var(--btn-primary); font-weight:bold; font-size:22px; display:flex; align-items:center; justify-content:center; margin-bottom:30px; font-family:serif; }
+.nav-icons { display:flex; flex-direction:column; gap:25px; flex-grow:1; margin-top:15px; }
+.nav-icon { color:#fff; font-size:22px; cursor:pointer; transition:0.3s; }
+.nav-icon:hover { opacity:0.7; }
+.settings-icon-bottom { background:var(--btn-primary); color:#fff; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:var(--shadow); }
+
+/* Sidebar menu */
+.menu-sidebar { width:240px; background:#fff; padding:30px 20px; border-right:1px solid var(--border-color); display:flex; flex-direction:column; flex-shrink:0; }
+.back-link { display:flex; align-items:center; color:var(--text-dark); text-decoration:none; font-weight:600; margin-bottom:25px; font-size:16px; }
+.back-link i { margin-right:8px; font-size:14px; }
+.menu-list { list-style:none; flex-grow:1; margin-top:10px; }
+.menu-item { margin-bottom:18px; display:flex; align-items:center; color:var(--text-grey); font-size:16px; cursor:pointer; transition:0.2s; padding:8px 12px; border-radius:6px; }
+.menu-item i { margin-right:10px; width:18px; text-align:center; }
+.menu-item.active { color:var(--text-dark); font-weight:600; background-color:#f8f9fa; }
+.menu-item.active i { color:var(--btn-primary); }
+.menu-item:hover { background-color:#f8f9fa; }
+
+/* Main content */
+.main-content { flex:1; background:#fff; padding:40px; display:flex; flex-direction:column; align-items:center; min-width:0; overflow-y:auto; }
+.header-area { width:100%; max-width: 800px; margin-bottom:35px; }
+.page-title { font-size:28px; font-weight:700; color:var(--text-dark); }
+
+/* Settings Cards */
+.settings-grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 800px; }
+.setting-card { display: flex; align-items: center; padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; background: #fff; text-decoration: none; color: var(--text-dark); transition: all 0.3s ease; }
+.setting-card:hover { border-color: var(--text-grey); box-shadow: var(--shadow); transform: translateY(-2px); }
+.setting-icon { width: 50px; height: 50px; border-radius: 50%; background: #f8f9fa; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--text-dark); margin-right: 20px; }
+.setting-info h3 { font-size: 16px; margin-bottom: 4px; }
+.setting-info p { font-size: 14px; color: var(--text-grey); }
+.setting-card.danger:hover { border-color: #ff4d4f; }
+.setting-card.danger .setting-icon { color: #ff4d4f; background: #fff1f0; }
+
+@media (max-width:768px) {
+    body { flex-direction:column; }
+    .icon-sidebar, .menu-sidebar { width:100%; flex-direction:row; padding:12px; border-right:none; border-bottom:1px solid var(--border-color); }
+    .nav-icons { flex-direction:row; justify-content:center; }
+}
+</style>
+</head>
+<body>
+
+<aside class="icon-sidebar">
+    <div class="logo-circle">SD</div>
+    <div class="nav-icons">
+        <a href="/" class="nav-icon"><i class="fa-solid fa-house"></i></a>
+        <a href="/notifications" class="nav-icon"><i class="fa-regular fa-bell"></i></a>
+        <i class="fa-regular fa-user nav-icon" onclick="location.href='{% url 'accounts:profile' %}'"></i>
+    </div>
+    <div class="settings-icon-bottom"><i class="fa-solid fa-gear"></i></div>
+</aside>
+
+<aside class="menu-sidebar">
+    <a href="{% url 'accounts:profile' %}" class="back-link"><i class="fa-solid fa-chevron-left"></i> My Profile</a>
+    <h2 style="margin-bottom:15px; font-size:18px;">Settings</h2>
+    <ul class="menu-list">
+        <li class="menu-item" onclick="location.href='{% url 'accounts:edit_profile' %}'"><i class="fa-solid fa-pen"></i> Edit profile</li>
+        <li class="menu-item" onclick="location.href='{% url 'accounts:update_email' %}'"><i class="fa-solid fa-envelope"></i> Update Email</li>
+        <li class="menu-item" onclick="location.href='{% url 'accounts:update_username' %}'"><i class="fa-solid fa-at"></i> Update Username</li>
+        <li class="menu-item" onclick="location.href='{% url 'accounts:update_password' %}'"><i class="fa-solid fa-key"></i> Update Password</li>
+        <li class="menu-item active" onclick="location.href='{% url 'accounts:settings' %}'"><i class="fa-regular fa-circle-question"></i> Settings</li>
+    </ul>
+</aside>
+
+<main class="main-content">
+    <div class="header-area">
+        <h1 class="page-title">Cài đặt</h1>
+    </div>
+
+    <div class="settings-grid">
+        <a href="{% url 'accounts:edit_profile' %}" class="setting-card">
+            <div class="setting-icon"><i class="fa-solid fa-user-pen"></i></div>
+            <div class="setting-info">
+                <h3>Chỉnh sửa trang cá nhân</h3>
+                <p>Cập nhật tên, tiểu sử và thông tin cá nhân của bạn</p>
+            </div>
+        </a>
+
+        <a href="{% url 'accounts:blocked_users' %}" class="setting-card danger">
+            <div class="setting-icon"><i class="fa-solid fa-ban"></i></div>
+            <div class="setting-info">
+                <h3>Người dùng đã chặn</h3>
+                <p>Quản lý danh sách và bỏ chặn người dùng</p>
+            </div>
+        </a>
+    </div>
+</main>
+
+</body>
+</html>

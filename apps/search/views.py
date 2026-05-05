@@ -63,6 +63,10 @@ def api_search_users(request):
     
     # Lấy QuerySet
     users_qs = User.objects.filter(search_query).exclude(id=request.user.id)
+
+    #Nếu bị chặn thì không hiện ra kết quả
+
+    users_qs = filter_blocked_users(users_qs, request.user)
     
     # Xử lý giới hạn số lượng
     if limit != 'all':

@@ -1,5 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse, Http404
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
@@ -8,9 +12,11 @@ import jwt
 from apps.middleware.utils import generate_jwt_pair_for_user
 from django.contrib import messages
 from .models import User, PasswordResetToken, EmailVerificationToken, UserProfile
+from apps.friends.models import *
 from .services import *
 from apps.accounts.services import *
 from apps.posts.services import *
+from apps.friends.services import *
 
 @csrf_exempt
 def register_view(request):
@@ -176,6 +182,18 @@ def profile_view(request, id=None, username=None):
             user = get_object_or_404(User, username=username)
         else:
             user = current_user
+
+        # =================================================================
+        # THÊM LOGIC CHECK BLOCK: Nếu có chặn nhau thì báo không tìm thấy
+        # =================================================================
+        if user != current_user:
+            # Lấy trạng thái chặn từ hàm trong services
+            block_status = get_block_status(current_user, user)
+            
+            # Nếu không phải là "not_blocked", nghĩa là đang chặn hoặc bị chặn
+            if block_status != "not_blocked":
+                raise Http404("Trang này không khả dụng hoặc người dùng không tồn tại.")
+        # =================================================================
 
         # posts + friends
         if user == current_user:
@@ -422,5 +440,111 @@ def update_password_view(request):
             "profile": profile,
             "messages": ["Please provide both old and new passwords."]
         })
+    except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
+        return redirect("accounts:login")
+    
+#View Block User in templates/accounts/block.html
+@csrf_exempt
+def blocked_users_view(request):
+    access_token = request.COOKIES.get("access")
+    if not access_token:
+        return redirect("accounts:login")
+
+    try:
+        payload = jwt.decode(
+            access_token,
+            settings.SECRET_KEY,
+            algorithms=["HS256"]
+        )
+        current_user_id = payload.get("user_id")
+        current_user = User.objects.get(id=current_user_id)
+        blocked_users = get_list_blocked_users(current_user)
+
+        return render(request, "accounts/blocked_users.html", {
+            "current_user": current_user,
+            "blocked_users": blocked_users
+        })
+
+    except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
+        return redirect("accounts:login")
+    
+@csrf_exempt
+def block_user_view(request, user_id):
+    access_token = request.COOKIES.get("access")
+    if not access_token:
+        return redirect("accounts:login")
+
+    try:
+        payload = jwt.decode(
+            access_token,
+            settings.SECRET_KEY,
+            algorithms=["HS256"]
+        )
+        current_user_id = payload.get("user_id")
+        current_user = User.objects.get(id=current_user_id)
+        target_user = get_object_or_404(User, id=user_id)
+
+        if request.method == "POST":
+            block_user(current_user, target_user)
+            return redirect("accounts:profile-other", id=target_user.id)
+
+        return render(request, "accounts/blocked_users.html", {
+            "current_user": current_user,
+            "target_user": target_user
+        })
+
+    except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
+        return redirect("accounts:login")
+    
+@csrf_exempt
+def unblock_user_view(request, user_id):
+    access_token = request.COOKIES.get("access")
+    if not access_token:
+        # Trả về JSON lỗi 401 để file JS bắt được và tự động chuyển về trang đăng nhập
+        return JsonResponse({"status": "error", "message": "Unauthorized"}, status=401)
+
+    try:
+        payload = jwt.decode(
+            access_token,
+            settings.SECRET_KEY,
+            algorithms=["HS256"]
+        )
+        current_user_id = payload.get("user_id")
+        current_user = User.objects.get(id=current_user_id)
+        target_user = get_object_or_404(User, id=user_id)
+
+        if request.method == "POST":
+            # Gọi hàm xử lý bỏ chặn trong services[cite: 10, 11]
+            unblock_user(current_user, target_user)
+            # Trả về JSON báo thành công cho Javascript xử lý ẩn thẻ trên màn hình
+            return JsonResponse({"status": "success", "message": "Đã bỏ chặn người dùng"})
+
+        # (Tùy chọn) Nếu lỡ ai đó gõ thẳng link lên thanh địa chỉ (GET request)
+        return redirect("accounts:profile", id=target_user.id)
+
+    except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
+        return JsonResponse({"status": "error", "message": "Unauthorized"}, status=401)
+    
+@csrf_exempt
+def settings_page_view(request):
+    access_token = request.COOKIES.get("access")
+    if not access_token:
+        return redirect("accounts:login")
+
+    try:
+        payload = jwt.decode(
+            access_token,
+            settings.SECRET_KEY,
+            algorithms=["HS256"]
+        )
+        user_id = payload.get("user_id")
+        user = User.objects.get(id=user_id)
+        profile = get_object_or_404(UserProfile, user=user)
+
+        return render(request, "accounts/settings.html", {
+            "user": user,
+            "profile": profile
+        })
+
     except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
         return redirect("accounts:login")
