@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blocked Users • SUDO</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* Sử dụng lại CSS base giống hệt settings.html để đồng bộ layout */
+:root {
+    --gradient-start: #f58529; --gradient-end: #dd2a7b;
+    --bg-light: #fafafa; --text-dark: #262626; --text-grey: #8e8e8e;
+    --border-color: #dbdbdb; --btn-primary: #e1306c; --shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+html, body { height:100%; width:100%; overflow-x:hidden; background:var(--bg-light); display:flex; }
+
+/* Sidebar icons & menu */
+.icon-sidebar { width:60px; background:linear-gradient(180deg,var(--gradient-start),var(--gradient-end)); display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:20px 0; flex-shrink:0; }
+.logo-circle { width:45px; height:45px; border-radius:50%; background:#fff; color:var(--btn-primary); font-weight:bold; font-size:22px; display:flex; align-items:center; justify-content:center; margin-bottom:30px; font-family:serif; }
+.nav-icons { display:flex; flex-direction:column; gap:25px; flex-grow:1; margin-top:15px; }
+.nav-icon { color:#fff; font-size:22px; cursor:pointer; transition:0.3s; }
+.nav-icon:hover { opacity:0.7; }
+.settings-icon-bottom { background:var(--btn-primary); color:#fff; width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:var(--shadow); }
+
+.menu-sidebar { width:240px; background:#fff; padding:30px 20px; border-right:1px solid var(--border-color); display:flex; flex-direction:column; flex-shrink:0; }
+.back-link { display:flex; align-items:center; color:var(--text-dark); text-decoration:none; font-weight:600; margin-bottom:25px; font-size:16px; }
+.back-link i { margin-right:8px; font-size:14px; }
+.menu-list { list-style:none; flex-grow:1; margin-top:10px; }
+.menu-item { margin-bottom:18px; display:flex; align-items:center; color:var(--text-grey); font-size:16px; cursor:pointer; transition:0.2s; padding:8px 12px; border-radius:6px; }
+.menu-item i { margin-right:10px; width:18px; text-align:center; }
+.menu-item.active { color:var(--text-dark); font-weight:600; background-color:#f8f9fa; }
+.menu-item.active i { color:var(--btn-primary); }
+.menu-item:hover { background-color:#f8f9fa; }
+
+/* Main content */
+.main-content { flex:1; background:#fff; padding:40px; display:flex; flex-direction:column; align-items:center; min-width:0; overflow-y:auto; }
+.header-area { width:100%; max-width:800px; margin-bottom:35px; }
+.page-title { font-size:28px; font-weight:700; color:var(--text-dark); }
+
+/* Blocked List UI */
+.blocked-container { width: 100%; max-width: 800px; background: #fff; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+.blocked-user-row { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--border-color); transition: opacity 0.3s ease; }
+.blocked-user-row:last-child { border-bottom: none; }
+.user-info { display: flex; align-items: center; gap: 15px; }
+.small-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid #efefef; }
+.user-details { display: flex; flex-direction: column; }
+.user-name { font-weight: 600; font-size: 15px; color: var(--text-dark); }
+.user-full-name { font-size: 14px; color: var(--text-grey); margin-top: 2px; }
+
+/* Unblock Button */
+.btn-unblock { background: #efefef; color: var(--text-dark); font-weight: 600; padding: 8px 16px; border-radius: 8px; font-size: 14px; border: none; cursor: pointer; transition: 0.2s; }
+.btn-unblock:hover { background: #dbdbdb; }
+.empty-state { padding: 40px; text-align: center; color: var(--text-grey); font-size: 15px; }
+
+@media (max-width:768px) {
+    body { flex-direction:column; }
+    .icon-sidebar, .menu-sidebar { width:100%; flex-direction:row; padding:12px; border-right:none; border-bottom:1px solid var(--border-color); }
+    .nav-icons { flex-direction:row; justify-content:center; }
+}
+</style>
+</head>
+<body>
+
+<aside class="icon-sidebar">
+    <div class="logo-circle">SD</div>
+    <div class="nav-icons">
+        <a href="/" class="nav-icon"><i class="fa-solid fa-house"></i></a>
+        <a href="/notifications" class="nav-icon"><i class="fa-regular fa-bell"></i></a>
+        <i class="fa-regular fa-user nav-icon" onclick="location.href='{% url 'accounts:profile' %}'"></i>
+    </div>
+    <div class="settings-icon-bottom" onclick="location.href='{% url 'accounts:settings' %}'"><i class="fa-solid fa-gear"></i></div>
+</aside>
+
+<aside class="menu-sidebar">
+    <a href="{% url 'accounts:settings' %}" class="back-link"><i class="fa-solid fa-chevron-left"></i> Cài đặt</a>
+    <h2 style="margin-bottom:15px; font-size:18px;">Người dùng đã chặn</h2>
+    <ul class="menu-list">
+        <li class="menu-item active"><i class="fa-solid fa-ban"></i> Danh sách chặn</li>
+    </ul>
+</aside>
+
+<main class="main-content">
+    <div class="header-area">
+        <h1 class="page-title">Người dùng đã chặn</h1>
+    </div>
+
+    <div class="blocked-container">
+        <!-- Vòng lặp lấy danh sách user bị chặn, with target hỗ trợ cả list Object Block và Object User -->
+        {% for item in blocked_users %}
+            {% with target=item.blocked|default:item %}
+            <div class="blocked-user-row">
+                <div class="user-info">
+                    <img src="{{ target.profile.avatar.url|default:'/avatars/normal.jpg' }}" alt="Avatar" class="small-avatar">
+                    <div class="user-details">
+                        <span class="user-name">{{ target.username }}</span>
+                        <span class="user-full-name">{{ target.profile.full_name }}</span>
+                    </div>
+                </div>
+                <!-- Nút Unblock gọi API -->
+                <button class="btn-unblock unblock-btn" data-user="{{ target.id }}">Bỏ chặn</button>
+            </div>
+            {% endwith %}
+        {% empty %}
+            <div class="empty-state">
+                <i class="fa-solid fa-user-shield" style="font-size: 30px; margin-bottom: 10px; color: #dbdbdb;"></i><br>
+                Bạn chưa chặn người dùng nào.
+            </div>
+        {% endfor %}
+    </div>
+</main>
+
+<script>
+    // Hàm lấy CSRF Token từ Cookie
+    function getCSRFToken() {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 10) === "csrftoken=") {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Gắn sự kiện click cho các nút Bỏ chặn
+    document.querySelectorAll('.unblock-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = this.dataset.user;
+            const row = this.closest('.blocked-user-row');
+            
+            // Đổi nút thành trạng thái đang xử lý
+            this.innerText = "Đang xử lý...";
+            this.style.opacity = '0.5';
+            this.disabled = true;
+
+            fetch(`/accounts/unblock/${userId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken(),
+                    "X-Requested-With": "XMLHttpRequest" // báo cho backend biết đây là AJAX
+                }
+            })
+            .then(res => {
+                if(res.status === 401 || res.status === 403) {
+                    alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+                    window.location.href = "/accounts/login/";
+                    return;
+                }
+                // Nếu thành công (hoặc backend tự redirect), mình tự ẩn row bên giao diện cho mượt
+                row.style.opacity = '0';
+                setTimeout(() => row.remove(), 300);
+            })
+            .catch(err => {
+                console.error(err);
+                this.innerText = "Lỗi!";
+                this.style.opacity = '1';
+                this.disabled = false;
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

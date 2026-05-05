@@ -2,12 +2,12 @@
 <div class="post-card" id="post-{{ post.id }}">
     <div class="post-header">
         <div class="header-left">
-            <a href="{% url 'accounts:profile' post.author.username %}">
+            <a href="{% url 'accounts:profile-username' post.author.username %}">
                 <img src="{{ post.author.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}" class="p-avatar">
             </a>
             <div class="p-info">
                 <h5>
-                    <a href="{% url 'accounts:profile' post.author.username %}">{{ post.author.username }}</a>
+                    <a href="{% url 'accounts:profile-username' post.author.username %}">{{ post.author.username }}</a>
                 </h5>
                 <div class="p-time">
                     <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span> • 

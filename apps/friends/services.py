@@ -1,6 +1,6 @@
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Exists, OuterRef
 # from django.contrib.auth import get_user_model
-from .models import FriendRequest, Friend
+from .models import *
 from apps.accounts.models import User
 from apps.notifications.services import create_notification
 
@@ -98,6 +98,9 @@ def get_friend_suggestions(user, limit=10):
         for r in random_users:
             r.mutual_count = 0
             suggestion_users.append(r)
+    
+    #dùng filter để lọc qua các user đã bị block bởi mình hoặc đã block mình
+    suggestion_users = filter_blocked_users(User.objects.filter(id__in=[u.id for u in suggestion_users]), user)
 
     return suggestion_users
 
@@ -217,3 +220,53 @@ def get_friend_status_detail(user, target_user):
         }
 
     return {"status": "none"}
+
+def get_block_status(user, target_user):
+    if Block.objects.filter(blocker=user, blocked=target_user).exists():
+        return "blocked_by_me"
+    if Block.objects.filter(blocker=target_user, blocked=user).exists():
+        return "blocked_by_them"
+    return "not_blocked"
+
+def block_user(blocker, blocked):
+    if blocker == blocked: return False, "Cannot block yourself."
+    if get_block_status(blocker, blocked) == "blocked_by_me": return False, "Already blocked."
+
+    # Xóa bạn bè nếu có
+    unfriend_user(blocker, blocked)
+
+    # Xóa tất cả request liên quan
+    FriendRequest.objects.filter(
+        Q(from_user=blocker, to_user=blocked) | Q(from_user=blocked, to_user=blocker)
+    ).delete()
+
+    Block.objects.get_or_create(blocker=blocker, blocked=blocked)
+    return True, "User blocked."
+
+def unblock_user(blocker, blocked):
+    if get_block_status(blocker, blocked) != "blocked_by_me": return False, "User not blocked."
+    Block.objects.filter(blocker=blocker, blocked=blocked).delete()
+    return True, "User unblocked."
+
+def filter_blocked_users(queryset, current_user):
+    blocked_by_me = Block.objects.filter(
+        blocker=current_user,
+        blocked=OuterRef("pk")
+    )
+
+    blocked_me = Block.objects.filter(
+        blocked=current_user,
+        blocker=OuterRef("pk")
+    )
+
+    return queryset.annotate(
+        is_blocked_by_me=Exists(blocked_by_me),
+        is_blocked_me=Exists(blocked_me),
+    ).filter(
+        is_blocked_by_me=False,
+        is_blocked_me=False
+    )
+    
+def get_list_blocked_users(user):
+    blocked = Block.objects.filter(blocker=user).select_related('blocked')
+    return [b.blocked for b in blocked] 
