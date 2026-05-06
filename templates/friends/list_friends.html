@@ -45,10 +45,10 @@
             <a href="{% url 'friends:index' %}" class="see-all">Back to Dashboard</a>
         </div>
 
-        <div class="grid-friends">
+        <div class="grid-friends" id="friends-grid">
             {% for friend in friends %}
-            <div class="card">
-                <img src="{{ friend|get_avatar }}">
+            <div class="card" data-user-id="{{ friend.id }}">
+                <img src="{{ friend|get_avatar }}" alt="{{ friend.username }}">
                 <div class="info">
                     <b>{{ friend.username }}</b>
                     <a href="/accounts/profile/{{ friend.id }}" class="btn-grey" style="text-align:center; display:block; margin-top:5px;">View Profile</a>

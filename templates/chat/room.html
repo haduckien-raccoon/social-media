@@ -18,7 +18,8 @@
             </div>
         </div>
         <div class="chat-top-actions">
-            <button type="button" class="chat-ghost-btn">✏️ Tạo nhóm</button>
+            <a href="/friends/list/" class="chat-ghost-btn">Bạn bè</a>
+            <a href="/notifications/" class="chat-ghost-btn">Thông báo</a>
         </div>
     </div>
 
@@ -93,6 +94,7 @@
     id="chat-config"
     data-current-user-id="{{ request.user.id }}"
     data-active-conversation-id="{% if initial_active_conversation_id %}{{ initial_active_conversation_id }}{% endif %}"
+    data-initial-friend-id="{{ initial_friend_id|default:'' }}"
     data-ws-token="{{ ws_token|default:"" }}"
     data-list-conversations-url="{% url 'chat:list_conversations' %}"
     data-list-messages-template="{% url 'chat:list_messages' conversation_id=0 %}"
@@ -101,6 +103,7 @@
     data-toggle-reaction-template="{% url 'chat:toggle_message_reaction' message_id=0 %}"
     data-search-friends-url="{% url 'chat:search_friends' %}"
     data-start-friend-chat-template="{% url 'chat:start_chat_with_friend' friend_id=0 %}"
+    data-send-first-message-template="{% url 'chat:send_first_message' friend_id=0 %}"
 ></div>
 {% endblock %}
 

@@ -110,6 +110,7 @@
     const emptyEl = document.getElementById("notifications-empty");
     const markAllBtn = document.getElementById("mark-all-read-btn");
     if (!listEl || !loadingEl || !emptyEl || !markAllBtn) return;
+    let currentUnreadCount = 0;
 
     const getCookie = (name) => {
         let cookieValue = null;
@@ -171,6 +172,10 @@
         `;
     };
 
+    const syncUnreadVisuals = () => {
+        currentUnreadCount = listEl.querySelectorAll('.notification-item.unread').length;
+    };
+
     const setLoading = (isLoading) => {
         loadingEl.style.display = isLoading ? "block" : "none";
         listEl.style.display = isLoading ? "none" : "flex";
@@ -192,17 +197,20 @@
                 listEl.innerHTML = "";
                 listEl.style.display = "none";
                 emptyEl.style.display = "block";
+                currentUnreadCount = 0;
                 return;
             }
 
             listEl.innerHTML = items.map(renderItem).join("");
             listEl.style.display = "flex";
             emptyEl.style.display = "none";
+            currentUnreadCount = Number(payload.unread_count || 0);
         } catch (error) {
             listEl.innerHTML = "";
             listEl.style.display = "none";
             emptyEl.style.display = "block";
             emptyEl.textContent = "Không thể tải thông báo. Vui lòng thử lại.";
+            currentUnreadCount = 0;
         } finally {
             setLoading(false);
         }
@@ -237,6 +245,60 @@
 
         listEl.style.display = "flex";
         emptyEl.style.display = "none";
+        syncUnreadVisuals();
+    };
+
+    const markNotificationItemRead = (notificationId) => {
+        const item = listEl.querySelector(`[data-notification-id="${notificationId}"]`);
+        if (!item) return;
+        item.classList.remove("unread");
+        syncUnreadVisuals();
+    };
+
+    const deleteNotificationItem = (notificationId) => {
+        const item = listEl.querySelector(`[data-notification-id="${notificationId}"]`);
+        if (!item) return;
+        item.remove();
+        syncUnreadVisuals();
+        if (!listEl.children.length) {
+            listEl.style.display = "none";
+            emptyEl.style.display = "block";
+        }
+    };
+
+    const markAllItemsRead = () => {
+        listEl.querySelectorAll('.notification-item.unread').forEach((item) => {
+            item.classList.remove('unread');
+        });
+        currentUnreadCount = 0;
+    };
+
+    const handleRealtimeEvent = (payload) => {
+        if (!payload || !payload.event) return;
+        if (payload.event === "created" || payload.event === "updated") {
+            upsertNotificationFromRealtime(payload);
+            if (payload.event === "updated" && payload.is_read === true) {
+                markNotificationItemRead(Number(payload.id));
+            }
+            if (Number.isFinite(Number(payload.unread_count))) {
+                currentUnreadCount = Number(payload.unread_count);
+            }
+            return;
+        }
+        if (payload.event === "deleted") {
+            deleteNotificationItem(Number(payload.id));
+            if (Number.isFinite(Number(payload.unread_count))) {
+                currentUnreadCount = Number(payload.unread_count);
+            }
+            return;
+        }
+        if (payload.event === "bulk_read") {
+            markAllItemsRead();
+            return;
+        }
+        if (payload.event === "unread_count" && Number.isFinite(Number(payload.unread_count))) {
+            currentUnreadCount = Number(payload.unread_count);
+        }
     };
 
     markAllBtn.addEventListener("click", async () => {
@@ -253,8 +315,15 @@
             // keep page stable
         } finally {
             markAllBtn.disabled = false;
+            markAllItemsRead();
             loadNotifications();
         }
+    });
+
+    listEl.addEventListener("click", (event) => {
+        const item = event.target.closest(".notification-item[data-notification-id]");
+        if (!item) return;
+        markNotificationItemRead(Number(item.dataset.notificationId));
     });
 
     loadNotifications();
@@ -267,12 +336,11 @@
         });
         return;
     }
-
     const eventSource = new EventSource("/notifications/sse/", { withCredentials: true });
     eventSource.addEventListener("notification", (event) => {
         try {
             const payload = JSON.parse(event.data || "{}");
-            upsertNotificationFromRealtime(payload);
+            handleRealtimeEvent(payload);
         } catch (error) {
             loadNotifications();
         }

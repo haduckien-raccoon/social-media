@@ -41,6 +41,9 @@ services:
     environment:
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-sudo_social}
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
       REDIS_HOST: redis
       REDIS_PORT: 6379
     command: ["/app/docker/entrypoint.sh", "web"]
@@ -50,7 +53,7 @@ services:
       redis:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "8081:8080"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request,sys; response=urllib.request.urlopen('http://127.0.0.1:8080/', timeout=5); sys.exit(0 if response.status < 500 else 1)\""]
@@ -73,7 +76,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      APP_BASE_URL: http://web:8080
+      APP_BASE_URL: http://web:8081
       DJANGO_DEBUG: "False"
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,web
     command: ["/app/docker/entrypoint.sh", "test"]

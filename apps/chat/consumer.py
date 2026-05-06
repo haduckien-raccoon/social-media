@@ -14,6 +14,7 @@ from apps.chat.models import Conversation, ConversationParticipant, Message
 from apps.chat.service import (
 	create_message,
 	get_unread_count,
+	list_conversations_for_user,
 	mark_conversation_read,
 	serialize_message,
 	toggle_message_reaction,
@@ -87,9 +88,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 	async def _handle_send_message(self, payload):
 		content = payload.get("content", "")
+		client_message_id = payload.get("client_message_id")
 		attachments = self._decode_ws_attachments(payload.get("attachments") or [])
 		message = await self._create_message(content, attachments)
 		message_payload = await self._serialize_message(message.id)
+		if client_message_id:
+			message_payload["client_message_id"] = str(client_message_id)
 		await self.channel_layer.group_send(
 			self.group_name,
 			{
@@ -101,6 +105,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				},
 			},
 		)
+		await broadcast_conversation_to_participants(self.channel_layer, self.conversation_id)
 
 	async def _handle_mark_read(self):
 		payload = await self._mark_read()
@@ -212,3 +217,60 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			raise ValidationError("Message does not belong to this conversation.")
 
 		return toggle_message_reaction(self.user, message, reaction_type, broadcast=False)
+
+
+class ChatInboxConsumer(AsyncWebsocketConsumer):
+	async def connect(self):
+		scope_user = self.scope.get("user")
+		if not scope_user or not getattr(scope_user, "is_authenticated", False):
+			await self.close(code=4401)
+			return
+		self.user = cast(User, scope_user)
+		self.group_name = f"chat_user_{self.user.id}_inbox"
+		await self.channel_layer.group_add(self.group_name, self.channel_name)
+		await self.accept()
+
+	async def disconnect(self, close_code):
+		group_name = getattr(self, "group_name", None)
+		if group_name:
+			await self.channel_layer.group_discard(group_name, self.channel_name)
+
+	async def chat_inbox_event(self, event):
+		await self.send(text_data=json.dumps(event["data"]))
+
+
+async def broadcast_conversation_to_participants(channel_layer, conversation_id):
+	participant_ids = await _conversation_participant_ids(conversation_id)
+	for participant_id in participant_ids:
+		conversation_payload = await _conversation_payload_for_user(participant_id, conversation_id)
+		if not conversation_payload:
+			continue
+		await channel_layer.group_send(
+			f"chat_user_{participant_id}_inbox",
+			{
+				"type": "chat_inbox_event",
+				"data": {
+					"event": "conversation_update",
+					"conversation": conversation_payload,
+				},
+			},
+		)
+
+
+@database_sync_to_async
+def _conversation_participant_ids(conversation_id):
+	return list(
+		ConversationParticipant.objects.filter(conversation_id=conversation_id)
+		.values_list("user_id", flat=True)
+	)
+
+
+@database_sync_to_async
+def _conversation_payload_for_user(user_id, conversation_id):
+	user = User.objects.filter(id=user_id).first()
+	if not user:
+		return None
+	for conversation in list_conversations_for_user(user):
+		if conversation["id"] == conversation_id:
+			return conversation
+	return None

@@ -79,6 +79,12 @@
         .nav-item-label { font-size: 16px; }
         .nav-item.active .nav-item-label { font-weight: 700; }
         .nav-item-badge-wrap { position: relative; display: inline-flex; align-items: center; }
+        .nav-item-profile { min-width: 0; }
+        .nav-item-profile .nav-item-label {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .nav-notification-badge {
             position: absolute;
             top: -8px;
@@ -140,7 +146,13 @@
             <div class="nav-item" onclick="search()"><i class="fa-solid fa-magnifying-glass"></i> <span class="nav-item-label">Search</span></div>
             <div class="nav-item" onclick="friend()"><i class="fa-solid fa-user-group"></i><span class="nav-item-label">Friend</span></div>
             <div class="nav-item" onclick="group()"><i class="fa-solid fa-people-group"></i> <span class="nav-item-label">Group</span></div>
-            <div class="nav-item" onclick="goChat()"><i class="fa-brands fa-facebook-messenger"></i> <span class="nav-item-label">Messages</span></div>
+            <div class="nav-item" onclick="goChat()">
+                <span class="nav-item-badge-wrap">
+                    <i class="fa-brands fa-facebook-messenger"></i>
+                    <span id="global-message-badge" class="nav-notification-badge">0</span>
+                </span>
+                <span class="nav-item-label">Messages</span>
+            </div>
             <div class="nav-item" onclick="goNotifications()">
                 <span class="nav-item-badge-wrap">
                     <i class="fa-regular fa-bell"></i>
@@ -149,7 +161,7 @@
                 <span class="nav-item-label">Notifications</span>
             </div>
             <div class="nav-item" onclick="createPost()"><i class="fa-regular fa-square-plus"></i> <span class="nav-item-label">Create</span></div>
-            <div class="nav-item" onclick="profile()">
+            <div class="nav-item nav-item-profile" onclick="profile()">
                 <i class="fa-solid fa-circle-user"></i> <span class="nav-item-label">{{ request.user.username }}</span>
             </div>
         </nav>
@@ -178,6 +190,8 @@
             const badge = document.getElementById("global-notification-badge");
             const toast = document.getElementById("global-notification-toast");
             if (!badge || !toast) return;
+            let lastUnreadCount = 0;
+            let lastLatencyLogAt = 0;
 
             const showToast = (message, link) => {
                 if (!message) return;
@@ -202,6 +216,7 @@
 
             const renderBadge = (count) => {
                 const unread = Number.isFinite(count) ? count : 0;
+                lastUnreadCount = unread;
                 if (unread > 0) {
                     badge.textContent = unread > 99 ? "99+" : String(unread);
                     badge.style.display = "inline-flex";
@@ -223,6 +238,27 @@
                 }
             };
 
+            const applyRealtimeUnread = (payload) => {
+                if (!payload || !payload.event) return false;
+                if (Number.isFinite(Number(payload.unread_count))) {
+                    renderBadge(Number(payload.unread_count));
+                    return true;
+                }
+                if (payload.event === "created") {
+                    renderBadge(lastUnreadCount + 1);
+                    return true;
+                }
+                if (payload.event === "updated" && payload.is_read === true && lastUnreadCount > 0) {
+                    renderBadge(lastUnreadCount - 1);
+                    return true;
+                }
+                if (payload.event === "bulk_read") {
+                    renderBadge(0);
+                    return true;
+                }
+                return false;
+            };
+
             refreshUnreadCount();
             const unreadPollTimer = window.setInterval(refreshUnreadCount, 10000);
 
@@ -232,12 +268,22 @@
             eventSource.addEventListener("notification", (event) => {
                 try {
                     const payload = JSON.parse(event.data || "{}");
+                    const publishedAtMs = Number(payload.published_at_ms || 0);
+                    if (publishedAtMs > 0) {
+                        const latencyMs = Date.now() - publishedAtMs;
+                        if (latencyMs >= 400 || Date.now() - lastLatencyLogAt >= 30000) {
+                            console.debug("[notifications:sse] latency_ms=", latencyMs, "event=", payload.event, "id=", payload.id);
+                            lastLatencyLogAt = Date.now();
+                        }
+                    }
                     const openUrl = payload.open_url || payload.link || "";
-                    if (payload.verb_text) showToast(payload.verb_text, openUrl);
+                    const handled = applyRealtimeUnread(payload);
+                    if (payload.event === "created" && payload.verb_text) showToast(payload.verb_text, openUrl);
+                    if (!handled) refreshUnreadCount();
                 } catch (error) {
                     // ignore malformed payload and keep connection alive
+                    refreshUnreadCount();
                 }
-                refreshUnreadCount();
             });
 
             eventSource.addEventListener("connected", () => {
@@ -251,6 +297,60 @@
             window.addEventListener("beforeunload", () => {
                 window.clearInterval(unreadPollTimer);
                 eventSource.close();
+            });
+        })();
+
+        (function initGlobalMessages() {
+            const badge = document.getElementById("global-message-badge");
+            if (!badge) return;
+
+            const renderBadge = (count) => {
+                const unread = Number.isFinite(count) ? count : 0;
+                if (unread > 0) {
+                    badge.textContent = unread > 99 ? "99+" : String(unread);
+                    badge.style.display = "inline-flex";
+                } else {
+                    badge.style.display = "none";
+                }
+            };
+
+            const refreshUnreadCount = async () => {
+                try {
+                    const response = await fetch("/chat/api/unread-count/", {
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    renderBadge(Number(data.unread_count || 0));
+                } catch (error) {
+                    // keep badge stable when chat API is temporarily unavailable
+                }
+            };
+
+            const openInboxSocket = () => {
+                if (!window.WebSocket) return null;
+                const proto = location.protocol === "https:" ? "wss" : "ws";
+                const socket = new WebSocket(`${proto}://${location.host}/ws/chat/inbox/`);
+                socket.onmessage = (event) => {
+                    try {
+                        const payload = JSON.parse(event.data || "{}");
+                        if (payload.event === "conversation_update") refreshUnreadCount();
+                    } catch (error) {
+                        // ignore malformed realtime payload
+                    }
+                };
+                socket.onclose = () => window.setTimeout(openInboxSocket, 1500);
+                socket.onerror = () => {};
+                return socket;
+            };
+
+            refreshUnreadCount();
+            const unreadPollTimer = window.setInterval(refreshUnreadCount, 10000);
+            const inboxSocket = openInboxSocket();
+
+            window.addEventListener("beforeunload", () => {
+                window.clearInterval(unreadPollTimer);
+                if (inboxSocket) inboxSocket.close();
             });
         })();
 

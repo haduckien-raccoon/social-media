@@ -117,9 +117,9 @@
         </div>
 
         {% if sent_requests %}
-        <div class="grid-friends">
+        <div class="grid-friends" id="sent-requests-grid">
             {% for req in sent_requests %}
-            <div class="card">
+            <div class="card" data-request-id="{{ req.id }}" data-user-id="{{ req.to_user.id }}" data-username="{{ req.to_user.username }}" data-profile-url="/accounts/profile/{{ req.to_user.id }}" data-avatar="{{ req.to_user|get_avatar }}">
                 <img src="{{ req.to_user|get_avatar }}" alt="avatar">
                 <div class="info">
                     <b><a href="/accounts/profile/{{ req.to_user.id }}">{{ req.to_user.username }}</a></b>
@@ -177,9 +177,9 @@
             <a href="{% url 'friends:all_friends' %}" class="see-all">See All</a>
         </div>
 
-        <div class="grid-friends">
+        <div class="grid-friends" id="friends-grid">
             {% for friend in friends %}
-            <div class="card">
+            <div class="card" data-user-id="{{ friend.id }}">
                 <img src="{{ friend|get_avatar }}" alt="{{ friend.username }}">
                 <div class="info">
                     <b>{{ friend.username }}</b>
@@ -194,6 +194,78 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const buttons = document.querySelectorAll('.btn-ajax-action');
+        const sentGrid = document.getElementById('sent-requests-grid');
+        const friendsGrid = document.getElementById('friends-grid');
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function friendCard(friend) {
+            const avatar = escapeHtml(friend.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(friend.username || 'User')}`);
+            const username = escapeHtml(friend.username || 'User');
+            const profileUrl = escapeHtml(friend.profile_url || `/accounts/profile/${friend.id}`);
+            return `
+                <div class="card" data-user-id="${friend.id}">
+                    <img src="${avatar}" alt="${username}">
+                    <div class="info">
+                        <b>${username}</b>
+                        <a href="${profileUrl}" class="btn-grey" style="text-align:center; display:block; margin-top:5px;">Profile</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function removeEmptyTextBefore(grid) {
+            const previous = grid && grid.previousElementSibling;
+            if (previous && previous.classList.contains('empty-text')) previous.remove();
+        }
+
+        function friendFromSentCard(card) {
+            return {
+                id: card.getAttribute('data-user-id'),
+                username: card.getAttribute('data-username'),
+                avatar: card.getAttribute('data-avatar'),
+                profile_url: card.getAttribute('data-profile-url')
+            };
+        }
+
+        function markSentCardAccepted(card) {
+            const friend = friendFromSentCard(card);
+            const button = card.querySelector('.btn-ajax-action');
+            if (button) {
+                button.textContent = 'Friends';
+                button.disabled = true;
+                button.removeAttribute('data-action');
+            }
+            if (friendsGrid && !friendsGrid.querySelector(`[data-user-id="${friend.id}"]`)) {
+                friendsGrid.insertAdjacentHTML('afterbegin', friendCard(friend));
+            }
+            setTimeout(() => card.remove(), 1200);
+        }
+
+        function pollSentRequestStatus() {
+            if (!sentGrid) return;
+            sentGrid.querySelectorAll('[data-request-id]').forEach(function(card) {
+                const requestId = card.getAttribute('data-request-id');
+                if (!requestId || card.dataset.statusPolling === '1') return;
+                card.dataset.statusPolling = '1';
+                fetch(`/friends/api/sent-status/${requestId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(response => response.ok ? response.json() : null)
+                    .then(data => {
+                        if (data && data.status === 'accepted') markSentCardAccepted(card);
+                    })
+                    .finally(() => { card.dataset.statusPolling = '0'; });
+            });
+        }
+
+        window.setInterval(pollSentRequestStatus, 3000);
+        pollSentRequestStatus();
 
         buttons.forEach(btn => {
             btn.addEventListener('click', function() {

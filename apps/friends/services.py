@@ -1,8 +1,13 @@
+import logging
+
 from django.db.models import Q, Count, Exists, OuterRef
 # from django.contrib.auth import get_user_model
 from .models import *
 from apps.accounts.models import User
 from apps.notifications.services import create_notification
+
+
+logger = logging.getLogger(__name__)
 
 # -------------------------------
 # 1. Helper Check Status

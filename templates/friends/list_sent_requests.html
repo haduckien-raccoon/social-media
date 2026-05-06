@@ -35,9 +35,9 @@
             <a href="{% url 'friends:index' %}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back</a>
         </div>
         
-        <div class="grid-friends">
+        <div class="grid-friends" id="sent-requests-grid">
             {% for req in sent_requests %}
-            <div class="card">
+            <div class="card" data-request-id="{{ req.id }}" data-user-id="{{ req.to_user.id }}">
                 <img src="{{ req.to_user|get_avatar }}" alt="avatar">
                 <div class="info">
                     <b><a href="/accounts/profile/{{ req.to_user.id }}">{{ req.to_user.username }}</a></b>
@@ -60,6 +60,38 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const buttons = document.querySelectorAll('.btn-ajax-action');
+        const sentGrid = document.getElementById('sent-requests-grid');
+
+        function markSentCardAccepted(card) {
+            const button = card.querySelector('.btn-ajax-action');
+            const status = card.querySelector('.status-text');
+            if (status) status.innerHTML = '<i class="fa-solid fa-check"></i> Friends';
+            if (button) {
+                button.textContent = 'Friends';
+                button.disabled = true;
+                button.removeAttribute('data-action');
+            }
+            setTimeout(() => card.remove(), 1200);
+        }
+
+        function pollSentRequestStatus() {
+            if (!sentGrid) return;
+            sentGrid.querySelectorAll('[data-request-id]').forEach(function(card) {
+                const requestId = card.getAttribute('data-request-id');
+                if (!requestId || card.dataset.statusPolling === '1') return;
+                card.dataset.statusPolling = '1';
+                fetch(`/friends/api/sent-status/${requestId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(response => response.ok ? response.json() : null)
+                    .then(data => {
+                        if (data && data.status === 'accepted') markSentCardAccepted(card);
+                    })
+                    .finally(() => { card.dataset.statusPolling = '0'; });
+            });
+        }
+
+        window.setInterval(pollSentRequestStatus, 3000);
+        pollSentRequestStatus();
+
         buttons.forEach(btn => {
             btn.addEventListener('click', function() {
                 const action = this.getAttribute('data-action');

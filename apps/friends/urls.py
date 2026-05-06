@@ -16,6 +16,7 @@ urlpatterns = [
     # Action AJAX
     path("api/send/<int:user_id>/", send_request_ajax, name="api_send_request"),
     path("api/cancel/<int:request_id>/", cancel_request_ajax, name="api_cancel_request"),
+    path("api/sent-status/<int:request_id>/", sent_request_status_ajax, name="api_sent_request_status"),
 
     # Action thường (Form Submit)
     path("accept/<int:request_id>/", accept_request_view, name="accept_request"),

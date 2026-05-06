@@ -15,6 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from apps.notifications.models import Notification
+from apps.notifications.signals import publish_notification_payload
 
 logger = logging.getLogger(__name__)
 
@@ -153,6 +154,14 @@ def mark_all_notifications_read(request):
         is_read=True,
         is_seen=True,
     )
+    publish_notification_payload(
+        request.user.id,
+        {
+            "event": "bulk_read",
+            "user_id": request.user.id,
+            "unread_count": 0,
+        },
+    )
     return JsonResponse({"ok": True, "updated": updated})
 
 
@@ -178,8 +187,25 @@ def delete_notification(request, notification_id: int):
     """
     POST /notifications/<id>/delete/
     """
-    deleted, _ = Notification.objects.filter(id=notification_id, user=request.user).delete()
-    return JsonResponse({"ok": True, "deleted": deleted > 0})
+    notification = Notification.objects.filter(id=notification_id, user=request.user).first()
+    if notification is None:
+        return JsonResponse({"ok": True, "deleted": False})
+
+    was_unread = not notification.is_read
+    notification.delete()
+    unread_count_value = None
+    if was_unread:
+        unread_count_value = Notification.objects.filter(user=request.user, is_read=False).count()
+        publish_notification_payload(
+            request.user.id,
+            {
+                "event": "unread_count",
+                "user_id": request.user.id,
+                "unread_count": unread_count_value,
+            },
+        )
+
+    return JsonResponse({"ok": True, "deleted": True, "unread_count": unread_count_value})
 
 
 @login_required
@@ -225,38 +251,52 @@ def sse_notifications(request):
 
     channel = f"notify_user_{request.user.id}_notifications"
     redis_client = _get_redis_client()
+    keepalive_interval = 15.0
+    poll_timeout = 0.2
 
     def stream():
         if redis_client is None:
             yield b'event: connected\ndata: {"degraded": true}\n\n'
+            last_keepalive_at = time.monotonic()
             while True:
-                yield b"event: keepalive\ndata: {}\n\n"
-                time.sleep(15)
+                now = time.monotonic()
+                if now - last_keepalive_at >= keepalive_interval:
+                    yield b"event: keepalive\ndata: {}\n\n"
+                    last_keepalive_at = now
+                time.sleep(poll_timeout)
             return
 
         try:
             pubsub = redis_client.pubsub(ignore_subscribe_messages=True)
             pubsub.subscribe(channel)
             yield b"event: connected\ndata: {}\n\n"
+            last_keepalive_at = time.monotonic()
         except Exception as exc:
             logger.warning("SSE Redis subscribe failed for user %s: %s", request.user.id, exc)
             yield b'event: connected\ndata: {"degraded": true}\n\n'
+            last_keepalive_at = time.monotonic()
             while True:
-                yield b"event: keepalive\ndata: {}\n\n"
-                time.sleep(15)
+                now = time.monotonic()
+                if now - last_keepalive_at >= keepalive_interval:
+                    yield b"event: keepalive\ndata: {}\n\n"
+                    last_keepalive_at = now
+                time.sleep(poll_timeout)
             return
 
         try:
             while True:
                 try:
-                    message = pubsub.get_message(timeout=15.0)
+                    message = pubsub.get_message(timeout=poll_timeout)
                 except Exception as exc:
                     logger.warning("SSE Redis read failed for user %s: %s", request.user.id, exc)
                     yield b'event: error\ndata: {"detail":"redis_unavailable"}\n\n'
                     break
 
                 if not message:
-                    yield b"event: keepalive\ndata: {}\n\n"
+                    now = time.monotonic()
+                    if now - last_keepalive_at >= keepalive_interval:
+                        yield b"event: keepalive\ndata: {}\n\n"
+                        last_keepalive_at = now
                     continue
 
                 if message["type"] != "message":

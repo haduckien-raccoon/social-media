@@ -21,6 +21,7 @@ from apps.chat.service import (
 	mark_conversation_read,
 	serialize_message,
 	toggle_message_reaction,
+	MAX_ATTACHMENT_SIZE_BYTES,
 )
 from apps.friends.models import Friend
 
@@ -87,12 +88,14 @@ def _direct_conversation_map(user: User) -> dict[int, int]:
 
 
 def _search_friends_payload(user: User, query: str = "", limit: int = 20) -> list[dict]:
+	logger.info("_search_friends_payload user_id=%s query=%s limit=%s", user.id, query, limit)
 	friend_query = Friend.objects.filter(Q(user=user) | Q(friend=user)).select_related(
 		"friend",
 		"friend__profile",
 		"user",
 		"user__profile",
 	)
+	logger.info("_search_friends_payload friend_query count=%s", friend_query.count())
 	if query:
 		friend_query = friend_query.filter(
 			Q(user=user, friend__username__icontains=query)
@@ -108,6 +111,7 @@ def _search_friends_payload(user: User, query: str = "", limit: int = 20) -> lis
 	seen_ids = set()
 	for relation in friend_query.order_by("id"):
 		friend_user = relation.friend if relation.user_id == user.id else relation.user
+		logger.info("_search_friends_payload relation id=%s user_id=%s friend_id=%s friend_user_id=%s", relation.id, relation.user_id, relation.friend_id, friend_user.id)
 		if not friend_user or friend_user.id in seen_ids:
 			continue
 		seen_ids.add(friend_user.id)
@@ -123,6 +127,7 @@ def _search_friends_payload(user: User, query: str = "", limit: int = 20) -> lis
 		if limit and len(results) >= limit:
 			break
 
+	logger.info("_search_friends_payload results count=%s", len(results))
 	return results
 
 
@@ -161,6 +166,18 @@ def _search_friends_payload(user: User, query: str = "", limit: int = 20) -> lis
 def chat_page_view(request):
     conversations = list_conversations_for_user(request.user)
     conversation_ids = {conversation["id"] for conversation in conversations}
+    requested_friend_id = None
+    requested_friend = None
+
+    raw_friend_id = request.GET.get("friend_id")
+    if raw_friend_id:
+        try:
+            requested_friend_id = int(raw_friend_id)
+        except (TypeError, ValueError):
+            requested_friend_id = None
+
+    if requested_friend_id and requested_friend_id != request.user.id:
+        requested_friend = User.objects.filter(id=requested_friend_id).first()
 
     active_conversation_id = None
     requested_conversation_id = request.GET.get("conversation_id")
@@ -195,6 +212,7 @@ def chat_page_view(request):
         "initial_active_conversation_id": active_conversation_id,
         "initial_messages": initial_messages,
         "initial_friend_candidates": _search_friends_payload(request.user, limit=20),
+        "initial_friend_id": requested_friend.id if requested_friend else "",
         "ws_token": getattr(request, "_new_access_token", None) or request.COOKIES.get("access", ""),
     }
     return render(request, "chat/room.html", context)
@@ -223,6 +241,14 @@ def create_conversation_view(request):
 def list_conversations_view(request):
 	results = list_conversations_for_user(request.user)
 	return JsonResponse({"results": results}, status=200)
+
+
+@login_required
+@require_GET
+def unread_count_view(request):
+	conversations = Conversation.objects.filter(participants=request.user).distinct()
+	unread_total = sum(get_unread_count(conversation, request.user) for conversation in conversations)
+	return JsonResponse({"unread_count": unread_total}, status=200)
 
 
 @login_required
@@ -292,41 +318,15 @@ def start_chat_with_friend_view(request, friend_id):
 	if not is_friend:
 		return JsonResponse({"error": "You can only start chat with your friends."}, status=403)
 
-	conversation, _ = get_or_create_direct_conversation(request.user, friend_user)
-	messages, unread_count = get_messages_for_conversation(
-		request.user,
-		conversation,
-		limit=INITIAL_MESSAGE_LIMIT,
-	)
-
-	conversation_payload = None
-	for item in list_conversations_for_user(request.user):
-		if item["id"] == conversation.id:
-			conversation_payload = item
-			break
-
-	if conversation_payload is None:
-		conversation_payload = {
-			"id": conversation.id,
-			"participants": [
-				{
-					"id": friend_user.id,
-					"username": friend_user.username,
-					"full_name": _display_name(friend_user),
-					"avatar": _avatar_url(friend_user),
-				}
-			],
-			"updated_at": conversation.updated_at.isoformat(),
-			"created_at": conversation.created_at.isoformat(),
-			"unread_count": unread_count,
-			"last_message": None,
-		}
-	
+	# Don't create conversation yet - will be created when first message is sent
 	return JsonResponse(
 		{
-			"conversation": conversation_payload,
-			"messages": messages,
-			"unread_count": unread_count,
+			"friend": {
+				"id": friend_user.id,
+				"username": friend_user.username,
+				"full_name": _display_name(friend_user),
+				"avatar": _avatar_url(friend_user),
+			}
 		},
 		status=200,
 	)
@@ -393,3 +393,93 @@ def toggle_message_reaction_view(request, message_id):
 		return JsonResponse({"error": str(exc)}, status=403)
 	except ValidationError as exc:
 		return JsonResponse({"error": _validation_error_message(exc)}, status=400)
+
+
+@login_required
+@require_POST
+def send_first_message_view(request, friend_id):
+	"""Send first message to a friend. Creates conversation if not exists."""
+	friend_user = get_object_or_404(User, id=friend_id)
+	if friend_user.pk == request.user.pk:
+		return JsonResponse({"error": "Cannot chat with yourself."}, status=400)
+
+	is_friend = Friend.objects.filter(
+		Q(user=request.user, friend=friend_user)
+		| Q(user=friend_user, friend=request.user)
+	).exists()
+	if not is_friend:
+		return JsonResponse({"error": "You can only chat with your friends."}, status=403)
+
+	# Parse content from form data
+	content = request.POST.get("content", "").strip()
+
+	# Handle file attachments
+	attachments = []
+	if request.FILES:
+		for key in request.FILES:
+			for uploaded_file in request.FILES.getlist(key):
+				if uploaded_file.size > MAX_ATTACHMENT_SIZE_BYTES:
+					return JsonResponse({"error": f"File {uploaded_file.name} exceeds 20MB limit."}, status=400)
+				attachments.append(uploaded_file)
+
+	if not content and not attachments:
+		return JsonResponse({"error": "Message content or attachments are required."}, status=400)
+
+	# Create conversation if not exists
+	conversation, _ = get_or_create_direct_conversation(request.user, friend_user)
+
+	# Send message
+	try:
+		message = create_message(
+			user=request.user,
+			conversation=conversation,
+			content=content,
+			attachments=attachments,
+		)
+	except (PermissionDenied, ValidationError) as exc:
+		return JsonResponse({"error": str(exc)}, status=403)
+
+	# Broadcast conversation update to all participants (realtime push)
+	try:
+		from apps.chat.consumer import broadcast_conversation_to_participants
+		from channels.layers import get_channel_layer
+		channel_layer = get_channel_layer()
+		if channel_layer:
+			# Use async_to_sync to call the async function
+			from asgiref.sync import async_to_sync
+			async_to_sync(broadcast_conversation_to_participants)(channel_layer, conversation.id)
+	except Exception as exc:
+		logger.warning("Failed to broadcast conversation update: %s", exc)
+
+	# Serialize and return
+	message_payload = serialize_message(message, request.user)
+	conversation_payload = None
+	for item in list_conversations_for_user(request.user):
+		if item["id"] == conversation.id:
+			conversation_payload = item
+			break
+
+	if conversation_payload is None:
+		conversation_payload = {
+			"id": conversation.id,
+			"participants": [
+				{
+					"id": friend_user.id,
+					"username": friend_user.username,
+					"full_name": _display_name(friend_user),
+					"avatar": _avatar_url(friend_user),
+				}
+			],
+			"updated_at": conversation.updated_at.isoformat(),
+			"created_at": conversation.created_at.isoformat(),
+			"unread_count": 0,
+			"last_message": message_payload,
+		}
+
+	return JsonResponse(
+		{
+			"conversation": conversation_payload,
+			"message": message_payload,
+		},
+		status=201,
+	)

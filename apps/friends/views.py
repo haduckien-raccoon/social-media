@@ -87,6 +87,13 @@ def cancel_request_ajax(request, request_id):
         return JsonResponse({"status": "error", "message": msg}, status=400)
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
 
+
+def sent_request_status_ajax(request, request_id):
+    request_obj = FriendRequest.objects.filter(id=request_id, from_user=request.user).select_related("to_user").first()
+    if request_obj:
+        return JsonResponse({"status": request_obj.status, "request_id": request_obj.id})
+    return JsonResponse({"status": "not_found", "request_id": request_id})
+
 # Giữ lại các view cũ cho Accept/Reject/Unfriend (dùng Form submit truyền thống hoặc sửa thành AJAX nếu muốn)
 def accept_request_view(request, request_id):
     if request.method == "POST":

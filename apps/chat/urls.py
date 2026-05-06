@@ -11,6 +11,7 @@ urlpatterns = [
 
 	# Chat UI support APIs
 	path("api/conversations/", views.list_conversations_view, name="list_conversations"),
+	path("api/unread-count/", views.unread_count_view, name="unread_count"),
 	path("api/conversations/create/", views.create_conversation_view, name="create_conversation"),
 	path(
 		"api/conversations/<int:conversation_id>/messages/",
@@ -37,6 +38,11 @@ urlpatterns = [
 		"api/friends/<int:friend_id>/start/",
 		views.start_chat_with_friend_view,
 		name="start_chat_with_friend",
+	),
+	path(
+		"api/friends/<int:friend_id>/send-first-message/",
+		views.send_first_message_view,
+		name="send_first_message",
 	),
 
 	# Legacy paths (kept for backward compatibility)

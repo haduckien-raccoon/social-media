@@ -84,7 +84,15 @@
         }));
     }
 
-    function isSocketOpen(ws) { return ws && ws.readyState === WebSocket.OPEN; }
+	function isSocketOpen(ws) { return ws && ws.readyState === WebSocket.OPEN; }
+
+	function createClientMessageId() {
+		return "local-" + String(Date.now()) + "-" + Math.random().toString(36).slice(2, 10);
+	}
+
+	function localMessageId(clientMessageId) {
+		return "local:" + clientMessageId;
+	}
 
     // ─── DOM refs ─────────────────────────────────────────────────────────────
     var cfg = document.getElementById("chat-config");
@@ -109,6 +117,7 @@
         listConversations:   cfg.dataset.listConversationsUrl,
         listMsgsTpl:         cfg.dataset.listMessagesTemplate,
         sendMsgTpl:          cfg.dataset.sendMessageTemplate,
+        sendFirstMsgTpl:      cfg.dataset.sendFirstMessageTemplate,
         markReadTpl:         cfg.dataset.markReadTemplate,
         toggleReactionTpl:   cfg.dataset.toggleReactionTemplate,
         searchFriends:       cfg.dataset.searchFriendsUrl,
@@ -121,12 +130,15 @@
     var state = {
         currentUserId:      toInt(cfg.dataset.currentUserId, 0),
         activeConvId:       toInt(cfg.dataset.activeConversationId, null),
+        pendingFriendId:    toInt(cfg.dataset.initialFriendId, null),
         conversations:      parseScriptJSON("chat-initial-conversations", []),
         friendCandidates:   parseScriptJSON("chat-initial-friends", []),
         msgsByConv:         {},
         paging:             {},
-        ws:                 null,
-        wsConvId:           null,
+		ws:                 null,
+		inboxWs:            null,
+		inboxConnected:     false,
+		wsConvId:           null,
         wsConnected:        false,
         wsQueue:            [],
         wsReconnectTimer:   null,
@@ -191,7 +203,7 @@
 
     function convSubtitle(conv) {
         var lm = conv.last_message;
-        if (!lm) return "Chưa có tin nhắn";
+        if (!lm) return "";
         var preview = lm.preview || "Tin nhắn mới";
         if (lm.sender_id === state.currentUserId) preview = "Bạn: " + preview;
         return preview;
@@ -246,6 +258,26 @@
     // ─── Render: Active Header ────────────────────────────────────────────────
     function renderHeader() {
         if (!elHeader) return;
+        if (state.pendingFriendId && !state.activeConvId) {
+            var pendingFriend = state.friendCandidates.find(function (friend) {
+                return friend.id === state.pendingFriendId;
+            });
+            var pendingName = pendingFriend ? (pendingFriend.full_name || pendingFriend.username) : "Bạn bè";
+            var pendingAvatar = pendingFriend ? pendingFriend.avatar : "";
+            elHeader.innerHTML =
+                '<div class="chat-header-draft">' +
+                    '<img class="chat-header-avatar" src="' + escapeHtml(pendingAvatar || ("https://ui-avatars.com/api/?name=" + encodeURIComponent(pendingName || "U"))) + '" alt="">' +
+                    '<div class="chat-header-text">' +
+                        '<h3>' + escapeHtml(pendingName) + '</h3>' +
+                        '<span class="chat-header-status">Bắt đầu cuộc trò chuyện mới</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="chat-header-actions">' +
+                    '<input id="chat-message-search-input" type="text" placeholder="🔍 Tìm tin nhắn..." disabled>' +
+                '</div>';
+            rebindMsgSearch();
+            return;
+        }
         if (!state.activeConvId) {
             elHeader.innerHTML =
                 '<div class="chat-header-empty">' +
@@ -315,22 +347,33 @@
         }).join("") + '</div>';
     }
 
-    function reactionBar(msg) {
-        var summary = msg.reaction_summary || {};
-        var keys = Object.keys(summary);
-        if (!keys.length) return "";
-        var parts = keys.map(function (k) {
-            return '<span class="chat-rxn-chip" title="' + escapeHtml(k) + '">' +
-                escapeHtml(REACTION_EMOJI[k] || k) + ' ' +
-                escapeHtml(String(summary[k])) +
-            '</span>';
-        }).join("");
-        return '<div class="chat-rxn-bar">' + parts + '</div>';
-    }
+	function reactionBar(msg) {
+		var summary = msg.reaction_summary || {};
+		var keys = Object.keys(summary);
+		if (!keys.length) return "";
+		var parts = keys.map(function (k) {
+			var users = (msg.reaction_details || {})[k] || [];
+			return '<button type="button" class="chat-rxn-chip" data-msg-id="' + escapeHtml(msg.id) + '" data-rxn="' + escapeHtml(k) + '" title="' + escapeHtml(k) + '">' +
+				escapeHtml(REACTION_EMOJI[k] || k) + ' ' +
+				escapeHtml(String(summary[k])) +
+			'</button>' +
+			'<div class="chat-rxn-details" data-msg-id="' + escapeHtml(msg.id) + '" data-rxn="' + escapeHtml(k) + '">' +
+				users.map(function (user) {
+					var name = user.full_name || user.username || ("User " + user.id);
+					var avatar = user.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(name || "U");
+					return '<div class="chat-rxn-user">' +
+						'<img src="' + escapeHtml(avatar) + '" alt="">' +
+						'<span>' + escapeHtml(name) + '</span>' +
+					'</div>';
+				}).join("") +
+			'</div>';
+		}).join("");
+		return '<div class="chat-rxn-bar">' + parts + '</div>';
+	}
 
-    function reactionPicker(msg) {
-        var myRxn = msg.current_user_reaction || "";
-        return '<div class="chat-rxn-actions" data-msg-id="' + escapeHtml(msg.id) + '">' +
+	function reactionPicker(msg) {
+		var myRxn = msg.current_user_reaction || "";
+		return '<div class="chat-rxn-actions" data-msg-id="' + escapeHtml(msg.id) + '">' +
             '<button type="button" class="chat-rxn-toggle" title="Cảm xúc">🙂</button>' +
             '<div class="chat-rxn-picker">' +
                 Object.keys(REACTION_EMOJI).map(function (k) {
@@ -339,8 +382,42 @@
                     '</button>';
                 }).join("") +
             '</div>' +
-        '</div>';
-    }
+		'</div>';
+	}
+
+	function seenUsersForMessage(msg) {
+		var seenUsers = Array.isArray(msg.seen_by_users) ? msg.seen_by_users : [];
+		if (seenUsers.length) return seenUsers.filter(function (user) {
+			return toInt(user.id || user.user_id, 0) !== state.currentUserId;
+		});
+		return (Array.isArray(msg.seen_by_user_ids) ? msg.seen_by_user_ids : [])
+			.filter(function (id) { return toInt(id, 0) !== state.currentUserId; })
+			.map(function (id) { return { id: id, username: "User " + id, full_name: "User " + id, avatar: "" }; });
+	}
+
+	function deliveryMeta(msg, isMine) {
+		if (!isMine) return "";
+		if (msg.delivery_status === "sending") return '<span class="chat-delivery sending">Đang gửi...</span>';
+		if (msg.delivery_status === "failed") return '<span class="chat-delivery failed">Gửi thất bại</span>';
+
+		var seenUsers = seenUsersForMessage(msg);
+		if (seenUsers.length) {
+			var label = seenUsers.length === 1 ? '✓✓ Đã xem' : 'Đã xem bởi ' + seenUsers.length + ' người';
+			return '<button type="button" class="chat-seen" data-msg-id="' + escapeHtml(msg.id) + '">' + escapeHtml(label) + '</button>' +
+				'<div class="chat-seen-popover" data-msg-id="' + escapeHtml(msg.id) + '">' +
+					seenUsers.map(function (user) {
+						var name = user.full_name || user.username || ("User " + user.id);
+						var avatar = user.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(name || "U");
+						return '<div class="chat-seen-user">' +
+							'<img src="' + escapeHtml(avatar) + '" alt="">' +
+							'<span>' + escapeHtml(name) + '</span>' +
+						'</div>';
+					}).join("") +
+				'</div>';
+		}
+
+		return '<span class="chat-delivery sent">Đã gửi</span>';
+	}
 
     function shouldShowAvatar(msgs, idx) {
         var msg = msgs[idx];
@@ -373,7 +450,7 @@
 
         var msgs = state.msgsByConv[state.activeConvId] || [];
         if (!msgs.length) {
-            elMsgList.innerHTML = '<div class="chat-empty-state">Chưa có tin nhắn nào. Hãy gửi tin nhắn đầu tiên! 👋</div>';
+            elMsgList.innerHTML = "";
             return;
         }
 
@@ -410,11 +487,7 @@
 
             var showTime = shouldShowTime(filtered, idx);
             var showAvatar = shouldShowAvatar(filtered, idx);
-            var seenByOthers = isMine && Array.isArray(msg.seen_by_user_ids) && msg.seen_by_user_ids.some(function (id) {
-                return toInt(id, 0) !== state.currentUserId;
-            });
-
-            var nextMsg = filtered[idx + 1];
+			var nextMsg = filtered[idx + 1];
             var prevMsg = filtered[idx - 1];
             var sameAsPrev = prevMsg && prevMsg.sender_id === msg.sender_id;
             var sameAsNext = nextMsg && nextMsg.sender_id === msg.sender_id;
@@ -445,11 +518,11 @@
                             '<div class="chat-bubble-content">' + contentHtml + '</div>' +
                             attachmentHtml(msg) +
                         '</div>' +
-                        reactionBar(msg) +
-                        '<div class="chat-msg-meta">' +
-                            (seenByOthers ? '<span class="chat-seen">✓✓ Đã xem</span>' : '') +
-                        '</div>' +
-                        reactionPicker(msg) +
+						reactionBar(msg) +
+						'<div class="chat-msg-meta">' +
+							deliveryMeta(msg, isMine) +
+						'</div>' +
+						reactionPicker(msg) +
                     '</div>' +
                 '</div>';
         });
@@ -477,17 +550,16 @@
 
     // ─── Render: Friend results ───────────────────────────────────────────────
     function renderFriends() {
-        var target = friendResultsTarget || pickFriendResultsTarget();
-        if (!target) return;
-        if (!(state.friendSearch || "").trim()) {
-            target.innerHTML = "";
-            return;
+		pickFriendResultsTarget();
+		var targets = [elFriendResults, elFriendResultsInline].filter(Boolean);
+		if (!targets.length) return;
+		var html;
+		if (!state.friendCandidates.length) {
+			html = '<div class="chat-empty-state">Chưa có bạn bè nào.</div>';
+			targets.forEach(function (target) { target.innerHTML = html; });
+			return;
         }
-        if (!state.friendCandidates.length) {
-            target.innerHTML = '<div class="chat-empty-state">Chưa có bạn bè nào.</div>';
-            return;
-        }
-        target.innerHTML = state.friendCandidates.map(function (f) {
+        html = state.friendCandidates.map(function (f) {
             var sub = f.conversation_id ? "Đã có hội thoại" : "@" + (f.username || "");
             return '<article class="chat-friend-item" data-id="' + f.id + '">' +
                 '<img class="chat-avatar" src="' + escapeHtml(f.avatar || "") + '" alt="">' +
@@ -498,6 +570,7 @@
                 '<button type="button" class="chat-start-btn" data-friend-id="' + f.id + '">Nhắn tin</button>' +
             '</article>';
         }).join("");
+        targets.forEach(function (target) { target.innerHTML = html; });
     }
 
     // ─── Render: Attachment preview ───────────────────────────────────────────
@@ -511,19 +584,23 @@
     }
 
     // ─── Data mutations ───────────────────────────────────────────────────────
-    function upsertMsg(convId, msg) {
-        if (!state.msgsByConv[convId]) state.msgsByConv[convId] = [];
-        var msgs = state.msgsByConv[convId];
-        var idx = msgs.findIndex(function (m) { return m.id === msg.id; });
-        if (idx >= 0) msgs[idx] = Object.assign({}, msgs[idx], msg);
-        else msgs.push(msg);
-        msgs.sort(function (a, b) { return new Date(a.created_at || 0) - new Date(b.created_at || 0); });
-    }
+	function upsertMsg(convId, msg) {
+		if (!state.msgsByConv[convId]) state.msgsByConv[convId] = [];
+		var msgs = state.msgsByConv[convId];
+		var idx = msgs.findIndex(function (m) {
+			if (m.id === msg.id) return true;
+			return msg.client_message_id && m.client_message_id === msg.client_message_id;
+		});
+		if (idx >= 0) msgs[idx] = Object.assign({}, msgs[idx], msg);
+		else msgs.push(msg);
+		msgs.sort(function (a, b) { return new Date(a.created_at || 0) - new Date(b.created_at || 0); });
+	}
 
     function mergeConv(conv) {
         var idx = state.conversations.findIndex(function (c) { return c.id === conv.id; });
         if (idx >= 0) state.conversations[idx] = conv;
         else state.conversations.unshift(conv);
+        sortConvs();
     }
 
     function touchConvWithMsg(convId, msg, increaseUnread) {
@@ -573,10 +650,42 @@
         }, delay);
     }
 
-    function closeSocket() {
-        if (state.ws) { try { state.ws.close(); } catch (e) { /* noop */ } }
-        state.ws = null; state.wsConvId = null; state.wsConnected = false;
-    }
+	function closeSocket() {
+		if (state.ws) { try { state.ws.close(); } catch (e) { /* noop */ } }
+		state.ws = null; state.wsConvId = null; state.wsConnected = false;
+	}
+
+	function closeInboxSocket() {
+		if (state.inboxWs) { try { state.inboxWs.close(); } catch (e) { /* noop */ } }
+		state.inboxWs = null; state.inboxConnected = false;
+	}
+
+	function openInboxSocket() {
+		if (isSocketOpen(state.inboxWs)) return;
+		if (!window.WebSocket) return;
+		var proto = location.protocol === "https:" ? "wss" : "ws";
+		var url = proto + "://" + location.host + "/ws/chat/inbox/";
+		if (wsToken) url += "?token=" + encodeURIComponent(wsToken);
+		state.inboxWs = new WebSocket(url);
+		state.inboxWs.onopen = function () { state.inboxConnected = true; };
+		state.inboxWs.onmessage = function (e) {
+			var payload;
+			try { payload = JSON.parse(e.data || "{}"); } catch (err) { return; }
+			handleInboxEvent(payload);
+		};
+		state.inboxWs.onclose = function () {
+			state.inboxConnected = false;
+			setTimeout(openInboxSocket, 1500);
+		};
+		state.inboxWs.onerror = function () { state.inboxConnected = false; };
+	}
+
+	function handleInboxEvent(payload) {
+		if (!payload || payload.event !== "conversation_update" || !payload.conversation) return;
+		mergeConv(payload.conversation);
+		renderConvList();
+		if (state.activeConvId === payload.conversation.id) renderHeader();
+	}
 
     function openSocket(convId) {
         if (!convId) { closeSocket(); return; }
@@ -629,11 +738,12 @@
             return;
         }
 
-        if (payload.event === "message_new") {
-            var convId = toInt(payload.conversation_id, null);
-            var msg = payload.message;
-            if (!convId || !msg) return;
-            upsertMsg(convId, msg);
+		if (payload.event === "message_new") {
+			var convId = toInt(payload.conversation_id, null);
+			var msg = payload.message;
+			if (!convId || !msg) return;
+			if (msg.client_message_id && msg.sender_id === state.currentUserId) msg.delivery_status = "sent";
+			upsertMsg(convId, msg);
             var increaseUnread = state.activeConvId !== convId && msg.sender_id !== state.currentUserId;
             touchConvWithMsg(convId, msg, increaseUnread);
             renderConvList();
@@ -654,11 +764,15 @@
             var readAtMs = new Date(readAt).getTime();
             (state.msgsByConv[rConvId] || []).forEach(function (m) {
                 var mMs = new Date(m.created_at || 0).getTime();
-                if (mMs <= readAtMs) {
-                    if (!Array.isArray(m.seen_by_user_ids)) m.seen_by_user_ids = [];
-                    if (!m.seen_by_user_ids.includes(readerId)) m.seen_by_user_ids.push(readerId);
-                }
-            });
+			if (mMs <= readAtMs) {
+				if (!Array.isArray(m.seen_by_user_ids)) m.seen_by_user_ids = [];
+				if (!m.seen_by_user_ids.includes(readerId)) m.seen_by_user_ids.push(readerId);
+				if (!Array.isArray(m.seen_by_users)) m.seen_by_users = [];
+				if (!m.seen_by_users.some(function (user) { return toInt(user.id || user.user_id, 0) === readerId; })) {
+					m.seen_by_users.push({ id: readerId, username: "User " + readerId, full_name: "User " + readerId, avatar: "" });
+				}
+			}
+		});
             var conv = state.conversations.find(function (c) { return c.id === rConvId; });
             if (conv && readerId === state.currentUserId && Number.isFinite(payload.unread_count)) {
                 conv.unread_count = payload.unread_count;
@@ -669,16 +783,17 @@
             return;
         }
 
-        if (payload.event === "message_reaction") {
-            var rxConvId = toInt(payload.conversation_id, null);
-            var msgId = toInt(payload.message_id, null);
-            if (!rxConvId || !msgId) return;
-            var m = (state.msgsByConv[rxConvId] || []).find(function (x) { return x.id === msgId; });
-            if (!m) return;
-            m.reaction_summary = payload.reaction_summary || {};
-            if (toInt(payload.user_id, 0) === state.currentUserId) m.current_user_reaction = payload.reaction_type || null;
-            if (state.activeConvId === rxConvId) renderMsgList(false);
-        }
+		if (payload.event === "message_reaction") {
+			var rxConvId = toInt(payload.conversation_id, null);
+			var msgId = toInt(payload.message_id, null);
+			if (!rxConvId || !msgId) return;
+			var m = (state.msgsByConv[rxConvId] || []).find(function (x) { return x.id === msgId; });
+			if (!m) return;
+			m.reaction_summary = payload.reaction_summary || {};
+			m.reaction_details = payload.reaction_details || {};
+			if (toInt(payload.user_id, 0) === state.currentUserId) m.current_user_reaction = payload.reaction_type || null;
+			if (state.activeConvId === rxConvId) renderMsgList(false);
+		}
     }
 
     // ─── Notification ─────────────────────────────────────────────────────────
@@ -766,14 +881,9 @@
         sendWs({ action: "mark_read" }, convId);
     }
 
-    async function searchFriends() {
-        var q = state.friendSearch.trim();
-        if (!q) {
-            state.friendCandidates = [];
-            renderFriends();
-            return;
-        }
-        var endpoint = urls.searchFriends + (q ? "?q=" + encodeURIComponent(q) : "");
+	async function searchFriends() {
+		var q = state.friendSearch.trim();
+		var endpoint = urls.searchFriends + (q ? "?q=" + encodeURIComponent(q) : "");
         try {
             var res = await fetch(endpoint, { headers: { "X-Requested-With": "XMLHttpRequest" } });
             if (!res.ok) return;
@@ -785,31 +895,33 @@
 
     async function startChatWithFriend(friendId, btn) {
         if (!friendId) return;
-        if (btn) btn.disabled = true;
-        try {
-            var res = await fetch(buildUrl(urls.startFriendChatTpl, friendId), {
-                method: "POST",
-                headers: { "X-CSRFToken": getCookie("csrftoken"), "X-Requested-With": "XMLHttpRequest" }
-            });
-            var data = await res.json();
-            if (!res.ok) { alert(data.error || "Không thể bắt đầu hội thoại."); return; }
-            if (data.conversation) mergeConv(data.conversation);
-            if (data.conversation && Array.isArray(data.messages)) {
-                var sorted = data.messages.slice().sort(function (a, b) { return new Date(a.created_at || 0) - new Date(b.created_at || 0); });
-                state.msgsByConv[data.conversation.id] = sorted;
-                _setPaging(data.conversation.id, sorted, MESSAGE_PAGE_SIZE, false, sorted.length);
-                setActiveConv(data.conversation.id, { messages: sorted });
-            }
-            var cand = state.friendCandidates.find(function (f) { return f.id === friendId; });
-            if (cand && data.conversation) cand.conversation_id = data.conversation.id;
-            renderFriends();
-        } catch (e) { alert("Không thể bắt đầu hội thoại."); }
-        finally { if (btn) btn.disabled = false; }
+        
+        // Find friend info from candidates
+        var cand = state.friendCandidates.find(function (f) { return f.id === friendId; });
+        if (!cand) return;
+        
+        // If already has conversation, just switch to it
+        if (cand.conversation_id) {
+            setActiveConv(cand.conversation_id);
+            return;
+        }
+        
+        // No conversation yet - show friend info in UI without server call
+        state.pendingFriendId = friendId;
+        state.activeConvId = null;
+        state.stickToBottom = true;
+        state.msgSearch = "";
+        
+        renderHeader();
+        renderMsgList(false);
+        renderFriends();
+        renderConvList();
     }
 
     // ─── Active conversation ──────────────────────────────────────────────────
     function setActiveConv(convId, opts) {
         opts = opts || {};
+        state.pendingFriendId = null;
         state.activeConvId = convId;
         state.stickToBottom = true;
         state.msgSearch = "";
@@ -832,13 +944,85 @@
     }
 
     // ─── Send message ─────────────────────────────────────────────────────────
-    async function sendMessage(e) {
-        e.preventDefault();
-        if (!state.activeConvId || state.sending) return;
-        if (!isSocketOpen(state.ws) || state.wsConvId !== state.activeConvId) {
-            openSocket(state.activeConvId);
-            return;
-        }
+	async function sendMessage(e) {
+		e.preventDefault();
+		if (state.sending) return;
+		
+		// Handle first message to a friend (no conversation yet)
+		if (state.pendingFriendId && !state.activeConvId) {
+			var content = (elInput.value || "").trim();
+			var files = Array.from(elFiles ? elFiles.files || [] : []);
+			if (!content && !files.length) return;
+			
+			for (var i = 0; i < files.length; i++) {
+				if (files[i].size >= MAX_ATTACHMENT_SIZE_BYTES) {
+					alert("Mỗi file phải nhỏ hơn 20MB.");
+					return;
+				}
+			}
+			
+			state.sending = true;
+			if (elSendBtn) elSendBtn.disabled = true;
+			
+			try {
+				var formData = new FormData();
+				formData.append("content", content);
+				for (var j = 0; j < files.length; j++) {
+					formData.append("attachments", files[j]);
+				}
+				
+				var res = await fetch(buildUrl(urls.sendFirstMsgTpl, state.pendingFriendId), {
+					method: "POST",
+					headers: { "X-CSRFToken": getCookie("csrftoken") },
+					body: formData
+				});
+				
+				var data = await res.json();
+				if (!res.ok) { alert(data.error || "Không thể gửi tin nhắn."); return; }
+				
+				// Clear pending state
+				state.pendingFriendId = null;
+				
+				// Update UI with new conversation
+				if (data.conversation) {
+					mergeConv(data.conversation, true);
+					if (data.message) {
+						if (!state.msgsByConv[data.conversation.id]) {
+							state.msgsByConv[data.conversation.id] = [];
+						}
+						state.msgsByConv[data.conversation.id].push(data.message);
+						_setPaging(data.conversation.id, state.msgsByConv[data.conversation.id], MESSAGE_PAGE_SIZE, false, 1);
+						setActiveConv(data.conversation.id, { messages: state.msgsByConv[data.conversation.id] });
+					}
+					// Connect websocket to new conversation
+					openSocket(data.conversation.id);
+				}
+				
+				elInput.value = "";
+				if (elFiles) elFiles.value = "";
+				renderFilesPreview();
+				
+				// Update friend candidate
+				var cand = state.friendCandidates.find(function (f) { return f.id === data.conversation.participants[0].id; });
+				if (cand) cand.conversation_id = data.conversation.id;
+				renderFriends();
+				
+			} catch (err) {
+				alert("Không thể gửi tin nhắn. Vui lòng thử lại.");
+			} finally {
+				state.sending = false;
+				if (elSendBtn) elSendBtn.disabled = false;
+				if (elInput) elInput.focus();
+			}
+			return;
+		}
+		
+		// Normal flow: conversation already exists
+		if (!state.activeConvId) return;
+		if (!isSocketOpen(state.ws) || state.wsConvId !== state.activeConvId) {
+			openSocket(state.activeConvId);
+			return;
+		}
 
         var content = (elInput.value || "").trim();
         var files = Array.from(elFiles ? elFiles.files || [] : []);
@@ -854,14 +1038,41 @@
         state.sending = true;
         if (elSendBtn) elSendBtn.disabled = true;
 
-        try {
-            var attachments = [];
-            if (files.length) {
-                try { attachments = await buildWsAttachments(files); }
-                catch (err) { alert("Không thể đọc file đính kèm."); return; }
-            }
-            sendWs({ action: "send_message", content: content, attachments: attachments }, state.activeConvId);
-            elInput.value = "";
+		try {
+			var attachments = [];
+			if (files.length) {
+				try { attachments = await buildWsAttachments(files); }
+				catch (err) { alert("Không thể đọc file đính kèm."); return; }
+			}
+			var clientMessageId = createClientMessageId();
+			var optimisticMessage = {
+				id: localMessageId(clientMessageId),
+				client_message_id: clientMessageId,
+				conversation_id: state.activeConvId,
+				sender_id: state.currentUserId,
+				sender_username: "Bạn",
+				sender_full_name: "Bạn",
+				sender_avatar: "",
+				content: content,
+				message_type: files.length ? "file" : "text",
+				attachments: [],
+				created_at: new Date().toISOString(),
+				is_deleted: false,
+				seen_by_user_ids: [],
+				seen_by_users: [],
+				reaction_summary: {},
+				current_user_reaction: null,
+				delivery_status: "sending"
+			};
+			upsertMsg(state.activeConvId, optimisticMessage);
+			renderMsgList(true);
+			var sent = sendWs({ action: "send_message", content: content, attachments: attachments, client_message_id: clientMessageId }, state.activeConvId);
+			if (!sent) {
+				optimisticMessage.delivery_status = "failed";
+				upsertMsg(state.activeConvId, optimisticMessage);
+				renderMsgList(true);
+			}
+			elInput.value = "";
             if (elFiles) elFiles.value = "";
             renderFilesPreview();
             state.stickToBottom = true;
@@ -934,14 +1145,40 @@
 
         if (elFiles) elFiles.addEventListener("change", renderFilesPreview);
 
-        if (elMsgList) {
+		if (elMsgList) {
             elMsgList.addEventListener("scroll", function () {
                 updateStickToBottom();
                 maybeLoadOlder();
             });
 
-            elMsgList.addEventListener("click", function (e) {
-                var toggleBtn = e.target.closest(".chat-rxn-toggle");
+			elMsgList.addEventListener("click", function (e) {
+				var rxnChip = e.target.closest(".chat-rxn-chip");
+				if (rxnChip) {
+					var bar = rxnChip.closest(".chat-rxn-bar");
+					var details = bar && bar.querySelector('.chat-rxn-details[data-msg-id="' + rxnChip.dataset.msgId + '"][data-rxn="' + rxnChip.dataset.rxn + '"]');
+					if (!details) return;
+					document.querySelectorAll(".chat-rxn-details.show").forEach(function (p) {
+						if (p !== details) p.classList.remove("show");
+					});
+					details.classList.toggle("show");
+					e.stopPropagation();
+					return;
+				}
+
+				var seenBtn = e.target.closest(".chat-seen");
+				if (seenBtn) {
+					var meta = seenBtn.closest(".chat-msg-meta");
+					var popover = meta && meta.querySelector(".chat-seen-popover");
+					if (!popover) return;
+					document.querySelectorAll(".chat-seen-popover.show").forEach(function (p) {
+						if (p !== popover) p.classList.remove("show");
+					});
+					popover.classList.toggle("show");
+					e.stopPropagation();
+					return;
+				}
+
+				var toggleBtn = e.target.closest(".chat-rxn-toggle");
                 if (toggleBtn) {
                     var actions = toggleBtn.closest(".chat-rxn-actions");
                     var picker = actions && actions.querySelector(".chat-rxn-picker");
@@ -979,13 +1216,22 @@
         bindFriendResultsClick(elFriendResults);
         bindFriendResultsClick(elFriendResultsInline);
 
-        document.addEventListener("click", function (e) {
-            if (!e.target.closest(".chat-rxn-actions")) {
+		document.addEventListener("click", function (e) {
+			if (!e.target.closest(".chat-rxn-bar")) {
+				document.querySelectorAll(".chat-rxn-details.show").forEach(function (p) { p.classList.remove("show"); });
+			}
+			if (!e.target.closest(".chat-msg-meta")) {
+				document.querySelectorAll(".chat-seen-popover.show").forEach(function (p) { p.classList.remove("show"); });
+			}
+			if (!e.target.closest(".chat-rxn-actions")) {
                 document.querySelectorAll(".chat-rxn-picker.show").forEach(function (p) { p.classList.remove("show"); });
             }
         });
 
-        window.addEventListener("beforeunload", closeSocket);
+		window.addEventListener("beforeunload", function () {
+			closeSocket();
+			closeInboxSocket();
+		});
         window.addEventListener("resize", function () {
             var prev = friendResultsTarget;
             pickFriendResultsTarget();
@@ -994,10 +1240,12 @@
     }
 
     // ─── Init ─────────────────────────────────────────────────────────────────
-    function init() {
-        requestNotificationPermission();
-        pickFriendResultsTarget();
+	function init() {
+		requestNotificationPermission();
+		pickFriendResultsTarget();
+		openInboxSocket();
         renderConvList();
+        renderHeader();
         renderFriends();
         renderFilesPreview();
         bindEvents();
@@ -1020,7 +1268,6 @@
             return;
         }
 
-        renderHeader();
         renderMsgList(false);
     }
 

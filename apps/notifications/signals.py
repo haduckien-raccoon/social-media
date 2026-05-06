@@ -1,9 +1,12 @@
-import json
 import logging
+import json
+import time
+
 import redis
 from django.conf import settings
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+
 from apps.notifications.models import Notification
 
 logger = logging.getLogger(__name__)
@@ -25,34 +28,54 @@ def _get_redis_client():
         return None
 
 
-@receiver(post_save, sender=Notification)
-def notify_handler(sender, instance: Notification, created, **kwargs):
-    # push cả create + update (đổi reaction, mark read...)
-    event = "created" if created else "updated"
-    channel = f"notify_user_{instance.user.id}_notifications"
-    open_url = f"/notifications/{instance.pk}/open/"
+def notification_channel(user_id: int) -> str:
+    return f"notify_user_{user_id}_notifications"
 
-    payload = {
+
+def serialize_notification(instance: Notification, event: str) -> dict:
+    return {
         "event": event,
         "id": instance.pk,
+        "user_id": instance.user_id,
         "actor": instance.actor.username if instance.actor else None,
         "verb_code": instance.verb_code,
         "verb_text": instance.verb_text,
         "reaction_type": instance.reaction_type,
         "target_repr": instance.target_repr,
         "link": instance.link,
-        "open_url": open_url,
+        "open_url": f"/notifications/{instance.pk}/open/",
         "is_seen": instance.is_seen,
         "is_read": instance.is_read,
+        "published_at_ms": int(time.time() * 1000),
         "created_at": instance.created_at.isoformat(),
         "updated_at": instance.updated_at.isoformat(),
     }
 
+
+def publish_notification_payload(user_id: int, payload: dict) -> bool:
     redis_client = _get_redis_client()
     if redis_client is None:
-        return
+        return False
 
     try:
-        redis_client.publish(channel, json.dumps(payload))
+        redis_client.publish(notification_channel(user_id), json.dumps(payload))
+        return True
     except Exception as exc:
-        logger.warning("Redis publish failed for notification %s: %s", instance.pk, exc)
+        logger.warning("Redis publish failed for notification user %s: %s", user_id, exc)
+        return False
+
+
+def publish_notification_event(instance: Notification, event: str) -> bool:
+    return publish_notification_payload(instance.user_id, serialize_notification(instance, event))
+
+
+@receiver(post_save, sender=Notification)
+def notify_handler(sender, instance: Notification, created, **kwargs):
+    event = "created" if created else "updated"
+    publish_notification_event(instance, event)
+
+
+@receiver(post_delete, sender=Notification)
+def notify_delete_handler(sender, instance: Notification, **kwargs):
+    payload = serialize_notification(instance, "deleted")
+    publish_notification_payload(instance.user_id, payload)

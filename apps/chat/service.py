@@ -107,6 +107,48 @@ def _reaction_summary_for_message(message: Message) -> dict:
 	return {row["reaction_type"]: row["total"] for row in summary_rows}
 
 
+def _reaction_details_for_message(message: Message) -> dict:
+	reaction_rows = (
+		MessageReaction.objects.filter(message=message)
+		.select_related("user", "user__profile")
+		.order_by("reaction_type", "user__username")
+	)
+	details: dict[str, list[dict]] = {}
+	for reaction in reaction_rows:
+		details.setdefault(reaction.reaction_type, []).append(
+			{
+				"id": reaction.user_id,
+				"username": reaction.user.username,
+				"full_name": _get_full_name(reaction.user),
+				"avatar": _get_avatar_url(reaction.user),
+			}
+		)
+	return details
+
+
+def _seen_users_for_message(message: Message) -> list[dict]:
+	participants = (
+		ConversationParticipant.objects.filter(
+			conversation=message.conversation,
+			last_read_at__isnull=False,
+			last_read_at__gte=message.created_at,
+		)
+		.exclude(user_id=message.sender_id)
+		.select_related("user", "user__profile")
+		.order_by("user__username")
+	)
+	return [
+		{
+			"id": participant.user_id,
+			"username": participant.user.username,
+			"full_name": _get_full_name(participant.user),
+			"avatar": _get_avatar_url(participant.user),
+			"last_read_at": participant.last_read_at.isoformat() if participant.last_read_at else None,
+		}
+		for participant in participants
+	]
+
+
 def _serialize_attachment(attachment: MessageAttachment) -> dict:
 	filename = attachment.filename or attachment.file.name.rsplit("/", 1)[-1]
 	return {
@@ -120,13 +162,8 @@ def _serialize_attachment(attachment: MessageAttachment) -> dict:
 
 def serialize_message(message: Message, viewer: User | None = None) -> dict:
 	attachments = list(message.attachments.all())
-	seen_by_user_ids = list(
-		ConversationParticipant.objects.filter(
-			conversation=message.conversation,
-			last_read_at__isnull=False,
-			last_read_at__gte=message.created_at,
-		).values_list("user_id", flat=True)
-	)
+	seen_by_users = _seen_users_for_message(message)
+	seen_by_user_ids = [user_payload["id"] for user_payload in seen_by_users]
 
 	current_user_reaction = None
 	if viewer and getattr(viewer, "is_authenticated", False):
@@ -149,7 +186,9 @@ def serialize_message(message: Message, viewer: User | None = None) -> dict:
 		"created_at": message.created_at.isoformat(),
 		"is_deleted": message.is_deleted,
 		"seen_by_user_ids": seen_by_user_ids,
+		"seen_by_users": seen_by_users,
 		"reaction_summary": _reaction_summary_for_message(message),
+		"reaction_details": _reaction_details_for_message(message),
 		"current_user_reaction": current_user_reaction,
 	}
 
@@ -434,6 +473,7 @@ def toggle_message_reaction(
 		"user_id": user.id,
 		"reaction_type": current_user_reaction,
 		"reaction_summary": reaction_summary,
+		"reaction_details": _reaction_details_for_message(message),
 	}
 
 	if broadcast:
