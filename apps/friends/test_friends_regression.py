@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
 
 from apps.accounts.models import User
 from apps.friends.models import Friend, FriendRequest
@@ -9,10 +9,12 @@ from apps.friends.services import (
 	send_friend_request,
 	unfriend_user,
 )
+from apps.friends.views import sent_request_status_ajax
 
 
 class FriendRegressionTests(TestCase):
 	def setUp(self):
+		self.factory = RequestFactory()
 		self.alice = User.objects.create_user(
 			email="alice_friend_regression@example.com",
 			username="alice_friend_regression",
@@ -53,3 +55,14 @@ class FriendRegressionTests(TestCase):
 		self.assertFalse(Friend.objects.filter(user=self.alice, friend=self.bob).exists())
 		self.assertFalse(Friend.objects.filter(user=self.bob, friend=self.alice).exists())
 		self.assertEqual(get_friend_status_detail(self.alice, self.bob), {"status": "none"})
+
+	def test_sent_request_status_returns_accepted_after_accept(self):
+		request_obj, _ = send_friend_request(self.alice, self.bob)
+		accept_friend_request(self.bob, request_obj.id)
+
+		request = self.factory.get(f"/friends/api/sent-status/{request_obj.id}/")
+		request.user = self.alice
+		response = sent_request_status_ajax(request, request_obj.id)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertJSONEqual(response.content, {"status": "accepted", "request_id": request_obj.id})

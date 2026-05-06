@@ -24,6 +24,7 @@ from apps.chat.views import (
 	send_message_view,
 	start_chat_with_friend_view,
 	toggle_message_reaction_view,
+	unread_count_view,
 )
 from apps.friends.models import Friend
 
@@ -109,14 +110,17 @@ class ChatServiceTests(TestCase):
 		first = toggle_message_reaction(self.bob, message, "like")
 		self.assertEqual(first["status"], "added")
 		self.assertEqual(first["reaction_summary"]["like"], 1)
+		self.assertEqual(first["reaction_details"]["like"][0]["id"], self.bob.id)
 
 		second = toggle_message_reaction(self.bob, message, "wow")
 		self.assertEqual(second["status"], "changed")
 		self.assertEqual(second["reaction_summary"], {"wow": 1})
+		self.assertEqual(second["reaction_details"]["wow"][0]["username"], self.bob.username)
 
 		third = toggle_message_reaction(self.bob, message, "wow")
 		self.assertEqual(third["status"], "removed")
 		self.assertEqual(third["reaction_summary"], {})
+		self.assertEqual(third["reaction_details"], {})
 		self.assertEqual(MessageReaction.objects.filter(message=message).count(), 0)
 
 	def test_serialize_message_contains_seen_and_reaction_data(self):
@@ -127,7 +131,22 @@ class ChatServiceTests(TestCase):
 		payload = serialize_message(message, viewer=self.bob)
 		self.assertEqual(payload["current_user_reaction"], "love")
 		self.assertEqual(payload["reaction_summary"]["love"], 1)
+		self.assertEqual(payload["reaction_details"]["love"][0]["id"], self.bob.id)
 		self.assertIn(self.bob.id, payload["seen_by_user_ids"])
+		self.assertEqual(payload["seen_by_users"][0]["id"], self.bob.id)
+		self.assertEqual(payload["seen_by_users"][0]["username"], self.bob.username)
+
+	def test_serialize_message_contains_group_seen_user_details(self):
+		group_conversation = create_conversation(self.alice, [self.bob.id, self.charlie.id])
+		message = create_message(self.alice, group_conversation, content="group payload")
+		mark_conversation_read(self.bob, group_conversation)
+		mark_conversation_read(self.charlie, group_conversation)
+
+		payload = serialize_message(message, viewer=self.alice)
+		seen_ids = {user_payload["id"] for user_payload in payload["seen_by_users"]}
+
+		self.assertEqual(seen_ids, {self.bob.id, self.charlie.id})
+		self.assertNotIn(self.alice.id, seen_ids)
 
 
 @override_settings(MEDIA_ROOT=tempfile.gettempdir())
@@ -197,6 +216,21 @@ class ChatViewTests(TestCase):
 		self.assertEqual(payload["unread_count"], 0)
 		self.assertIsNotNone(payload["last_read_at"])
 
+	def test_unread_count_view_returns_total_unread_messages(self):
+		other_conversation = create_conversation(self.alice, [self.charlie.id])
+		create_message(self.bob, self.conversation, content="Unread one")
+		create_message(self.charlie, other_conversation, content="Unread two")
+		create_message(self.alice, self.conversation, content="Own message")
+
+		request = self.factory.get("/chat/api/unread-count/")
+		request.user = self.alice
+
+		response = unread_count_view(request)
+		payload = json.loads(response.content.decode("utf-8"))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(payload["unread_count"], 2)
+
 	def test_toggle_message_reaction_view_returns_reaction_state(self):
 		message = create_message(self.alice, self.conversation, content="React from view")
 		request = self.factory.post(
@@ -241,6 +275,17 @@ class ChatFriendDiscoveryTests(TestCase):
 
 	def test_search_friends_view_returns_only_friends(self):
 		request = self.factory.get("/chat/api/friends/search/?q=bob")
+		request.user = self.alice
+
+		response = search_friends_view(request)
+		payload = json.loads(response.content.decode("utf-8"))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(len(payload["results"]), 1)
+		self.assertEqual(payload["results"][0]["id"], self.bob.id)
+
+	def test_search_friends_view_returns_friends_without_query(self):
+		request = self.factory.get("/chat/api/friends/search/")
 		request.user = self.alice
 
 		response = search_friends_view(request)

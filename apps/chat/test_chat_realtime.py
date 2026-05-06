@@ -80,6 +80,7 @@ class ChatRealtimeServiceTests(TestCase):
 		self.assertEqual(payload["event"], "message_reaction")
 		self.assertEqual(payload["message_id"], message.id)
 		self.assertEqual(payload["reaction_summary"], {"love": 1})
+		self.assertEqual(payload["reaction_details"]["love"][0]["id"], self.bob.id)
 
 
 class ChatConsumerContractTests(TestCase):
@@ -184,7 +185,10 @@ class ChatConsumerActionTests(TransactionTestCase):
 
 		async_to_sync(consumer.receive)(text_data=json.dumps(payload))
 		mocked_create_message.assert_awaited_once()
-		consumer.channel_layer.group_send.assert_awaited_once()
+		self.assertGreaterEqual(consumer.channel_layer.group_send.await_count, 1)
+		group_name, event = consumer.channel_layer.group_send.await_args_list[0].args
+		self.assertEqual(group_name, f"chat_conversation_{self.conversation.id}")
+		self.assertEqual(event["data"]["event"], "message_new")
 
 		content_arg, attachments = mocked_create_message.call_args.args
 		self.assertEqual(content_arg, "Hello websocket")

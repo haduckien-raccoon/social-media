@@ -1,3 +1,6 @@
+import json
+from unittest.mock import patch
+
 from django.test import TestCase
 
 from apps.accounts.models import User
@@ -53,3 +56,45 @@ class FriendNotificationTests(TestCase):
                 verb_code="friend_accept",
             ).exists()
         )
+
+    def test_send_friend_request_publishes_standard_notification_payload(self):
+        published_messages = []
+
+        class CapturingRedisClient:
+            def publish(self, channel, payload):
+                published_messages.append((channel, json.loads(payload)))
+                return 1
+
+        with patch("apps.notifications.signals._get_redis_client", return_value=CapturingRedisClient()):
+            request_obj, _ = send_friend_request(self.sender, self.receiver)
+
+        self.assertIsNotNone(request_obj)
+        self.assertEqual(len(published_messages), 1)
+        channel, payload = published_messages[0]
+        self.assertEqual(channel, f"notify_user_{self.receiver.id}_notifications")
+        self.assertEqual(payload["event"], "created")
+        self.assertEqual(payload["verb_code"], "friend_request")
+        self.assertEqual(payload["actor"], self.sender.username)
+        self.assertIn("published_at_ms", payload)
+
+    def test_accept_friend_request_publishes_standard_notification_payload(self):
+        request_obj, _ = send_friend_request(self.sender, self.receiver)
+        Notification.objects.all().delete()
+        published_messages = []
+
+        class CapturingRedisClient:
+            def publish(self, channel, payload):
+                published_messages.append((channel, json.loads(payload)))
+                return 1
+
+        with patch("apps.notifications.signals._get_redis_client", return_value=CapturingRedisClient()):
+            success, _ = accept_friend_request(self.receiver, request_obj.id)
+
+        self.assertTrue(success)
+        self.assertEqual(len(published_messages), 1)
+        channel, payload = published_messages[0]
+        self.assertEqual(channel, f"notify_user_{self.sender.id}_notifications")
+        self.assertEqual(payload["event"], "created")
+        self.assertEqual(payload["verb_code"], "friend_accept")
+        self.assertEqual(payload["actor"], self.receiver.username)
+        self.assertIn("published_at_ms", payload)

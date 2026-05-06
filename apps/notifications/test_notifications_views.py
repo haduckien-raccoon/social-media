@@ -5,7 +5,13 @@ from django.test import RequestFactory, TestCase, override_settings
 
 from apps.accounts.models import User
 from apps.notifications.models import Notification
-from apps.notifications.views import list_notifications, open_notification
+from apps.notifications.views import (
+    delete_notification,
+    list_notifications,
+    mark_all_notifications_read,
+    open_notification,
+    unread_count,
+)
 
 
 class NotificationViewTests(TestCase):
@@ -59,6 +65,7 @@ class NotificationViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         payload = json.loads(response.content.decode("utf-8"))
         self.assertEqual(payload["count"], 1)
+        self.assertEqual(payload["unread_count"], 1)
         self.assertEqual(payload["results"][0]["verb_code"], "friend_request")
         self.assertEqual(payload["results"][0]["open_url"], f"/notifications/{payload['results'][0]['id']}/open/")
 
@@ -127,7 +134,7 @@ class NotificationViewTests(TestCase):
         Notification.objects.create(
             user=self.recipient,
             actor=self.actor,
-            verb_code="friend_request",
+            verb_code="friend_accept",
             verb_text="b",
         )
 
@@ -144,3 +151,81 @@ class NotificationViewTests(TestCase):
         self.assertEqual(payload["page"], 1)
         self.assertEqual(payload["page_size"], 100)
         self.assertEqual(payload["count"], 2)
+
+    def test_unread_count_reflects_friend_notifications(self):
+        Notification.objects.create(
+            user=self.recipient,
+            actor=self.actor,
+            verb_code="friend_request",
+            verb_text="request",
+            is_read=False,
+        )
+        Notification.objects.create(
+            user=self.recipient,
+            actor=self.actor,
+            verb_code="friend_accept",
+            verb_text="accept",
+            is_read=False,
+        )
+
+        request = self.factory.get("/notifications/unread-count/")
+        request.user = self.recipient
+        response = unread_count(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"unread_count": 2})
+
+    def test_mark_all_notifications_read_publishes_bulk_event(self):
+        Notification.objects.create(
+            user=self.recipient,
+            actor=self.actor,
+            verb_code="friend_request",
+            verb_text="request",
+            is_read=False,
+        )
+        Notification.objects.create(
+            user=self.recipient,
+            actor=self.actor,
+            verb_code="friend_accept",
+            verb_text="accept",
+            is_read=False,
+        )
+        published_payloads = []
+
+        def capture_publish(user_id, payload):
+            published_payloads.append((user_id, payload))
+            return True
+
+        request = self.factory.post("/notifications/read-all/")
+        request.user = self.recipient
+
+        with patch("apps.notifications.views.publish_notification_payload", side_effect=capture_publish):
+            response = mark_all_notifications_read(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Notification.objects.filter(user=self.recipient, is_read=False).count(), 0)
+        self.assertEqual(published_payloads, [(self.recipient.id, {"event": "bulk_read", "user_id": self.recipient.id, "unread_count": 0})])
+
+    def test_delete_notification_publishes_unread_count_when_unread_item_removed(self):
+        notification = Notification.objects.create(
+            user=self.recipient,
+            actor=self.actor,
+            verb_code="friend_request",
+            verb_text="request",
+            is_read=False,
+        )
+        published_payloads = []
+
+        def capture_publish(user_id, payload):
+            published_payloads.append((user_id, payload))
+            return True
+
+        request = self.factory.post(f"/notifications/{notification.id}/delete/")
+        request.user = self.recipient
+
+        with patch("apps.notifications.views.publish_notification_payload", side_effect=capture_publish):
+            response = delete_notification(request, notification.id)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"ok": True, "deleted": True, "unread_count": 0})
+        self.assertEqual(published_payloads, [(self.recipient.id, {"event": "unread_count", "user_id": self.recipient.id, "unread_count": 0})])

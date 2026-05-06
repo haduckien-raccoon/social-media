@@ -6,8 +6,10 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase, override_settings
 
 from apps.accounts.models import User
+from apps.friends.services import accept_friend_request, send_friend_request
 from apps.notifications.models import Notification
 from apps.notifications.signals import _get_redis_client as get_signal_redis_client
+from apps.notifications.signals import publish_notification_payload
 from apps.notifications.views import _get_redis_client as get_stream_redis_client
 from apps.notifications.views import sse_notifications
 
@@ -124,7 +126,7 @@ class NotificationSSETests(TestCase):
             )
         self.assertIsNotNone(notif.id)
 
-    def test_notification_signal_payload_contains_open_url_and_iso_timestamps(self):
+    def test_notification_signal_payload_contains_open_url_iso_timestamps_and_publish_timestamp(self):
         redis_client = _CapturingRedisClient()
 
         with patch("apps.notifications.signals._get_redis_client", return_value=redis_client):
@@ -145,10 +147,48 @@ class NotificationSSETests(TestCase):
         self.assertEqual(payload["open_url"], f"/notifications/{notif.id}/open/")
         self.assertEqual(payload["link"], "/accounts/profile/actor/")
         self.assertEqual(payload["event"], "created")
+        self.assertGreater(payload["published_at_ms"], 0)
 
-        # Raises ValueError if format is invalid.
         datetime.fromisoformat(payload["created_at"])
         datetime.fromisoformat(payload["updated_at"])
+
+    def test_notification_delete_publishes_deleted_event(self):
+        redis_client = _CapturingRedisClient()
+        with patch("apps.notifications.signals._get_redis_client", return_value=redis_client):
+            notif = Notification.objects.create(
+                user=self.recipient,
+                actor=self.actor,
+                verb_code="friend_request",
+                verb_text="actor sent request",
+            )
+            redis_client.published_messages.clear()
+            notif.delete()
+
+        self.assertEqual(len(redis_client.published_messages), 1)
+        _, raw_payload = redis_client.published_messages[0]
+        payload = json.loads(raw_payload)
+        self.assertEqual(payload["event"], "deleted")
+        self.assertEqual(payload["id"], notif.id)
+
+    def test_publish_notification_payload_returns_false_when_redis_missing(self):
+        with patch("apps.notifications.signals._get_redis_client", return_value=None):
+            self.assertFalse(publish_notification_payload(self.recipient.id, {"event": "bulk_read"}))
+
+    def test_friend_request_and_accept_emit_standard_notification_events(self):
+        redis_client = _CapturingRedisClient()
+
+        with patch("apps.notifications.signals._get_redis_client", return_value=redis_client):
+            request_obj, _ = send_friend_request(self.actor, self.recipient)
+            Notification.objects.filter(user=self.recipient).delete()
+            redis_client.published_messages.clear()
+            accept_friend_request(self.recipient, request_obj.id)
+
+        self.assertEqual(len(redis_client.published_messages), 1)
+        channel, raw_payload = redis_client.published_messages[0]
+        payload = json.loads(raw_payload)
+        self.assertEqual(channel, f"notify_user_{self.actor.id}_notifications")
+        self.assertEqual(payload["event"], "created")
+        self.assertEqual(payload["verb_code"], "friend_accept")
 
     @override_settings(
         REDIS_HOST="redis-host",
