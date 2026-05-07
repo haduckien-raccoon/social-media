@@ -16,10 +16,14 @@ from django.conf import settings
 from django.contrib.staticfiles.handlers import ASGIStaticFilesHandler
 from django.core.asgi import get_asgi_application
 
+
+def _env_flag(name, default=""):
+    return os.getenv(name, default).strip().lower() in {"1", "true", "yes", "y"}
+
 # Ensure Django app registry is fully initialized before importing consumers/routing.
 django_asgi_app = get_asgi_application()
-if settings.DEBUG:
-    # Serve static files in development when running via ASGI server (uvicorn/daphne).
+if settings.DEBUG or _env_flag("DJANGO_SERVE_STATIC", "false"):
+    # Serve static files when running via ASGI server (uvicorn/daphne).
     django_asgi_app = ASGIStaticFilesHandler(django_asgi_app)
 
 from apps.middleware.jwt_auth import jwt_auth_middleware_stack

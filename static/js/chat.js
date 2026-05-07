@@ -258,6 +258,17 @@
     // ─── Render: Active Header ────────────────────────────────────────────────
     function renderHeader() {
         if (!elHeader) return;
+        var shell = document.querySelector(".chat-shell");
+        var chatPage = document.querySelector(".chat-page");
+        if (shell) {
+            if (state.activeConvId || state.pendingFriendId) {
+                shell.classList.add("has-active-conv");
+                if (chatPage) chatPage.classList.add("has-active-conv");
+            } else {
+                shell.classList.remove("has-active-conv");
+                if (chatPage) chatPage.classList.remove("has-active-conv");
+            }
+        }
         if (state.pendingFriendId && !state.activeConvId) {
             var pendingFriend = state.friendCandidates.find(function (friend) {
                 return friend.id === state.pendingFriendId;
@@ -266,6 +277,7 @@
             var pendingAvatar = pendingFriend ? pendingFriend.avatar : "";
             elHeader.innerHTML =
                 '<div class="chat-header-draft">' +
+                    '<button type="button" class="chat-mob-back" aria-label="Quay lại">❮</button>' +
                     '<img class="chat-header-avatar" src="' + escapeHtml(pendingAvatar || ("https://ui-avatars.com/api/?name=" + encodeURIComponent(pendingName || "U"))) + '" alt="">' +
                     '<div class="chat-header-text">' +
                         '<h3>' + escapeHtml(pendingName) + '</h3>' +
@@ -295,6 +307,7 @@
 
         elHeader.innerHTML =
             '<div class="chat-header-info">' +
+                '<button type="button" class="chat-mob-back" aria-label="Quay lại">❮</button>' +
                 '<div class="chat-header-avatar-wrap">' +
                     '<img class="chat-header-avatar" src="' + escapeHtml(avatarSrc) + '" alt="">' +
                     '<span class="chat-online-dot"></span>' +
@@ -840,7 +853,8 @@
             if (isOlder) {
                 var existing = state.msgsByConv[convId] || [];
                 var existIds = new Set(existing.map(function (m) { return m.id; }));
-                var older = incoming.filter(function (m) { return !existIds.has(m.id); });
+                var incoming_sorted = incoming.slice().sort(function (a, b) { return new Date(a.created_at || 0) - new Date(b.created_at || 0); });
+                var older = incoming_sorted.filter(function (m) { return !existIds.has(m.id); });
                 if (older.length) {
                     state.msgsByConv[convId] = older.concat(existing);
                     changed = true;
@@ -1103,6 +1117,22 @@
 
     // ─── Event binding ────────────────────────────────────────────────────────
     function bindEvents() {
+        if (elHeader) {
+            elHeader.addEventListener("click", function(e) {
+                if (e.target.closest(".chat-mob-back")) {
+                    state.activeConvId = null;
+                    state.pendingFriendId = null;
+                    if (window.history.pushState) {
+                        var url = new URL(window.location.href);
+                        url.search = "";
+                        window.history.pushState({}, document.title, url.toString());
+                    }
+                    renderHeader();
+                    renderConvList();
+                    renderMsgList();
+                }
+            });
+        }
         if (elConvFilter) {
             elConvFilter.addEventListener("input", function (e) {
                 state.convFilter = e.target.value || "";
