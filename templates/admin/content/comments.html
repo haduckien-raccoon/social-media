@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Moderation - Bình luận</h2>
+    {% include 'admin/partials/nav.html' %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="d-flex flex-wrap gap-2">
+                <input type="text" name="q" class="form-control" placeholder="Tìm theo nội dung, user, ID..." value="{{ query }}">
+                <select name="status" class="form-select" style="max-width: 200px;">
+                    <option value="">Tất cả trạng thái</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <select name="deleted" class="form-select" style="max-width: 200px;">
+                    <option value="">Tất cả</option>
+                    <option value="1" {% if deleted == '1' %}selected{% endif %}>Đã xóa mềm</option>
+                    <option value="0" {% if deleted == '0' %}selected{% endif %}>Chưa xóa</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Lọc</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Bài viết</th>
+                    <th>Người viết</th>
+                    <th>Nội dung</th>
+                    <th>Trạng thái</th>
+                    <th>Xóa mềm</th>
+                    <th>Vi phạm</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comment in comments %}
+                <tr>
+                    <td>{{ comment.id }}</td>
+                    <td>#{{ comment.post.id }}</td>
+                    <td>{{ comment.user.username }}</td>
+                    <td>{{ comment.content|truncatechars:80 }}</td>
+                    <td>{{ comment.status }}</td>
+                    <td>{% if comment.is_deleted %}<span class="badge bg-danger">Đã xóa</span>{% else %}<span class="badge bg-success">Hoạt động</span>{% endif %}</td>
+                    <td>{{ comment.violation_count }}</td>
+                    <td>{{ comment.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <form method="POST" action="{% url 'custom_admin:content_comment_action' comment.id %}" class="d-flex flex-column gap-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <select name="action" class="form-select form-select-sm">
+                                <option value="flag">Gắn cờ</option>
+                                <option value="unflag">Bỏ cờ</option>
+                                <option value="hide">Ẩn</option>
+                                <option value="delete">Xóa</option>
+                                <option value="restore">Khôi phục</option>
+                            </select>
+                            <input type="text" name="reason" class="form-control form-control-sm" placeholder="Lý do (tuỳ chọn)">
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Áp dụng</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" class="text-center">Không có bình luận phù hợp.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if comments.paginator.num_pages > 1 %}
+    <nav>
+        <ul class="pagination">
+            {% if comments.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ comments.previous_page_number }}&q={{ query }}&status={{ status }}&deleted={{ deleted }}">Trước</a></li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ comments.number }}/{{ comments.paginator.num_pages }}</span></li>
+            {% if comments.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ comments.next_page_number }}&q={{ query }}&status={{ status }}&deleted={{ deleted }}">Sau</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

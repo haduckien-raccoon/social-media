@@ -30,6 +30,7 @@ handler403 = 'apps.core.views.error_403_view'
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("system-admin/", include("apps.admin.urls")),
     path("", include("apps.core.urls")),
     path("accounts/", include("apps.accounts.urls")),
     path('friends/', include('apps.friends.urls')),

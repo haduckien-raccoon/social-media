@@ -1,8 +1,10 @@
 # services.py
 # from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.db.models import Count
 from .models import SearchHistory
 from apps.accounts.models import User
+from apps.posts.models import Hashtag
 # User = get_user_model()
 
 def get_user_history(user, limit=10):
@@ -64,3 +66,29 @@ def save_profile_click(user, target_user_id):
         return obj
     except User.DoesNotExist:
         return None
+
+
+def search_hashtags(query, limit=10):
+    """Tìm hashtag theo từ khóa."""
+    keyword = (query or "").strip().lstrip("#").lower()
+    if not keyword:
+        return []
+
+    qs = (
+        Hashtag.objects
+        .filter(tag__icontains=keyword)
+        .annotate(post_count=Count("posts", distinct=True))
+        .order_by("-post_count", "tag")
+    )
+
+    if limit is not None:
+        qs = qs[:limit]
+
+    results = []
+    for tag in qs:
+        results.append({
+            "id": tag.id,
+            "tag": tag.tag,
+            "post_count": tag.post_count,
+        })
+    return results

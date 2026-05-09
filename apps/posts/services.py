@@ -1,4 +1,6 @@
-﻿from django.db import transaction
+﻿import re
+
+from django.db import transaction
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.utils import timezone
 from django.db.models import Q, Count
@@ -171,8 +173,14 @@ def create_post(
                 tagged_user_ids.add(uid_int)
 
     # 5. Hashtags
+    content_hashtags = extract_hashtags_from_text(normalized_content)
+    combined_hashtags = []
     if hashtags:
-        add_hashtags(post, hashtags)
+        combined_hashtags.extend(hashtags)
+    if content_hashtags:
+        combined_hashtags.extend(content_hashtags)
+    if combined_hashtags:
+        add_hashtags(post, combined_hashtags)
 
     # 6. Location
     if location_name:
@@ -211,6 +219,7 @@ def update_post(
     content=None, 
     privacy=None, 
     tagged_users=None, 
+    hashtags=None,
     images=None, 
     files=None, 
     location_name=None,
@@ -280,6 +289,15 @@ def update_post(
             remove_location(post)
         else:
             add_location(post, location_name, 0.0, 0.0)
+
+    # 6. Update Hashtags
+    combined_hashtags = []
+    if hashtags is not None:
+        combined_hashtags.extend(hashtags)
+    if content is not None:
+        combined_hashtags.extend(extract_hashtags_from_text(post.content))
+    if hashtags is not None or content is not None:
+        sync_hashtags(post, combined_hashtags)
 
     post.updated_at = timezone.now()
     post.save()
@@ -673,6 +691,30 @@ def toggle_comment_reaction(user, comment, reaction_type):
 # =====================================================
 # 7. UTILS
 # =====================================================
+HASHTAG_PATTERN = re.compile(r"#([^\s#]{1,50})", re.UNICODE)
+HASHTAG_TRAILING_PUNCT = ".,!?;:()[]{}\"'`"
+
+
+def extract_hashtags_from_text(text):
+    """Trích xuất hashtag từ nội dung text (giữ thứ tự, không trùng)."""
+    if not text:
+        return []
+    tags = []
+    seen = set()
+    for raw_tag in HASHTAG_PATTERN.findall(text):
+        tag = raw_tag.strip().lower().strip(HASHTAG_TRAILING_PUNCT)
+        if not tag or tag in seen:
+            continue
+        seen.add(tag)
+        tags.append(tag)
+    return tags
+
+
+def sync_hashtags(post, hashtags):
+    """Đồng bộ hashtags cho bài viết."""
+    PostHashtag.objects.filter(post=post).delete()
+    add_hashtags(post, hashtags)
+
 def toggle_comments(post, user, enable: bool):
     """Bật/tắt bình luận cho bài viết"""
     if post.author != user:

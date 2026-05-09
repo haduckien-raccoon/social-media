@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Quản lý người dùng</h2>
+    {% include 'admin/partials/nav.html' %}
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="d-flex gap-2">
+                <input type="text" name="q" class="form-control" placeholder="Tìm theo email hoặc username..." value="{{ query }}">
+                <select name="status" class="form-select" style="max-width: 200px;">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active" {% if status == 'active' %}selected{% endif %}>Hoạt động</option>
+                    <option value="banned" {% if status == 'banned' %}selected{% endif %}>Đã khóa</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Lọc</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tham gia</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>
+                        {% if user.is_staff %} <span class="badge bg-danger">Admin</span>
+                        {% else %} <span class="badge bg-secondary">User</span> {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_banned %} <span class="badge bg-danger">Banned</span>
+                        {% else %} <span class="badge bg-success">Active</span> {% endif %}
+                    </td>
+                    <td>{{ user.date_joined|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'custom_admin:user_detail' user.id %}" class="btn btn-sm btn-info">Chi tiết</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center">Không tìm thấy người dùng nào.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

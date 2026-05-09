@@ -67,7 +67,8 @@ def feed_view(request):
         .distinct()  # Bắt buộc có distinct() vì ta có JOIN với bảng GroupMember (Many-to-Many)
         .select_related("author", "author__profile")
         .prefetch_related(
-            "images", "files", "comments", "shared_post", 
+            "images", "files", "comments", "shared_post",
+            "hashtags", "tagged_users__user", "group_context__group",
             "shared_post__original_post", "shared_post__original_post__author",
             "shared_post__original_post__author__profile", "shared_post__original_post__images"
         )
@@ -142,11 +143,93 @@ def public_feed_view(request):
         setattr(post, 'current_user_reaction', reaction.reaction_type if reaction else None)
     return render(request, "posts/public_feed.html", {"posts": posts})
 
+
+def hashtag_feed_view(request, tag):
+    """Danh sách bài viết theo hashtag"""
+    normalized_tag = (tag or "").strip().lstrip("#").lower()
+    hashtag = get_object_or_404(Hashtag, tag=normalized_tag)
+
+    friends_ids = get_friend_ids(request.user)
+
+    personal_posts_q = Q(group_context__isnull=True) & (
+        Q(privacy="public") |
+        Q(privacy="friends", author__id__in=friends_ids) |
+        Q(privacy="only_me", author=request.user)
+    )
+
+    group_posts_q = Q(
+        group_context__isnull=False,
+        group_context__is_deleted=False,
+        group_context__status="approved"
+    ) & (
+        Q(group_context__group__members__user=request.user, group_context__group__members__status="approved") |
+        Q(group_context__group__owner=request.user)
+    )
+
+    final_filter = (personal_posts_q | group_posts_q) & Q(hashtags=hashtag)
+
+    posts = (
+        Post.objects
+        .filter(is_deleted=False)
+        .filter(final_filter)
+        .distinct()
+        .select_related("author", "author__profile")
+        .prefetch_related(
+            "images", "files", "comments", "shared_post",
+            "hashtags", "tagged_users__user", "group_context__group",
+            "shared_post__original_post", "shared_post__original_post__author",
+            "shared_post__original_post__author__profile", "shared_post__original_post__images"
+        )
+        .annotate(
+            reaction_count=Count("reactions", distinct=True),
+            comment_count=Count("comments", filter=Q(comments__is_deleted=False), distinct=True),
+            share_count=Count("shares", distinct=True),
+        )
+        .order_by("-created_at")
+    )
+
+    paginator = Paginator(posts, 5)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    post_list = list(page_obj.object_list)
+    if post_list:
+        my_reactions = (
+            PostReaction.objects
+            .filter(user=request.user, post__in=post_list)
+            .values_list("post_id", "reaction_type")
+        )
+        my_reaction_map = {pid: rtype for pid, rtype in my_reactions}
+    else:
+        my_reaction_map = {}
+
+    for post in post_list:
+        post.current_user_reaction = my_reaction_map.get(post.id)
+        shares = list(post.shared_post.all())
+        post.original_post_obj = shares[0].original_post if shares else None
+
+    if request.GET.get("ajax") == "1":
+        html = render_to_string(
+            "posts/partials/post_list_chunk.html",
+            {"posts": post_list, "request": request}
+        )
+        return JsonResponse({
+            "html": html,
+            "has_next": page_obj.has_next()
+        })
+
+    return render(request, "posts/feed.html", {
+        "hashtag": hashtag,
+        "posts": post_list,
+        "has_next": page_obj.has_next(),
+        "profile": getattr(request.user, "profile", None),
+    })
+
 def post_detail_view(request, post_id):
     """Chi tiết bài viết - Đã tích hợp kiểm tra quyền Group & Bạn bè"""
     post = get_object_or_404(
         Post.objects.select_related("author").prefetch_related(
-            "images", "files", "tagged_users", "hashtags", "reactions"
+            "images", "files", "tagged_users__user", "hashtags", "reactions"
         ),
         id=post_id,
         is_deleted=False

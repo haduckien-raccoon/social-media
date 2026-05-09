@@ -127,6 +127,11 @@
             <hr>
         </div> {% endcomment %}
         <div class="feed-center">
+            {% if hashtag %}
+            <div class="alert alert-info" style="border-radius: 12px;">
+                Bài viết với hashtag <strong>#{{ hashtag.tag }}</strong>
+            </div>
+            {% endif %}
             <div class="create-post">
                 <div class="cp-top">
                     <img src="{{ request.user.profile.avatar.url|default:'images/avatars/normal.jpg' }}" style="width:40px; height:40px; border-radius:50%">

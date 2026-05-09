@@ -125,6 +125,41 @@
             pointer-events: auto;
         }
 
+        .post-hashtags { padding: 0 16px 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .post-hashtag {
+            display: inline-flex; align-items: center;
+            padding: 4px 10px; border-radius: 999px;
+            background: #e7f3ff; color: #1877f2;
+            font-size: 13px; font-weight: 600;
+        }
+        .tagged-more { color: #1877f2; font-weight: 600; }
+
+        .tagged-modal {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.35);
+            display: none; align-items: center; justify-content: center;
+            z-index: 3000;
+        }
+        .tagged-modal.show { display: flex; }
+        .tagged-box {
+            width: 100%; max-width: 420px;
+            background: #fff; border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+            overflow: hidden;
+        }
+        .tagged-header {
+            padding: 12px 16px; font-weight: 700; font-size: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+        .tagged-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+        .tagged-item { padding: 6px 0; font-weight: 600; color: #262626; }
+        .tagged-close {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: #e4e6eb; color: #444;
+            font-size: 18px; line-height: 1;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar { width: 72px; padding: 20px 12px; }
@@ -164,6 +199,9 @@
             <div class="nav-item nav-item-profile" onclick="profile()">
                 <i class="fa-solid fa-circle-user"></i> <span class="nav-item-label">{{ request.user.username }}</span>
             </div>
+            {% if request.user.is_staff %}
+            <div class="nav-item" onclick="window.location.href='{% url 'custom_admin:user_list' %}'"><i class="fa-solid fa-shield-halved"></i> <span class="nav-item-label">Admin</span></div>
+            {% endif %}
         </nav>
         <div class="nav-item"><i class="fa-solid fa-bars"></i> <span class="nav-item-label">More</span></div>
         <div class="nav-item" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> <span class="nav-item-label">Logout</span></div>
@@ -185,6 +223,23 @@
         function group() { window.location.href = "/groups/"; }
         function goChat() { window.location.href = "/chat/"; }
         function goNotifications() { window.location.href = "/notifications/"; }
+
+        function openTaggedModal(postId) {
+            const modal = document.getElementById(`tagged-modal-${postId}`);
+            if (modal) modal.classList.add("show");
+        }
+
+        function closeTaggedModal(postId) {
+            const modal = document.getElementById(`tagged-modal-${postId}`);
+            if (modal) modal.classList.remove("show");
+        }
+
+        function handleTaggedBackdrop(event, postId) {
+            if (!event) return;
+            if (event.target && event.target.id === `tagged-modal-${postId}`) {
+                closeTaggedModal(postId);
+            }
+        }
 
         (function initGlobalNotifications() {
             const badge = document.getElementById("global-notification-badge");

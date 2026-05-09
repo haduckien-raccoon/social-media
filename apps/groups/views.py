@@ -189,6 +189,7 @@ def group_detail(request, group_id):
             'posts': posts,
             'user': request.user,
             'user_role': user_role,
+            'group': group,
         }, request=request)
         
         return JsonResponse({

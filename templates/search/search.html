@@ -196,6 +196,10 @@
 
     async function searchUsersSuggestions(query) {
         try {
+            if (query.startsWith('#')) {
+                await searchHashtagsSuggestions(query);
+                return;
+            }
             const url = `{% url 'search:api_search_users' %}?q=${encodeURIComponent(query)}`;
             const res = await fetch(url);
             if (res.ok) {
@@ -206,41 +210,81 @@
         finally { toggleLoading(false); }
     }
 
+    async function searchHashtagsSuggestions(query) {
+        try {
+            const url = `{% url 'search:api_search_hashtags' %}?q=${encodeURIComponent(query)}`;
+            const res = await fetch(url);
+            if (res.ok) {
+                const data = await res.json();
+                renderDropdown(data.results, 'hashtag');
+            }
+        } catch (err) { console.error(err); }
+        finally { toggleLoading(false); }
+    }
+
     async function renderFullResults(query) {
         toggleLoading(true);
         mainResults.innerHTML = '<div style="padding:20px; text-align:center;">Đang tải...</div>';
         mainResults.style.display = 'block'; // Hiện khung kết quả
 
         try {
-            const url = `{% url 'search:api_search_users' %}?q=${encodeURIComponent(query)}&limit=all`;
-            const res = await fetch(url);
-            
-            if (res.ok) {
-                const data = await res.json();
-                const items = data.results;
+            if (query.startsWith('#')) {
+                const url = `{% url 'search:api_search_hashtags' %}?q=${encodeURIComponent(query)}&limit=all`;
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    const items = data.results;
 
-                if (items.length === 0) {
-                    mainResults.innerHTML = `<div style="padding: 20px; text-align: center; color: #65676b;">Không tìm thấy kết quả nào cho "<b>${query}</b>"</div>`;
-                } else {
-                    let html = `<div style="padding: 10px 15px; font-weight:bold; font-size:18px; border-bottom:1px solid #eee;">Mọi người</div>`;
-                    items.forEach(item => {
-                        html += `
-                        <div class="result-card">
-                            <a href="/accounts/profile/${item.id}/">
-                                <img src="${item.avatar}" alt="${item.username}">
-                            </a>
-                            <div class="result-info">
-                                <div class="result-name">
-                                    <a href="/accounts/profile/${item.id}/">${item.full_name}</a>
+                    if (items.length === 0) {
+                        mainResults.innerHTML = `<div style="padding: 20px; text-align: center; color: #65676b;">Không tìm thấy hashtag nào cho "<b>${query}</b>"</div>`;
+                    } else {
+                        let html = `<div style="padding: 10px 15px; font-weight:bold; font-size:18px; border-bottom:1px solid #eee;">Hashtag</div>`;
+                        items.forEach(item => {
+                            html += `
+                            <div class="result-card" onclick="handleClickHashtag('${item.tag}')">
+                                <div class="result-info">
+                                    <div class="result-name">#${item.tag}</div>
+                                    <div class="result-detail">${item.post_count} bài viết</div>
                                 </div>
-                                <div class="result-detail">${item.email}</div>
-                            </div>
-                            <div class="result-action">
-                                <a href="/accounts/profile/${item.id}/" class="btn-view">Xem trang</a>
-                            </div>
-                        </div>`;
-                    });
-                    mainResults.innerHTML = html;
+                                <div class="result-action">
+                                    <span class="btn-view">Xem</span>
+                                </div>
+                            </div>`;
+                        });
+                        mainResults.innerHTML = html;
+                    }
+                }
+            } else {
+                const url = `{% url 'search:api_search_users' %}?q=${encodeURIComponent(query)}&limit=all`;
+                const res = await fetch(url);
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    const items = data.results;
+
+                    if (items.length === 0) {
+                        mainResults.innerHTML = `<div style="padding: 20px; text-align: center; color: #65676b;">Không tìm thấy kết quả nào cho "<b>${query}</b>"</div>`;
+                    } else {
+                        let html = `<div style="padding: 10px 15px; font-weight:bold; font-size:18px; border-bottom:1px solid #eee;">Mọi người</div>`;
+                        items.forEach(item => {
+                            html += `
+                            <div class="result-card">
+                                <a href="/accounts/profile/${item.id}/">
+                                    <img src="${item.avatar}" alt="${item.username}">
+                                </a>
+                                <div class="result-info">
+                                    <div class="result-name">
+                                        <a href="/accounts/profile/${item.id}/">${item.full_name}</a>
+                                    </div>
+                                    <div class="result-detail">${item.email}</div>
+                                </div>
+                                <div class="result-action">
+                                    <a href="/accounts/profile/${item.id}/" class="btn-view">Xem trang</a>
+                                </div>
+                            </div>`;
+                        });
+                        mainResults.innerHTML = html;
+                    }
                 }
             }
         } catch (err) {
@@ -259,6 +303,7 @@
         
         let html = '';
         if (mode === 'search') html += `<div class="dropdown-header">GỢI Ý</div>`;
+        else if (mode === 'hashtag') html += `<div class="dropdown-header">HASHTAG</div>`;
         else html += `<div class="dropdown-header">GẦN ĐÂY</div>`;
 
         items.forEach(item => {
@@ -269,6 +314,17 @@
                     <div class="item-info">
                         <div class="item-name">${item.full_name}</div>
                         <div class="item-sub">User • ${item.email}</div>
+                    </div>
+                </div>`;
+            } else if (mode === 'hashtag') {
+                html += `
+                <div class="history-item" onclick="handleClickHashtag('${item.tag}')">
+                    <div class="history-icon-circle">
+                        #
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name">#${item.tag}</div>
+                        <div class="item-sub">${item.post_count} bài viết</div>
                     </div>
                 </div>`;
             } else {
@@ -319,6 +375,11 @@
     async function handleClickUser(targetId) {
         await saveHistory('user', targetId);
         window.location.href = `/accounts/profile/${targetId}/`; 
+    }
+
+    async function handleClickHashtag(tag) {
+        await saveHistory('query', `#${tag}`);
+        window.location.href = `/posts/hashtag/${encodeURIComponent(tag)}/`;
     }
 
     async function handleClickQuery(text) {

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Moderation - Media</h2>
+    {% include 'admin/partials/nav.html' %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="d-flex flex-wrap gap-2">
+                <select name="type" class="form-select" style="max-width: 200px;">
+                    <option value="all" {% if media_type == 'all' %}selected{% endif %}>Tất cả</option>
+                    <option value="post_image" {% if media_type == 'post_image' %}selected{% endif %}>Ảnh bài viết</option>
+                    <option value="comment_image" {% if media_type == 'comment_image' %}selected{% endif %}>Ảnh bình luận</option>
+                    <option value="post_file" {% if media_type == 'post_file' %}selected{% endif %}>File bài viết</option>
+                    <option value="comment_file" {% if media_type == 'comment_file' %}selected{% endif %}>File bình luận</option>
+                </select>
+                <input type="text" name="q" class="form-control" placeholder="Tìm theo ID bài viết/bình luận" value="{{ query }}">
+                <button type="submit" class="btn btn-primary">Lọc</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Loại</th>
+                    <th>Preview</th>
+                    <th>Liên kết</th>
+                    <th>Bài viết</th>
+                    <th>Bình luận</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in media_items %}
+                <tr>
+                    <td>{{ item.type }}</td>
+                    <td>
+                        {% if item.type == 'post_image' or item.type == 'comment_image' %}
+                            <img src="{{ item.url }}" alt="media" style="width: 80px; height: 60px; object-fit: cover; border-radius: 6px;">
+                        {% else %}
+                            <i class="fa-solid fa-file"></i>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ item.url }}" target="_blank">
+                            {% if item.filename %}{{ item.filename|truncatechars:30 }}{% else %}Mở media{% endif %}
+                        </a>
+                    </td>
+                    <td>{% if item.post %}#{{ item.post.id }}{% else %}-{% endif %}</td>
+                    <td>{% if item.comment %}#{{ item.comment.id }}{% else %}-{% endif %}</td>
+                    <td>
+                        <form method="POST" action="{% url 'custom_admin:content_media_action' %}" class="d-flex flex-column gap-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="media_type" value="{{ item.type }}">
+                            <input type="hidden" name="media_id" value="{{ item.id }}">
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <input type="text" name="reason" class="form-control form-control-sm" placeholder="Lý do (tuỳ chọn)">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center">Không có media.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+    <nav>
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&type={{ media_type }}&q={{ query }}">Trước</a></li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&type={{ media_type }}&q={{ query }}">Sau</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

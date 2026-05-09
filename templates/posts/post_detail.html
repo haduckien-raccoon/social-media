@@ -559,15 +559,38 @@
                 <a href="{% url 'accounts:profile-username' post.author.username %}">
                     <img src="{{ post.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="post-avatar">
                 </a>
+                {% with tagged_list=post.tagged_users.all %}
+                {% with tag_count=tagged_list|length %}
                 <div class="post-info">
-                    <h4><a href="{% url 'accounts:profile-username' post.author.username %}">{{ post.author.username }}</a></h4>
+                    <h4>
+                        <a href="{% url 'accounts:profile-username' post.author.username %}">{{ post.author.username }}</a>
+                        {% if group_post %}
+                            <span class="text-muted">-></span>
+                            <a href="{% url 'groups:group_detail' group_post.group.id %}">{{ group_post.group.name }}</a>
+                        {% endif %}
+                        {% if tag_count %}
+                            <span class="text-muted">cùng với</span>
+                            {% if tag_count <= 4 %}
+                                {% for tag in tagged_list %}
+                                    <a href="{% url 'accounts:profile-username' tag.user.username %}">{{ tag.user.username }}</a>{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {% with first_tag=tagged_list|first %}
+                                    <a href="{% url 'accounts:profile-username' first_tag.user.username %}">{{ first_tag.user.username }}</a>
+                                {% endwith %}
+                                <a href="javascript:void(0)" class="tagged-more" onclick="openTaggedModal({{ post.id }})">và {{ tag_count|add:"-1" }} người khác</a>
+                            {% endif %}
+                        {% endif %}
+                    </h4>
                     <div class="post-time">
-                        <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span> • 
+                        <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span> •
                         {% if post.privacy == 'public' %}<i class="fas fa-globe-americas"></i>
                         {% elif post.privacy == 'friends' %}<i class="fas fa-user-friends"></i>
                         {% else %}<i class="fas fa-lock"></i>{% endif %}
                     </div>
                 </div>
+                {% endwith %}
+                {% endwith %}
             </div>
 
             <div class="post-options-menu">
@@ -593,6 +616,13 @@
         </div>
 
         <div class="post-content">{{ post.content|linebreaksbr }}</div>
+        {% if post.hashtags.all %}
+        <div class="post-hashtags">
+            {% for hashtag in post.hashtags.all %}
+                <a class="post-hashtag" href="{% url 'posts:hashtag_feed' hashtag.tag %}">#{{ hashtag.tag }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
 
         {% if original_post %}
         <div class="shared-post-container" onclick="window.location.href='{% url 'posts:post_detail' original_post.id %}'">
@@ -663,17 +693,46 @@
                             <i class="fas fa-file-word" style="color:#1e88e5"></i>
 
                         {% elif ".xls" in ext or ".xlsx" in ext %}
-                            <i class="fas fa-file-excel" style="color:#43a047"></i>
+                    {% with tagged_list=post.tagged_users.all tag_count=post.tagged_users.count %}
+                    <div class="post-info">
+                        <h4>
+                            <a href="{% url 'accounts:profile-username' post.author.username %}">{{ post.author.username }}</a>
+                            {% if group_post %}
+                                <span class="text-muted">→</span>
+                                <a href="{% url 'groups:group_detail' group_post.group.id %}">{{ group_post.group.name }}</a>
+                            {% endif %}
+                            {% if tag_count %}
+                                <span class="text-muted">cùng với</span>
+                                {% if tag_count <= 4 %}
+                                    {% for tag in tagged_list %}
+                                        <a href="{% url 'accounts:profile-username' tag.user.username %}">{{ tag.user.username }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% with first_tag=tagged_list|first %}
+                                        <a href="{% url 'accounts:profile-username' first_tag.user.username %}">{{ first_tag.user.username }}</a>
+                                    {% endwith %}
+                                    <a href="javascript:void(0)" class="tagged-more" onclick="openTaggedModal({{ post.id }})">và {{ tag_count|add:"-1" }} người khác</a>
+                                {% endif %}
+                            {% endif %}
+                        </h4>
+                        <div class="post-time">
+                            <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span>
+                            •
+                            {% if post.privacy == 'public' %}<i class="fas fa-globe-americas"></i>
+                            {% elif post.privacy == 'friends' %}<i class="fas fa-user-friends"></i>
+                            {% else %}<i class="fas fa-lock"></i>{% endif %}
+                        </div>
+                    </div>
+                    {% endwith %}
 
-                        {% elif ".zip" in ext or ".rar" in ext %}
-                            <i class="fas fa-file-archive" style="color:#fb8c00"></i>
-
-                        {% elif ".png" in ext or ".jpg" in ext or ".jpeg" in ext %}
-                            <i class="fas fa-file-image" style="color:#8e24aa"></i>
-
-                        {% elif ".txt" in ext %}
-                            <i class="fas fa-file-lines" style="color:#607d8b"></i>
-
+            <div class="post-content">{{ post.content|linebreaksbr }}</div>
+            {% if post.hashtags.all %}
+            <div class="post-hashtags">
+                {% for hashtag in post.hashtags.all %}
+                    <a class="post-hashtag" href="{% url 'posts:hashtag_feed' hashtag.tag %}">#{{ hashtag.tag }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
                         {% else %}
                             <i class="fas fa-file"></i>
                         {% endif %}
@@ -1324,5 +1383,21 @@
         }
     });
 </script>
+
+{% if post.tagged_users.all|length > 4 %}
+<div id="tagged-modal-{{ post.id }}" class="tagged-modal" onclick="handleTaggedBackdrop(event, {{ post.id }})">
+    <div class="tagged-box">
+        <div class="tagged-header">
+            Những người được gắn thẻ
+            <button type="button" class="tagged-close" onclick="closeTaggedModal({{ post.id }})">&times;</button>
+        </div>
+        <div class="tagged-body">
+            {% for tag in post.tagged_users.all %}
+                <a class="tagged-item" href="{% url 'accounts:profile-username' tag.user.username %}">{{ tag.user.username }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 

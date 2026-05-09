@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "django_celery_results",
     # Your apps
+    "apps.admin.apps.CustomAdminConfig",
     "apps.core",
     "apps.accounts",
     "apps.friends",
@@ -193,7 +194,7 @@ USE_TZ = True
 # ---------------------------
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/images/"
 MEDIA_ROOT = BASE_DIR / "images"
 IMAGES_URL = MEDIA_URL

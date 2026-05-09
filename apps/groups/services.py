@@ -50,7 +50,7 @@ class GroupService:
         ).select_related(
             'post', 'post__author'
         ).prefetch_related(
-            'post__images'
+            'post__images', 'post__hashtags', 'post__tagged_users__user'
         ).annotate(
             reaction_count=Count('post__reactions', distinct=True),
             comment_count=Count(
@@ -521,6 +521,10 @@ class GroupPostService:
             status=ContentStatus.NORMAL
         )
 
+        content_hashtags = extract_hashtags_from_text(normalized_content)
+        if content_hashtags:
+            add_hashtags(post, content_hashtags)
+
         if image_list:
             for idx, img in enumerate(image_list):
                 PostImage.objects.create(post=post, image=img, order=idx)
@@ -588,6 +592,7 @@ class GroupPostService:
         
         if content is not None:
             group_post.post.content = content
+            sync_hashtags(group_post.post, extract_hashtags_from_text(content))
 
         if tagged_users is not None:
             # Xóa tag cũ

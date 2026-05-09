@@ -103,3 +103,29 @@ def api_search_users(request):
         })
     
     return JsonResponse({'results': results})
+
+
+@require_http_methods(["GET"])
+def api_search_hashtags(request):
+    """
+    API tìm kiếm hashtag.
+    Params:
+    - q: Từ khóa
+    - limit: Số lượng giới hạn (Mặc định 10, nếu 'all' thì lấy hết)
+    """
+    q = request.GET.get('q', '').strip()
+    limit = request.GET.get('limit', '10')
+
+    if not q:
+        return JsonResponse({'results': []})
+
+    if limit == 'all':
+        limit_num = None
+    else:
+        try:
+            limit_num = int(limit)
+        except ValueError:
+            limit_num = 10
+
+    results = services.search_hashtags(q, limit=limit_num)
+    return JsonResponse({'results': results})

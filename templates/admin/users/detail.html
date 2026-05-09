@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Chi tiết người dùng: {{ target_user.username }}</h2>
+        <a href="{% url 'custom_admin:user_list' %}" class="btn btn-outline-secondary">Quay lại danh sách</a>
+    </div>
+    {% include 'admin/partials/nav.html' %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Thông tin cơ bản -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-light"><strong>Thông tin tài khoản</strong></div>
+                <div class="card-body">
+                    <p><strong>Email:</strong> {{ target_user.email }}</p>
+                    <p><strong>Username:</strong> {{ target_user.username }}</p>
+                    <p><strong>Ngày tham gia:</strong> {{ target_user.date_joined|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Truy cập cuối:</strong> {{ target_user.last_login|date:"d/m/Y H:i"|default:"Chưa đăng nhập" }}</p>
+                    <p><strong>Quyền hiện tại:</strong> 
+                        {% if target_user.is_staff %} Admin
+                        {% else %} User
+                        {% endif %}
+                    </p>
+                    <p><strong>Trạng thái:</strong> 
+                        {% if target_user.is_banned %} <span class="text-danger">Bị khóa</span>
+                        {% else %}  <span class="text-success">Hoạt động</span> {% endif %}
+                    </p>
+                    
+                    <a href="{% url 'custom_admin:user_activities' target_user.id %}" class="btn btn-primary mt-2">Xem Lịch sử Hoạt động</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Các thao tác quản trị -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-light"><strong>Thao tác Quản trị</strong></div>
+                <div class="card-body">
+                    
+                    <!-- Ban/Unban -->
+                    <form method="POST" action="{% url 'custom_admin:user_toggle_ban' target_user.id %}" class="mb-3">
+                        {% csrf_token %}
+                        {% if target_user.is_banned %}
+                            <button type="submit" class="btn btn-success w-100">Mở khóa (Unban)</button>
+                        {% else %}
+                            <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Bạn có chắc chắn muốn KHÓA tài khoản này?');">Khóa tài khoản (Ban)</button>
+                        {% endif %}
+                    </form>
+
+                    <!-- Phân quyền -->
+                    <form method="POST" action="{% url 'custom_admin:user_set_role' target_user.id %}" class="mb-3">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <select name="role" class="form-select">
+                                <option value="user" {% if not target_user.is_staff %}selected{% endif %}>User Bình thường</option>
+                                <option value="admin" {% if target_user.is_staff %}selected{% endif %}>Admin</option>
+                            </select>
+                            <button class="btn btn-warning" type="submit" onclick="return confirm('Xác nhận thay đổi quyền?');">Cập nhật Quyền</button>
+                        </div>
+                    </form>
+
+                    <!-- Reset Password -->
+                    <form method="POST" action="{% url 'custom_admin:user_reset_password' target_user.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-dark w-100" onclick="return confirm('Mật khẩu mới sẽ được tạo ngẫu nhiên và hiển thị trên màn hình. Xác nhận?');">
+                            Reset Password
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

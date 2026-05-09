@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Quản lý Hashtag</h2>
+    {% include 'admin/partials/nav.html' %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="d-flex flex-wrap gap-2">
+                <input type="text" name="q" class="form-control" placeholder="Tìm hashtag..." value="{{ query }}">
+                <button type="submit" class="btn btn-primary">Lọc</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-light"><strong>Thêm hashtag mới</strong></div>
+        <div class="card-body">
+            <form method="POST" class="d-flex flex-wrap gap-2">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create">
+                <input type="text" name="tag" class="form-control" placeholder="#hashtag">
+                <button type="submit" class="btn btn-success">Tạo</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Hashtag</th>
+                    <th>Bài viết</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tag in hashtags %}
+                <tr>
+                    <td>{{ tag.id }}</td>
+                    <td>#{{ tag.tag }}</td>
+                    <td>{{ tag.post_count }}</td>
+                    <td>{{ tag.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="d-flex gap-2">
+                        <a href="{% url 'custom_admin:hashtag_detail' tag.id %}" class="btn btn-sm btn-outline-primary">Sửa</a>
+                        <form method="POST" action="{% url 'custom_admin:hashtag_delete' tag.id %}" onsubmit="return confirm('Xóa hashtag này?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center">Chưa có hashtag.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if hashtags.paginator.num_pages > 1 %}
+    <nav>
+        <ul class="pagination">
+            {% if hashtags.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ hashtags.previous_page_number }}&q={{ query }}">Trước</a></li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ hashtags.number }}/{{ hashtags.paginator.num_pages }}</span></li>
+            {% if hashtags.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ hashtags.next_page_number }}&q={{ query }}">Sau</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

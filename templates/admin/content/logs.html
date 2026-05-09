@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Moderation Logs</h2>
+    {% include 'admin/partials/nav.html' %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="d-flex flex-wrap gap-2">
+                <select name="type" class="form-select" style="max-width: 220px;">
+                    <option value="">Tất cả loại</option>
+                    {% for value, label in target_types %}
+                        <option value="{{ value }}" {% if target_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary">Lọc</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Actor</th>
+                    <th>Target</th>
+                    <th>Action</th>
+                    <th>Lý do</th>
+                    <th>Thời gian</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.id }}</td>
+                    <td>{% if log.actor %}{{ log.actor.username }}{% else %}-{% endif %}</td>
+                    <td>{{ log.target_type }} #{{ log.target_id }}</td>
+                    <td>{{ log.action }}</td>
+                    <td>{{ log.reason|default:"-" }}</td>
+                    <td>{{ log.created_at|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center">Chưa có log nào.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if logs.paginator.num_pages > 1 %}
+    <nav>
+        <ul class="pagination">
+            {% if logs.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ logs.previous_page_number }}&type={{ target_type }}">Trước</a></li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ logs.number }}/{{ logs.paginator.num_pages }}</span></li>
+            {% if logs.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ logs.next_page_number }}&type={{ target_type }}">Sau</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

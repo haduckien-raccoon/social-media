@@ -281,6 +281,7 @@ input:checked + .chk-ui::after {
     {% csrf_token %}
 
     <textarea class="post-text" id="content" placeholder="Bạn muốn chia sẻ điều gì với nhóm?"></textarea>
+    <div class="text-muted" style="font-size: 12px; margin-bottom: 10px;">Gợi ý: dùng #hashtag để gắn chủ đề.</div>
 
     <div class="tag-box" id="tagPreview"></div>
     <div class="img-grid" id="imgPreview"></div>

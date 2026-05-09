@@ -7,6 +7,7 @@ urlpatterns = [
     # Feed
     path("", feed_view, name="feed"),
     path("public/", public_feed_view, name="public_feed"),
+    path("hashtag/<str:tag>/", hashtag_feed_view, name="hashtag_feed"),
 
     # Post CRUD
     path("create/", create_post_view, name="create"),

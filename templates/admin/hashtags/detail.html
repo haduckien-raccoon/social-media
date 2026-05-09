@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Chỉnh sửa Hashtag</h2>
+        <a href="{% url 'custom_admin:hashtag_list' %}" class="btn btn-outline-secondary">Quay lại</a>
+    </div>
+    {% include 'admin/partials/nav.html' %}
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" class="d-flex flex-column gap-3" style="max-width: 420px;">
+                {% csrf_token %}
+                <label class="form-label">Hashtag</label>
+                <input type="text" name="tag" class="form-control" value="#{{ hashtag.tag }}">
+                <button type="submit" class="btn btn-primary">Lưu</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
