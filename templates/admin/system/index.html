@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    :root { 
+        --bg-main: #f8fafc; 
+        --card-bg: #ffffff; 
+        --border: #e2e8f0; 
+        --primary: #0d6efd; 
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+    }
+    
+    body { background-color: var(--bg-main); color: #1e293b; }
+    
+    .system-wrapper { min-height: 100vh; }
+    
+    /* Box tổng */
+    .custom-card { 
+        background: var(--card-bg); 
+        border: 1px solid var(--border); 
+        border-radius: 16px; 
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+    }
+    
+    /* Navigation Tabs */
+    .nav-tabs .nav-link { color: #64748b; font-weight: 600; padding: 16px 24px; border: none; border-bottom: 3px solid transparent; transition: 0.2s; }
+    .nav-tabs .nav-link:hover { color: var(--primary); }
+    .nav-tabs .nav-link.active { color: var(--primary); background: transparent; border-color: transparent transparent var(--primary) transparent; }
+    
+    /* Linux Monitor Style CSS */
+    .monitor-box {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        transition: transform 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .monitor-box:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+    
+    /* Font monospace (kiểu code/terminal) cho các con số */
+    .tech-font {
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+    .metric-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 700; }
+    
+    /* Khu vực vẽ biểu đồ */
+    .chart-container-live { position: relative; height: 280px; width: 100%; margin-top: 10px; }
+    
+    /* Terminal Logs */
+    .terminal-box { 
+        background: #0f172a; 
+        color: #38bdf8; 
+        font-family: 'Courier New', monospace; 
+        font-size: 0.85rem; 
+        padding: 20px; 
+        border-radius: 12px; 
+        height: 600px; 
+        overflow-y: auto; 
+        white-space: pre-wrap; 
+        box-shadow: inset 0 4px 6px rgba(0,0,0,0.3);
+    }
+</style>
+
+<div class="system-wrapper py-4 pb-5">
+    <div class="container-fluid">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="fw-bold text-dark mb-1"><i class="bi bi-pc-display-horizontal text-primary me-2"></i>System Monitor</h3>
+                <p class="text-muted m-0">Giám sát tài nguyên máy chủ theo thời gian thực (Real-time OS Monitoring)</p>
+            </div>
+            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill shadow-sm">
+                <span class="spinner-grow spinner-grow-sm me-1" role="status" style="width: 0.5rem; height: 0.5rem;"></span> System Online
+            </span>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 shadow-sm border-0">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="custom-card overflow-hidden">
+            <ul class="nav nav-tabs bg-light border-bottom px-3" id="sysTabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#monitor"><i class="bi bi-activity me-2"></i>Performance Monitor</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#config"><i class="bi bi-sliders me-2"></i>System Config</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#logs"><i class="bi bi-terminal me-2"></i>Access & Error Logs</button></li>
+            </ul>
+
+            <div class="tab-content p-4">
+                
+                <div class="tab-pane fade show active" id="monitor">
+                    
+                    <div class="row g-4 mb-4">
+                        <div class="col-xl-3 col-md-6">
+                            <div class="monitor-box h-100">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div class="metric-title"><i class="bi bi-cpu-fill text-primary me-1"></i> CPU Usage</div>
+                                    <span class="badge bg-light text-muted border" id="cpu-cores">-- Cores</span>
+                                </div>
+                                <div class="d-flex align-items-end gap-2">
+                                    <div class="tech-font text-dark" style="font-size: 2.5rem; line-height: 1;" id="cpu-val">0.0%</div>
+                                </div>
+                                <div class="progress mt-3" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" id="cpu-bar" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6">
+                            <div class="monitor-box h-100">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div class="metric-title"><i class="bi bi-memory text-success me-1"></i> Memory (RAM)</div>
+                                    <span class="badge bg-light text-muted border" id="ram-text">-- GB / -- GB</span>
+                                </div>
+                                <div class="d-flex align-items-end gap-2">
+                                    <div class="tech-font text-dark" style="font-size: 2.5rem; line-height: 1;" id="ram-val">0.0%</div>
+                                </div>
+                                <div class="progress mt-3" style="height: 6px;">
+                                    <div class="progress-bar bg-success" id="ram-bar" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6">
+                            <div class="monitor-box h-100">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div class="metric-title"><i class="bi bi-device-hdd-fill text-warning me-1"></i> Storage (/)</div>
+                                    <span class="badge bg-light text-muted border" id="disk-text">-- GB / -- GB</span>
+                                </div>
+                                <div class="d-flex align-items-end gap-2">
+                                    <div class="tech-font text-dark" style="font-size: 2.5rem; line-height: 1;" id="disk-val">0.0%</div>
+                                </div>
+                                <div class="progress mt-3" style="height: 6px;">
+                                    <div class="progress-bar bg-warning" id="disk-bar" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6">
+                            <div class="monitor-box h-100 bg-light border-0">
+                                <div class="metric-title mb-3"><i class="bi bi-info-square-fill text-secondary me-1"></i> Server Info</div>
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="d-flex justify-content-between border-bottom pb-1">
+                                        <span class="text-muted small">OS</span>
+                                        <span class="fw-bold text-dark small text-end">{{ server_status.os }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between border-bottom pb-1">
+                                        <span class="text-muted small">Python</span>
+                                        <span class="fw-bold text-dark small">{{ server_status.python }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted small">Swap Usage</span>
+                                        <span class="fw-bold text-danger small tech-font" id="swap-val">0.0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="monitor-box p-4">
+                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                                    <h6 class="fw-bold m-0 text-dark">CPU History</h6>
+                                    <span class="text-muted small">Cập nhật mỗi 2s</span>
+                                </div>
+                                <div class="chart-container-live"><canvas id="cpuChart"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="monitor-box p-4">
+                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                                    <h6 class="fw-bold m-0 text-dark">Memory History</h6>
+                                    <span class="text-muted small">Cập nhật mỗi 2s</span>
+                                </div>
+                                <div class="chart-container-live"><canvas id="ramChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="config">
+                    <div class="alert alert-light border shadow-sm d-flex align-items-center gap-3 mb-4">
+                        <i class="bi bi-info-circle-fill fs-4 text-primary"></i>
+                        <div>Các thông số dưới đây được lưu trực tiếp vào Database, không cần khởi động lại máy chủ khi thay đổi.</div>
+                    </div>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="row g-4">
+                            {% for config in configs %}
+                            <div class="col-md-6">
+                                <div class="p-4 border rounded-4 bg-light h-100">
+                                    <label class="fw-bold text-dark mb-1 d-block font-monospace">{{ config.key }}</label>
+                                    <small class="text-muted d-block mb-3">{{ config.description }}</small>
+                                    {% if config.data_type == 'bool' %}
+                                        <div class="form-check form-switch fs-5">
+                                            <input class="form-check-input" type="checkbox" name="config_{{ config.key }}" value="on" {% if config.value == 'True' or config.value == 'true' or config.value == '1' %}checked{% endif %}>
+                                        </div>
+                                    {% else %}
+                                        <input type="{% if config.data_type == 'int' %}number{% else %}text{% endif %}" class="form-control rounded-3" name="config_{{ config.key }}" value="{{ config.value }}">
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-4 text-end"><button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-bold"><i class="bi bi-save me-2"></i>Lưu cấu hình</button></div>
+                    </form>
+                </div>
+
+                <div class="tab-pane fade" id="logs">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold m-0"><i class="bi bi-card-list text-muted me-2"></i>200 Dòng nhật ký gần nhất</h6>
+                        <div class="btn-group shadow-sm">
+                            <a href="?log=access#logs" class="btn btn-sm {% if log_type == 'access' %}btn-primary{% else %}btn-light border{% endif %} fw-medium">Access Log</a>
+                            <a href="?log=error#logs" class="btn btn-sm {% if log_type == 'error' %}btn-danger{% else %}btn-light border{% endif %} fw-medium">Error Log</a>
+                        </div>
+                    </div>
+                    <div class="terminal-box" id="termBox">{{ log_content }}</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Xử lý giữ Tab khi reload trang
+    if(window.location.hash) {
+        let triggerEl = document.querySelector(`button[data-bs-target="${window.location.hash}"]`);
+        if(triggerEl) new bootstrap.Tab(triggerEl).show();
+    }
+    const term = document.getElementById('termBox'); if(term) term.scrollTop = term.scrollHeight;
+
+    // 2. Cấu hình Chart.js (Style mượt mà, tắt điểm neo)
+    const commonChartOpts = {
+        responsive: true, 
+        maintainAspectRatio: false, 
+        animation: { duration: 0 }, // Tắt animation để vẽ Live mượt
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: { 
+            y: { min: 0, max: 100, grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', font: {family: 'monospace'} } }, 
+            x: { display: false } 
+        },
+        elements: { point: { radius: 0 }, line: { borderWidth: 2 } } // Ẩn dấu chấm, làm nét đường
+    };
+    
+    const maxPoints = 40; // Hiển thị 40 mốc thời gian trên màn hình
+    const emptyLabels = Array(maxPoints).fill('');
+    const cpuData = Array(maxPoints).fill(0);
+    const ramData = Array(maxPoints).fill(0);
+
+    // Khởi tạo Canvas CPU
+    const cpuCtx = document.getElementById('cpuChart').getContext('2d');
+    let cpuGradient = cpuCtx.createLinearGradient(0, 0, 0, 300);
+    cpuGradient.addColorStop(0, 'rgba(13, 110, 253, 0.4)');
+    cpuGradient.addColorStop(1, 'rgba(13, 110, 253, 0.0)');
+    
+    const cpuChart = new Chart(cpuCtx, {
+        type: 'line', 
+        data: { labels: emptyLabels, datasets: [{ data: cpuData, borderColor: '#0d6efd', backgroundColor: cpuGradient, fill: true, tension: 0.4 }] }, 
+        options: commonChartOpts
+    });
+
+    // Khởi tạo Canvas RAM
+    const ramCtx = document.getElementById('ramChart').getContext('2d');
+    let ramGradient = ramCtx.createLinearGradient(0, 0, 0, 300);
+    ramGradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+    ramGradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+    const ramChart = new Chart(ramCtx, {
+        type: 'line', 
+        data: { labels: emptyLabels, datasets: [{ data: ramData, borderColor: '#10b981', backgroundColor: ramGradient, fill: true, tension: 0.4 }] }, 
+        options: commonChartOpts
+    });
+
+    // 3. Hàm gọi API và Cập nhật Giao diện
+    let pollTimer;
+    function fetchLiveMetrics() {
+        fetch("{% url 'custom_admin:system_metrics_api' %}")
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'ok') {
+                    // Update Text & Bars
+                    document.getElementById('cpu-val').innerText = data.cpu + '%';
+                    document.getElementById('cpu-bar').style.width = data.cpu + '%';
+                    document.getElementById('cpu-cores').innerText = data.cpu_cores + ' Cores';
+
+                    document.getElementById('ram-val').innerText = data.ram + '%';
+                    document.getElementById('ram-bar').style.width = data.ram + '%';
+                    document.getElementById('ram-text').innerText = data.ram_used + ' GB / ' + data.ram_total + ' GB';
+
+                    document.getElementById('disk-val').innerText = data.disk + '%';
+                    document.getElementById('disk-bar').style.width = data.disk + '%';
+                    document.getElementById('disk-text').innerText = data.disk_used + ' GB / ' + data.disk_total + ' GB';
+
+                    document.getElementById('swap-val').innerText = data.swap + '%';
+                    
+                    // Update Charts (Dịch mảng dữ liệu)
+                    cpuData.shift(); cpuData.push(data.cpu); cpuChart.update();
+                    ramData.shift(); ramData.push(data.ram); ramChart.update();
+                }
+            }).catch(err => console.error("Monitor API Error:", err));
+    }
+
+    // 4. Tiết kiệm tài nguyên: Chỉ gọi API (Polling) khi đang ở Tab Monitor
+    const monitorTab = document.querySelector('button[data-bs-target="#monitor"]');
+    if(monitorTab.classList.contains('active')) {
+        fetchLiveMetrics(); 
+        pollTimer = setInterval(fetchLiveMetrics, 2000); // 2 giây cập nhật 1 lần
+    }
+
+    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', e => {
+            if(e.target.getAttribute('data-bs-target') === '#monitor') {
+                fetchLiveMetrics(); 
+                pollTimer = setInterval(fetchLiveMetrics, 2000);
+            } else { 
+                clearInterval(pollTimer); // Ngừng gọi API khi chuyển sang tab Config/Log
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

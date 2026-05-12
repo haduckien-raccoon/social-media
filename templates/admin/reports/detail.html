@@ -1,0 +1,1020 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+:root{
+    --primary:#ff4d6d;
+    --primary-soft:#fff1f4;
+
+    --bg:#f5f7fb;
+    --card:#ffffff;
+
+    --text:#0f172a;
+    --text-soft:#64748b;
+
+    --border:#e2e8f0;
+
+    --danger:#ef4444;
+    --warning:#f59e0b;
+    --success:#22c55e;
+}
+
+body{
+    background:linear-gradient(
+        180deg,
+        #f8fafc 0%,
+        #f1f5f9 100%
+    );
+}
+
+/* =========================
+    WRAPPER
+========================= */
+
+.report-detail-wrapper{
+    min-height:100vh;
+    position:relative;
+    overflow:hidden;
+}
+
+/* floating blur */
+.report-detail-wrapper::before{
+    content:'';
+
+    position:absolute;
+
+    width:420px;
+    height:420px;
+
+    background:rgba(255,77,109,.08);
+
+    border-radius:50%;
+
+    top:-120px;
+    right:-120px;
+
+    filter:blur(60px);
+
+    z-index:0;
+}
+
+.report-detail-wrapper::after{
+    content:'';
+
+    position:absolute;
+
+    width:350px;
+    height:350px;
+
+    background:rgba(59,130,246,.07);
+
+    border-radius:50%;
+
+    bottom:-100px;
+    left:-100px;
+
+    filter:blur(60px);
+
+    z-index:0;
+}
+
+.content-layer{
+    position:relative;
+    z-index:2;
+}
+
+/* =========================
+    BREADCRUMB
+========================= */
+
+.custom-breadcrumb{
+    background:rgba(255,255,255,.7);
+
+    backdrop-filter:blur(14px);
+
+    border:1px solid rgba(255,255,255,.8);
+
+    border-radius:18px;
+
+    padding:14px 18px;
+
+    box-shadow:
+        0 8px 20px rgba(15,23,42,.05);
+}
+
+/* =========================
+    CARDS
+========================= */
+
+.custom-card{
+    background:rgba(255,255,255,.82);
+
+    backdrop-filter:blur(14px);
+
+    border:1px solid rgba(255,255,255,.7) !important;
+
+    border-radius:24px !important;
+
+    overflow:hidden;
+
+    transition:.25s ease;
+
+    box-shadow:
+        0 8px 30px rgba(15,23,42,.06);
+}
+
+.custom-card:hover{
+    transform:translateY(-3px);
+
+    box-shadow:
+        0 14px 40px rgba(15,23,42,.09);
+}
+
+.card-header{
+    background:transparent !important;
+}
+
+/* =========================
+    TITLES
+========================= */
+
+.section-title{
+    font-size:1.05rem;
+    font-weight:800;
+    letter-spacing:.2px;
+}
+
+.section-icon{
+    width:42px;
+    height:42px;
+
+    border-radius:14px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:linear-gradient(
+        135deg,
+        rgba(255,77,109,.12),
+        rgba(255,77,109,.18)
+    );
+
+    color:var(--primary);
+}
+
+/* =========================
+    CONTENT BOX
+========================= */
+
+.content-box{
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.8),
+            rgba(248,250,252,.9)
+        );
+
+    border:1px solid rgba(226,232,240,.9);
+
+    border-radius:20px;
+
+    padding:24px;
+
+    line-height:1.9;
+
+    font-size:1rem;
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.content-box::before{
+    content:'';
+
+    position:absolute;
+
+    width:120px;
+    height:120px;
+
+    background:rgba(255,77,109,.05);
+
+    border-radius:50%;
+
+    top:-40px;
+    right:-40px;
+}
+
+/* =========================
+    AVATAR
+========================= */
+
+.avatar-box{
+    width:52px;
+    height:52px;
+
+    border-radius:18px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(59,130,246,.12),
+            rgba(59,130,246,.22)
+        );
+
+    color:#2563eb;
+
+    font-size:1.1rem;
+}
+
+/* =========================
+    IMAGE
+========================= */
+
+.image-hover{
+    position:relative;
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+    display:block;
+
+    box-shadow:
+        0 6px 18px rgba(15,23,42,.06);
+}
+
+.image-hover img{
+    transition:
+        transform .35s ease,
+        filter .35s ease;
+}
+
+.image-hover:hover img{
+    transform:scale(1.06);
+    filter:brightness(.95);
+}
+
+.image-hover::after{
+    content:'\F52A';
+
+    font-family:'bootstrap-icons';
+
+    position:absolute;
+
+    inset:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:white;
+
+    font-size:2rem;
+
+    background:rgba(0,0,0,.22);
+
+    opacity:0;
+
+    transition:.25s ease;
+}
+
+.image-hover:hover::after{
+    opacity:1;
+}
+
+/* =========================
+    TABLE
+========================= */
+
+.custom-table th{
+    text-transform:uppercase;
+
+    font-size:.72rem;
+
+    letter-spacing:.6px;
+
+    color:var(--text-soft);
+
+    font-weight:700;
+}
+
+.custom-table td{
+    vertical-align:middle;
+}
+
+.custom-table tbody tr{
+    transition:.2s ease;
+}
+
+.custom-table tbody tr:hover{
+    background:#fafafa;
+}
+
+/* =========================
+    BADGES
+========================= */
+
+.custom-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    font-size:.78rem;
+    font-weight:700;
+}
+
+.badge-danger-soft{
+    background:#fff1f2;
+    color:#e11d48;
+}
+
+.badge-success-soft{
+    background:#f0fdf4;
+    color:#15803d;
+}
+
+.badge-warning-soft{
+    background:#fff7ed;
+    color:#d97706;
+}
+
+.badge-secondary-soft{
+    background:#f1f5f9;
+    color:#64748b;
+}
+
+/* =========================
+    SIDE PANEL
+========================= */
+
+.side-panel{
+    position:sticky;
+    top:24px;
+}
+
+.info-box{
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff,
+            #f8fafc
+        );
+
+    border:1px solid #e2e8f0;
+
+    border-radius:20px;
+
+    padding:20px;
+}
+
+/* =========================
+    BUTTONS
+========================= */
+
+.action-btn{
+    position:relative;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    min-height:52px;
+
+    border:none;
+
+    border-radius:18px;
+
+    font-weight:700;
+
+    transition:.22s ease;
+
+    overflow:hidden;
+}
+
+.action-btn::before{
+    content:'';
+
+    position:absolute;
+
+    inset:0;
+
+    background:rgba(255,255,255,.12);
+
+    opacity:0;
+
+    transition:.22s ease;
+}
+
+.action-btn:hover::before{
+    opacity:1;
+}
+
+.action-btn:hover{
+    transform:translateY(-2px);
+}
+
+.btn-ignore{
+    background:white;
+
+    border:1px solid #e2e8f0;
+
+    color:#475569;
+}
+
+.btn-ignore:hover{
+    background:#f8fafc;
+}
+
+.btn-warning-custom{
+    background:linear-gradient(
+        135deg,
+        #f59e0b,
+        #fbbf24
+    );
+
+    color:#1e293b;
+
+    box-shadow:
+        0 10px 24px rgba(245,158,11,.25);
+}
+
+.btn-danger-custom{
+    background:linear-gradient(
+        135deg,
+        #ef4444,
+        #f43f5e
+    );
+
+    color:white;
+
+    box-shadow:
+        0 10px 24px rgba(239,68,68,.25);
+}
+
+/* =========================
+    TEXTAREA
+========================= */
+
+textarea.form-control{
+    border-radius:18px !important;
+
+    border:1px solid #e2e8f0 !important;
+
+    background:#f8fafc !important;
+
+    padding:16px !important;
+
+    min-height:130px;
+
+    transition:.2s ease;
+}
+
+textarea.form-control:focus{
+    border-color:#ffb3c1 !important;
+
+    box-shadow:
+        0 0 0 4px rgba(255,77,109,.08) !important;
+
+    background:white !important;
+}
+
+/* =========================
+    ALERT
+========================= */
+
+.custom-alert{
+    border:none !important;
+
+    border-radius:18px !important;
+
+    backdrop-filter:blur(10px);
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.05);
+}
+
+/* =========================
+    FADE ANIMATION
+========================= */
+
+.fade-up{
+    animation:fadeUp .45s ease;
+}
+
+@keyframes fadeUp{
+
+    from{
+        opacity:0;
+        transform:translateY(16px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+
+/* =========================
+    RESPONSIVE
+========================= */
+
+@media(max-width:992px){
+
+    .side-panel{
+        position:relative;
+        top:0;
+    }
+
+}
+
+</style>
+
+<div class="report-detail-wrapper py-4 pb-5">
+
+    <div class="container-fluid content-layer">
+
+        <!-- BREADCRUMB -->
+        <div class="d-flex align-items-center gap-3 mb-4 fade-up">
+            <button onclick="history.back()" class="btn text-white px-4 py-2 custom-card" style="background: linear-gradient(135deg, var(--primary), #ff758f); border:none; border-radius: 14px; font-weight:600; box-shadow: 0 4px 15px rgba(255,77,109,0.35); transition: 0.3s;">
+                <i class="bi bi-arrow-left"></i> Quay lại
+            </button>
+
+            <nav class="custom-breadcrumb flex-grow-1 m-0">
+
+                <ol class="breadcrumb m-0">
+
+                    <li class="breadcrumb-item">
+
+                        <a href="{% url 'custom_admin:report_list' %}"
+                           class="text-decoration-none fw-semibold" style="color: var(--primary);">
+
+                            Danh sách Báo cáo
+
+                        </a>
+
+                    </li>
+
+                    <li class="breadcrumb-item active text-muted">
+                        Chi tiết Báo cáo #{{ report.id }}
+                    </li>
+
+                </ol>
+
+            </nav>
+        </div>
+
+        <!-- ALERT -->
+        {% if messages %}
+            {% for message in messages %}
+
+                <div class="alert alert-{{ message.tags }} custom-alert alert-dismissible fade show mb-4 fade-up">
+
+                    {{ message }}
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"></button>
+
+                </div>
+
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+
+            <!-- LEFT -->
+            <div class="col-lg-8">
+
+                <!-- CONTENT -->
+                <div class="card custom-card mb-4 fade-up">
+
+                    <div class="card-header px-4 pt-4 d-flex justify-content-between align-items-center">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="section-icon">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </div>
+
+                            <div class="section-title">
+                                Nội dung bị báo cáo
+                            </div>
+
+                        </div>
+
+                        <span class="custom-badge badge-secondary-soft">
+                            ID {{ report.target_id }}
+                        </span>
+
+                    </div>
+
+                    <div class="card-body p-4">
+
+                        {% if target_content %}
+
+                            <div class="d-flex align-items-center mb-4">
+
+                                <div class="avatar-box me-3">
+
+                                    <i class="bi {% if report.target_type == 'POST' %}bi-file-post{% else %}bi-chat-left-dots{% endif %}"></i>
+
+                                </div>
+
+                                <div>
+
+                                    <div class="fw-bold">
+
+                                        {% if report.target_type == 'POST' %}
+                                            {{ target_content.author.username }}
+                                        {% else %}
+                                            {{ target_content.user.username }}
+                                        {% endif %}
+
+                                    </div>
+
+                                    <small class="text-muted">
+                                        {{ target_content.created_at|date:"H:i - d/m/Y" }}
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                            <div class="content-box">
+
+                                {{ target_content.content }}
+
+                            </div>
+
+                            {% if target_content.images.all %}
+
+                                <div class="row g-3 mt-1">
+
+                                    {% for img in target_content.images.all %}
+
+                                        <div class="col-md-6 col-lg-4">
+
+                                            <a href="{{ img.image.url }}"
+                                               target="_blank"
+                                               class="image-hover">
+
+                                                <img src="{{ img.image.url }}"
+                                                     class="img-fluid w-100 object-fit-cover"
+                                                     style="height:220px;">
+
+                                            </a>
+
+                                        </div>
+
+                                    {% endfor %}
+
+                                </div>
+
+                            {% endif %}
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <!-- CONTEXT -->
+                <div class="card custom-card mb-4 fade-up">
+
+                    <div class="card-header px-4 pt-4">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="section-icon">
+                                <i class="bi bi-eye-fill"></i>
+                            </div>
+
+                            <div class="section-title">
+                                Bối cảnh liên quan
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        {% if report.target_type == 'COMMENT' %}
+
+                            <div class="content-box">
+
+                                <div class="fw-bold mb-2">
+                                    {{ related_context.author.username }}
+                                </div>
+
+                                <div class="text-muted">
+                                    {{ related_context.content|truncatewords:50 }}
+                                </div>
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="list-group list-group-flush">
+
+                                {% for comment in related_context %}
+
+                                    <div class="list-group-item border-0 px-0 py-3">
+
+                                        <div class="d-flex justify-content-between mb-1">
+
+                                            <span class="fw-bold">
+                                                {{ comment.user.username }}
+                                            </span>
+
+                                            <small class="text-muted">
+                                                {{ comment.created_at|date:"d/m H:i" }}
+                                            </small>
+
+                                        </div>
+
+                                        <div class="text-muted">
+                                            {{ comment.content }}
+                                        </div>
+
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <!-- DUPLICATE -->
+                <div class="card custom-card fade-up">
+
+                    <div class="card-header px-4 pt-4 d-flex justify-content-between align-items-center">
+
+                        <div class="section-title">
+                            Báo cáo trùng lặp
+                        </div>
+
+                        <span class="custom-badge badge-danger-soft">
+                            {{ similar_reports.count }} báo cáo
+                        </span>
+
+                    </div>
+
+                    <div class="card-body p-0">
+
+                        <div class="table-responsive">
+
+                            <table class="table custom-table align-middle mb-0">
+
+                                <thead class="table-light">
+
+                                    <tr>
+
+                                        <th class="ps-4">
+                                            Người gửi
+                                        </th>
+
+                                        <th>
+                                            Lý do
+                                        </th>
+
+                                        <th>
+                                            Mô tả
+                                        </th>
+
+                                        <th class="text-end pe-4">
+                                            Ngày gửi
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    {% for s in similar_reports %}
+
+                                    <tr>
+
+                                        <td class="ps-4 fw-semibold">
+                                            {{ s.reporter.username }}
+                                        </td>
+
+                                        <td>
+
+                                            <span class="custom-badge badge-danger-soft">
+
+                                                {{ s.reason.name|default:"Khác" }}
+
+                                            </span>
+
+                                        </td>
+
+                                        <td class="text-muted small">
+                                            {{ s.custom_reason|default:"-"|truncatechars:50 }}
+                                        </td>
+
+                                        <td class="text-end pe-4 text-muted small">
+                                            {{ s.created_at|date:"d/m/Y" }}
+                                        </td>
+
+                                    </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT -->
+            <div class="col-lg-4">
+
+                <div class="card custom-card side-panel fade-up">
+
+                    <div class="card-header px-4 pt-4">
+
+                        <div class="text-center">
+
+                            <div class="section-title">
+
+                                {% if report.status == 'pending' %}
+                                    Quyết định xử lý
+                                {% else %}
+                                    Kết quả xử lý
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card-body p-4">
+
+                        <div class="info-box mb-4">
+
+                            <div class="d-flex justify-content-between mb-3">
+
+                                <span class="text-muted">
+                                    Người gửi
+                                </span>
+
+                                <span class="fw-bold">
+                                    {{ report.reporter.username }}
+                                </span>
+
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-3">
+
+                                <span class="text-muted">
+                                    Phân loại
+                                </span>
+
+                                <span class="custom-badge badge-danger-soft">
+
+                                    {{ report.reason.name|default:"Khác" }}
+
+                                </span>
+
+                            </div>
+
+                            <hr>
+
+                            <div class="small text-muted">
+
+                                "{{ report.custom_reason|default:'Không có mô tả chi tiết' }}"
+
+                            </div>
+
+                        </div>
+
+                        <form id="action-form"
+                              action="{% url 'custom_admin:report_action' report.id %}"
+                              method="POST">
+
+                            {% csrf_token %}
+
+                            <div class="mb-4">
+
+                                <label class="form-label fw-bold small mb-2">
+
+                                    Ghi chú Admin
+
+                                </label>
+
+                                <textarea name="reason"
+                                          class="form-control"
+                                          placeholder="Nhập ghi chú xử lý..."
+                                          required></textarea>
+
+                            </div>
+
+                            <div class="d-grid gap-3">
+
+                                <button type="submit"
+                                        name="action"
+                                        value="IGNORE"
+                                        class="action-btn btn-ignore">
+
+                                    <i class="bi bi-arrow-return-left"></i>
+                                    Bỏ qua báo cáo
+
+                                </button>
+
+                                <button type="submit"
+                                        name="action"
+                                        value="DELETE_CONTENT"
+                                        class="action-btn btn-warning-custom">
+
+                                    <i class="bi bi-trash3-fill"></i>
+                                    Xóa nội dung
+
+                                </button>
+
+                                <button type="submit"
+                                        name="action"
+                                        value="BAN_USER"
+                                        class="action-btn btn-danger-custom">
+
+                                    <i class="bi bi-person-fill-slash"></i>
+                                    Xóa & Khóa User
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.querySelectorAll('.custom-card').forEach(card => {
+
+    card.addEventListener('mousemove', e => {
+
+        const rect = card.getBoundingClientRect();
+
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        card.style.background = `
+            radial-gradient(
+                circle at ${x}px ${y}px,
+                rgba(255,255,255,.92),
+                rgba(255,255,255,.82)
+            )
+        `;
+
+    });
+
+    card.addEventListener('mouseleave', () => {
+
+        card.style.background = `
+            rgba(255,255,255,.82)
+        `;
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

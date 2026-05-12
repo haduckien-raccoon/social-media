@@ -1,0 +1,485 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    :root{
+        --primary:#2563eb;
+        --secondary:#06b6d4;
+        --dark:#0f172a;
+        --border:#e2e8f0;
+        --card:#ffffff;
+        --bg:#f1f5f9;
+    }
+
+    body{
+        background:
+            radial-gradient(circle at top left,#dbeafe 0%,transparent 30%),
+            radial-gradient(circle at bottom right,#cffafe 0%,transparent 30%),
+            var(--bg);
+        min-height:100vh;
+    }
+
+    .notify-wrapper{
+        animation: fadeIn 0.7s ease;
+    }
+
+    .notify-card{
+        background: rgba(255,255,255,0.82);
+        backdrop-filter: blur(18px);
+        border:1px solid rgba(255,255,255,0.4);
+        border-radius:30px;
+        overflow:hidden;
+        box-shadow:
+            0 10px 40px rgba(15,23,42,.08),
+            0 2px 10px rgba(15,23,42,.05);
+    }
+
+    .left-panel{
+        background:
+            linear-gradient(135deg,#2563eb 0%,#06b6d4 100%);
+        color:white;
+        position:relative;
+        overflow:hidden;
+    }
+
+    .left-panel::before{
+        content:"";
+        position:absolute;
+        width:320px;
+        height:320px;
+        background:rgba(255,255,255,0.08);
+        border-radius:50%;
+        top:-120px;
+        right:-100px;
+    }
+
+    .left-panel::after{
+        content:"";
+        position:absolute;
+        width:240px;
+        height:240px;
+        background:rgba(255,255,255,0.06);
+        border-radius:50%;
+        bottom:-100px;
+        left:-60px;
+    }
+
+    .left-content{
+        position:relative;
+        z-index:2;
+    }
+
+    .step-badge{
+        width:42px;
+        height:42px;
+        border-radius:14px;
+        background:rgba(255,255,255,.15);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:700;
+        margin-bottom:15px;
+    }
+
+    .form-section{
+        padding:35px;
+    }
+
+    .section-title{
+        font-size:.82rem;
+        font-weight:800;
+        letter-spacing:1px;
+        text-transform:uppercase;
+        color:#64748b;
+        margin-bottom:16px;
+    }
+
+    .modern-input,
+    .modern-textarea{
+        border:none;
+        border-radius:18px;
+        background:#f8fafc;
+        padding:16px 18px;
+        transition:.3s;
+        box-shadow: inset 0 0 0 1px #e2e8f0;
+    }
+
+    .modern-input:focus,
+    .modern-textarea:focus{
+        background:white;
+        box-shadow:
+            0 0 0 4px rgba(37,99,235,.12),
+            inset 0 0 0 1px #2563eb;
+    }
+
+    .channel-grid{
+        display:grid;
+        grid-template-columns: repeat(2,1fr);
+        gap:16px;
+    }
+
+    .channel-box{
+        position:relative;
+        border-radius:22px;
+        padding:24px;
+        background:#f8fafc;
+        border:2px solid transparent;
+        transition:.35s;
+        cursor:pointer;
+        overflow:hidden;
+    }
+
+    .channel-box::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        background:linear-gradient(135deg,#2563eb15,#06b6d415);
+        opacity:0;
+        transition:.3s;
+    }
+
+    .channel-box:hover{
+        transform:translateY(-4px);
+        border-color:#bfdbfe;
+    }
+
+    .channel-box.active{
+        border-color:#2563eb;
+        background:white;
+        box-shadow:0 10px 25px rgba(37,99,235,.12);
+    }
+
+    .channel-box.active::before{
+        opacity:1;
+    }
+
+    .channel-icon{
+        width:70px;
+        height:70px;
+        border-radius:20px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        margin:auto;
+        margin-bottom:15px;
+        font-size:30px;
+        background:linear-gradient(135deg,#2563eb,#06b6d4);
+        color:white;
+        box-shadow:0 10px 20px rgba(37,99,235,.2);
+    }
+
+    .target-group{
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+    }
+
+    .target-group label{
+        border-radius:999px !important;
+        padding:12px 22px !important;
+        font-weight:700;
+        transition:.3s;
+    }
+
+    .btn-send{
+        border:none;
+        border-radius:20px;
+        padding:18px;
+        width:100%;
+        color:white;
+        font-weight:800;
+        letter-spacing:.5px;
+        background:linear-gradient(135deg,#2563eb,#06b6d4);
+        box-shadow:0 12px 30px rgba(37,99,235,.25);
+        transition:.35s;
+    }
+
+    .btn-send:hover{
+        transform:translateY(-3px) scale(1.01);
+        box-shadow:0 18px 40px rgba(37,99,235,.35);
+    }
+
+    .alert{
+        border:none;
+        border-radius:18px;
+    }
+
+    @keyframes fadeIn{
+        from{
+            opacity:0;
+            transform:translateY(20px);
+        }
+        to{
+            opacity:1;
+            transform:translateY(0);
+        }
+    }
+
+    @media(max-width:991px){
+        .left-panel{
+            display:none;
+        }
+
+        .channel-grid{
+            grid-template-columns:1fr;
+        }
+    }
+</style>
+
+<div class="container-fluid py-5 notify-wrapper">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xxl-11">
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} shadow-sm mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="notify-card">
+
+                <div class="row g-0">
+
+                    <!-- LEFT -->
+                    <div class="col-lg-4">
+                        <div class="left-panel h-100 p-5">
+
+                            <div class="left-content">
+
+                                <div class="step-badge">
+                                    <i class="bi bi-send"></i>
+                                </div>
+
+                                <h2 class="fw-bold mb-3">
+                                    Trung tâm gửi thông báo
+                                </h2>
+
+                                <p class="opacity-75 mb-5">
+                                    Gửi thông báo hàng loạt tới người dùng thông qua nhiều kênh khác nhau với giao diện quản trị hiện đại.
+                                </p>
+
+                                <div class="d-flex align-items-center mb-4">
+                                    <i class="bi bi-lightning-charge-fill fs-4 me-3"></i>
+                                    <div>
+                                        <div class="fw-bold">Realtime Notification</div>
+                                        <small class="opacity-75">Thông báo tức thời</small>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center mb-4">
+                                    <i class="bi bi-envelope-check-fill fs-4 me-3"></i>
+                                    <div>
+                                        <div class="fw-bold">SMTP Email</div>
+                                        <small class="opacity-75">Gửi email hàng loạt</small>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-shield-check fs-4 me-3"></i>
+                                    <div>
+                                        <div class="fw-bold">Secure Delivery</div>
+                                        <small class="opacity-75">Bảo mật và ổn định</small>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- RIGHT -->
+                    <div class="col-lg-8">
+
+                        <div class="form-section">
+
+                            <div class="mb-5">
+                                <h3 class="fw-bold text-dark mb-2">
+                                    Hệ thống gửi tin đa kênh
+                                </h3>
+                                <p class="text-muted mb-0">
+                                    Quản lý và gửi thông báo tới toàn bộ hệ thống.
+                                </p>
+                            </div>
+
+                            <form method="POST">
+                                {% csrf_token %}
+
+                                <!-- GROUP -->
+                                <div class="mb-5">
+                                    <div class="section-title">
+                                        1. Nhóm người nhận
+                                    </div>
+
+                                    <div class="target-group">
+
+                                        <input type="radio" class="btn-check"
+                                               name="target_group"
+                                               id="target_all"
+                                               value="all"
+                                               checked>
+
+                                        <label class="btn btn-outline-primary"
+                                               for="target_all">
+                                            <i class="bi bi-people-fill me-2"></i>
+                                            Tất cả người dùng
+                                        </label>
+
+                                        <input type="radio" class="btn-check"
+                                               name="target_group"
+                                               id="target_staff"
+                                               value="staff">
+
+                                        <label class="btn btn-outline-primary"
+                                               for="target_staff">
+                                            <i class="bi bi-person-badge-fill me-2"></i>
+                                            Ban quản trị
+                                        </label>
+
+                                    </div>
+                                </div>
+
+                                <!-- CHANNEL -->
+                                <div class="mb-5">
+                                    <div class="section-title">
+                                        2. Kênh thông báo
+                                    </div>
+
+                                    <div class="channel-grid">
+
+                                        <div class="channel-box active">
+                                            <input type="checkbox"
+                                                   class="d-none"
+                                                   name="notify_types"
+                                                   value="web"
+                                                   id="ch_web"
+                                                   checked>
+
+                                            <label for="ch_web" class="w-100 text-center cursor-pointer">
+                                                <div class="channel-icon">
+                                                    <i class="bi bi-browser-chrome"></i>
+                                                </div>
+
+                                                <h5 class="fw-bold mb-1">
+                                                    Web Notification
+                                                </h5>
+
+                                                <p class="text-muted small mb-0">
+                                                    Hiển thị tại hệ thống website
+                                                </p>
+                                            </label>
+                                        </div>
+
+                                        <div class="channel-box">
+                                            <input type="checkbox"
+                                                   class="d-none"
+                                                   name="notify_types"
+                                                   value="email"
+                                                   id="ch_email">
+
+                                            <label for="ch_email" class="w-100 text-center cursor-pointer">
+                                                <div class="channel-icon">
+                                                    <i class="bi bi-envelope-paper-fill"></i>
+                                                </div>
+
+                                                <h5 class="fw-bold mb-1">
+                                                    SMTP Email
+                                                </h5>
+
+                                                <p class="text-muted small mb-0">
+                                                    Gửi email hàng loạt tự động
+                                                </p>
+                                            </label>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <!-- TITLE -->
+                                <div class="mb-4">
+                                    <br>
+                                    <div class="section-title">
+                                        3. Tiêu đề
+                                    </div>
+
+                                    <input type="text"
+                                           name="title"
+                                           class="form-control modern-input"
+                                           placeholder="Ví dụ: Thông báo bảo trì hệ thống..."
+                                           required>
+                                </div>
+
+                                <!-- CONTENT -->
+                                <div class="mb-4">
+                                    <div class="section-title">
+                                        4. Nội dung
+                                    </div>
+
+                                    <textarea name="content"
+                                              rows="6"
+                                              class="form-control modern-textarea"
+                                              placeholder="Nhập nội dung thông báo..."
+                                              required></textarea>
+                                </div>
+
+                                <!-- LINK -->
+                                <div class="mb-5">
+                                    <div class="section-title">
+                                        5. URL đính kèm
+                                    </div>
+
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-0 px-4 rounded-start-4">
+                                            <i class="bi bi-link-45deg"></i>
+                                        </span>
+
+                                        <input type="url"
+                                               name="link"
+                                               class="form-control modern-input rounded-start-0"
+                                               placeholder="https://your-link.com">
+                                    </div>
+                                </div>
+
+                                <!-- BTN -->
+                                <button type="submit"
+                                        class="btn-send"
+                                        onclick="return confirm('Bạn chắc chắn muốn gửi thông báo này?')">
+
+                                    <i class="bi bi-send-fill me-2"></i>
+                                    GỬI THÔNG BÁO NGAY
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.channel-box').forEach(box => {
+
+        box.addEventListener('click', function () {
+
+            const checkbox = this.querySelector('input[type="checkbox"]');
+
+            checkbox.checked = !checkbox.checked;
+
+            if (checkbox.checked) {
+                this.classList.add('active');
+            } else {
+                this.classList.remove('active');
+            }
+        });
+    });
+</script>
+
+{% endblock %}

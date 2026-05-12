@@ -19,6 +19,12 @@ class ModerationAction(models.TextChoices):
 	RESTORE = "restore", "Restore"
 	DELETE = "delete", "Delete"
 	UPDATE = "update", "Update"
+	RESOLVE = "resolve", "Resolve"
+	REJECT = "reject", "Reject"
+	REJECTED = "rejected", "Rejected"
+	APPROVED = "approved", "Approved"
+	IGNORE = "ignore", "Ignore"
+	RESOLVED = "resolved", "Resolved"
 
 
 class ContentModerationLog(models.Model):

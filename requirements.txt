@@ -18,3 +18,5 @@ django-celery-beat
 django-celery-results
 uvicorn[standard]
 cryptography
+psutil
+celery

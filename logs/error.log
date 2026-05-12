@@ -1,0 +1,1294 @@
+[2026/05/10 14:03:27] [error] 9117#95530: *916 Permission denied
+[2026/05/09 16:31:34] [error] 2946#34043: *719 Redis connection failed
+[2026/05/09 12:40:31] [error] 6339#64733: *5521 Redis connection failed
+[2026/05/10 01:37:12] [error] 7156#66270: *3592 Upload failed
+[2026/05/11 21:02:50] [error] 3357#93482: *7661 Upload failed
+[2026/05/11 00:45:02] [error] 6947#81460: *6975 Internal server error
+[2026/05/09 23:47:44] [error] 5557#27566: *3731 Object does not exist
+[2026/05/10 11:29:48] [error] 6725#31534: *5490 Upload failed
+[2026/05/11 02:59:14] [error] 8575#71258: *5676 Upload failed
+[2026/05/11 17:45:03] [error] 7691#68855: *9303 Permission denied
+[2026/05/11 00:28:39] [error] 3871#48225: *7482 Redis connection failed
+[2026/05/10 04:54:23] [error] 1150#16346: *6370 JWT token invalid
+[2026/05/10 03:43:33] [error] 1303#19679: *5040 Database connection timeout
+[2026/05/10 06:11:53] [error] 1856#22831: *2398 Permission denied
+[2026/05/11 21:40:21] [error] 9853#64093: *5183 Permission denied
+[2026/05/10 17:33:34] [error] 4830#13438: *5434 Redis connection failed
+[2026/05/11 11:03:33] [error] 4357#26211: *1852 Database connection timeout
+[2026/05/10 06:00:03] [error] 1942#63657: *6560 Object does not exist
+[2026/05/10 08:50:07] [error] 2025#19358: *3356 Upload failed
+[2026/05/10 18:36:39] [error] 1132#16811: *1269 Database connection timeout
+[2026/05/10 10:12:04] [error] 1538#77349: *4505 JWT token invalid
+[2026/05/11 11:29:34] [error] 5045#83836: *8989 Database connection timeout
+[2026/05/09 21:04:39] [error] 5208#74048: *6307 Internal server error
+[2026/05/09 20:50:13] [error] 5044#15854: *3637 Permission denied
+[2026/05/11 09:28:00] [error] 7634#30144: *1991 Memory overflow detected
+[2026/05/10 23:19:45] [error] 9119#43564: *5299 Database connection timeout
+[2026/05/10 18:09:28] [error] 5395#74202: *5951 Upload failed
+[2026/05/09 21:33:10] [error] 7553#25178: *9336 Database connection timeout
+[2026/05/09 22:43:23] [error] 1466#31716: *3452 Upload failed
+[2026/05/09 13:11:36] [error] 9062#92572: *3021 JWT token invalid
+[2026/05/10 00:25:20] [error] 3984#87010: *8233 JWT token invalid
+[2026/05/11 02:09:10] [error] 6909#52333: *8271 Database connection timeout
+[2026/05/09 14:14:19] [error] 6215#71757: *1224 Database connection timeout
+[2026/05/11 05:54:12] [error] 2027#57095: *6226 JWT token invalid
+[2026/05/11 04:02:52] [error] 1740#15798: *2828 Object does not exist
+[2026/05/10 12:10:59] [error] 7703#43602: *4559 Redis connection failed
+[2026/05/10 10:42:22] [error] 9669#74158: *3666 Memory overflow detected
+[2026/05/10 00:52:45] [error] 9111#23283: *8085 Permission denied
+[2026/05/09 14:18:30] [error] 9028#77863: *7534 Permission denied
+[2026/05/12 08:41:53] [error] 9221#88757: *3609 Redis connection failed
+[2026/05/10 07:08:39] [error] 3265#61601: *3846 Memory overflow detected
+[2026/05/10 16:13:22] [error] 5253#97816: *9302 JWT token invalid
+[2026/05/10 12:47:46] [error] 6298#12975: *8422 Memory overflow detected
+[2026/05/11 18:20:53] [error] 9413#85253: *6155 Redis connection failed
+[2026/05/09 12:32:07] [error] 4804#75496: *435 Database connection timeout
+[2026/05/11 01:06:18] [error] 9887#57786: *1199 Internal server error
+[2026/05/10 00:13:08] [error] 5624#13913: *1071 Redis connection failed
+[2026/05/11 05:26:23] [error] 9949#93169: *6420 Database connection timeout
+[2026/05/10 06:16:45] [error] 2057#24861: *8240 Upload failed
+[2026/05/11 08:17:04] [error] 8553#64407: *2514 JWT token invalid
+[2026/05/09 15:05:17] [error] 4907#71336: *9976 Upload failed
+[2026/05/11 14:13:22] [error] 8132#10706: *2976 Upload failed
+[2026/05/12 01:21:23] [error] 4890#17412: *7547 Object does not exist
+[2026/05/11 17:05:41] [error] 8738#48305: *5523 Object does not exist
+[2026/05/10 06:26:11] [error] 7168#25433: *790 Upload failed
+[2026/05/10 08:55:41] [error] 5190#96374: *6629 Permission denied
+[2026/05/10 10:19:00] [error] 5571#81851: *2580 Internal server error
+[2026/05/10 09:43:16] [error] 8598#39116: *2385 Redis connection failed
+[2026/05/10 14:02:25] [error] 7668#83248: *4262 Object does not exist
+[2026/05/10 12:13:26] [error] 3341#88883: *2648 Upload failed
+[2026/05/11 09:18:53] [error] 5236#78056: *8354 JWT token invalid
+[2026/05/11 00:27:59] [error] 1138#31588: *4001 JWT token invalid
+[2026/05/10 14:35:21] [error] 8348#14108: *1257 JWT token invalid
+[2026/05/09 12:01:29] [error] 8227#56715: *9897 Internal server error
+[2026/05/11 21:44:02] [error] 4902#79603: *9618 Upload failed
+[2026/05/10 23:32:47] [error] 4777#76499: *4903 Object does not exist
+[2026/05/10 21:50:10] [error] 9066#25977: *3514 Redis connection failed
+[2026/05/12 01:32:45] [error] 1712#55011: *6008 Upload failed
+[2026/05/11 00:04:13] [error] 8432#94200: *5989 Upload failed
+[2026/05/11 21:44:46] [error] 2550#95148: *8998 Internal server error
+[2026/05/11 06:48:58] [error] 6985#93449: *319 Object does not exist
+[2026/05/11 06:48:45] [error] 7724#28806: *2986 JWT token invalid
+[2026/05/11 09:37:59] [error] 3032#58763: *6251 Internal server error
+[2026/05/11 04:22:34] [error] 4882#64401: *956 Internal server error
+[2026/05/11 04:07:15] [error] 7921#18813: *3055 JWT token invalid
+[2026/05/12 03:49:30] [error] 7298#82678: *7787 Internal server error
+[2026/05/11 03:37:05] [error] 3768#89810: *2908 Object does not exist
+[2026/05/11 10:01:22] [error] 2037#88049: *592 Redis connection failed
+[2026/05/09 15:18:53] [error] 4960#23000: *1375 Object does not exist
+[2026/05/11 02:02:05] [error] 4425#14803: *2708 Memory overflow detected
+[2026/05/11 00:08:23] [error] 3748#24193: *9211 Database connection timeout
+[2026/05/09 17:41:38] [error] 7400#30193: *6808 Internal server error
+[2026/05/10 07:32:35] [error] 1955#80055: *169 Memory overflow detected
+[2026/05/10 06:27:39] [error] 3392#56594: *7766 Permission denied
+[2026/05/12 01:16:21] [error] 7419#60550: *9543 Upload failed
+[2026/05/11 12:46:07] [error] 4222#31712: *2441 JWT token invalid
+[2026/05/10 15:30:54] [error] 3441#27522: *45 Internal server error
+[2026/05/11 19:53:31] [error] 2139#57214: *1959 Memory overflow detected
+[2026/05/12 09:04:01] [error] 1364#65193: *5209 Database connection timeout
+[2026/05/12 06:35:57] [error] 2842#11257: *7685 Object does not exist
+[2026/05/11 01:02:07] [error] 8177#35893: *2348 Database connection timeout
+[2026/05/11 00:08:03] [error] 9484#42180: *4265 Object does not exist
+[2026/05/11 15:02:12] [error] 5270#96919: *8083 Object does not exist
+[2026/05/11 01:33:40] [error] 3890#22534: *746 Internal server error
+[2026/05/11 13:55:08] [error] 9379#40345: *5419 Redis connection failed
+[2026/05/10 18:06:53] [error] 4300#71204: *1449 Upload failed
+[2026/05/09 16:59:12] [error] 2385#78440: *7348 Permission denied
+[2026/05/09 20:37:36] [error] 4328#96103: *7301 Internal server error
+[2026/05/11 05:43:30] [error] 5554#12363: *8509 Upload failed
+[2026/05/11 22:47:08] [error] 5555#76320: *2937 JWT token invalid
+[2026/05/10 07:11:24] [error] 4403#73783: *2631 Permission denied
+[2026/05/11 11:08:47] [error] 4864#32130: *1651 Upload failed
+[2026/05/12 00:41:42] [error] 4706#82287: *1424 Object does not exist
+[2026/05/09 13:12:15] [error] 9533#30159: *3295 Object does not exist
+[2026/05/11 23:00:16] [error] 7427#35248: *5461 Database connection timeout
+[2026/05/11 08:09:32] [error] 3991#37980: *4807 Database connection timeout
+[2026/05/10 12:22:47] [error] 2514#77282: *2780 Redis connection failed
+[2026/05/10 20:00:26] [error] 8356#25609: *8349 Memory overflow detected
+[2026/05/11 23:33:11] [error] 1113#34109: *6813 Permission denied
+[2026/05/11 17:20:19] [error] 2251#14154: *6788 Redis connection failed
+[2026/05/10 09:28:23] [error] 9435#11602: *7070 Upload failed
+[2026/05/10 05:20:49] [error] 9593#81439: *9594 Permission denied
+[2026/05/10 05:28:53] [error] 5881#63627: *8443 Redis connection failed
+[2026/05/11 17:27:06] [error] 4174#48862: *4951 Internal server error
+[2026/05/12 03:37:30] [error] 6059#55700: *4943 Object does not exist
+[2026/05/09 21:14:05] [error] 2469#31915: *3571 Redis connection failed
+[2026/05/11 20:39:40] [error] 1154#99925: *4102 JWT token invalid
+[2026/05/09 16:29:50] [error] 1293#69589: *7180 Object does not exist
+[2026/05/11 11:09:35] [error] 3294#13690: *1302 Upload failed
+[2026/05/12 08:37:29] [error] 5977#70654: *7577 Redis connection failed
+[2026/05/10 05:20:42] [error] 7486#48212: *8753 Internal server error
+[2026/05/10 19:48:54] [error] 7218#52284: *9324 Memory overflow detected
+[2026/05/11 18:03:58] [error] 1173#39740: *27 Redis connection failed
+[2026/05/10 15:10:33] [error] 7166#89144: *8602 JWT token invalid
+[2026/05/11 03:44:44] [error] 3882#26698: *1290 Database connection timeout
+[2026/05/09 17:48:56] [error] 9082#90060: *4934 JWT token invalid
+[2026/05/10 14:15:01] [error] 5331#67409: *6546 JWT token invalid
+[2026/05/12 08:46:48] [error] 3185#90562: *4125 Permission denied
+[2026/05/10 05:00:06] [error] 5992#34518: *3265 Permission denied
+[2026/05/10 09:42:15] [error] 4050#96618: *6111 Internal server error
+[2026/05/09 16:50:26] [error] 4179#79544: *1060 JWT token invalid
+[2026/05/10 15:13:00] [error] 9042#63888: *7629 Object does not exist
+[2026/05/10 13:50:18] [error] 6117#82082: *9397 Redis connection failed
+[2026/05/10 01:32:45] [error] 9948#85431: *7380 Internal server error
+[2026/05/10 02:09:08] [error] 7122#67336: *4535 Object does not exist
+[2026/05/10 04:55:34] [error] 1332#53610: *318 Object does not exist
+[2026/05/09 21:20:27] [error] 7422#29732: *7326 Permission denied
+[2026/05/11 10:24:51] [error] 5564#42681: *32 Permission denied
+[2026/05/11 23:25:14] [error] 1029#40571: *6322 Internal server error
+[2026/05/10 16:21:13] [error] 2327#31539: *9894 Redis connection failed
+[2026/05/10 04:34:45] [error] 6976#38958: *8775 Object does not exist
+[2026/05/11 01:53:08] [error] 3250#67179: *4082 Object does not exist
+[2026/05/11 16:52:43] [error] 7468#50458: *9823 Object does not exist
+[2026/05/09 21:47:00] [error] 9576#37003: *2489 Upload failed
+[2026/05/09 16:27:51] [error] 1244#94212: *3977 JWT token invalid
+[2026/05/10 05:26:18] [error] 5026#90050: *8767 Redis connection failed
+[2026/05/11 09:45:18] [error] 3831#80399: *7635 Database connection timeout
+[2026/05/09 15:40:01] [error] 2112#94358: *4285 Redis connection failed
+[2026/05/10 03:37:56] [error] 4706#82826: *425 Redis connection failed
+[2026/05/11 19:48:48] [error] 9145#67353: *1181 Database connection timeout
+[2026/05/11 03:41:21] [error] 3520#72699: *1225 Redis connection failed
+[2026/05/12 02:55:47] [error] 1732#13741: *1723 Internal server error
+[2026/05/10 00:41:39] [error] 7788#70514: *6915 Permission denied
+[2026/05/10 05:51:26] [error] 1801#59158: *7772 Permission denied
+[2026/05/11 20:26:58] [error] 9979#46063: *6217 Database connection timeout
+[2026/05/11 01:03:25] [error] 1509#38387: *8283 Permission denied
+[2026/05/10 15:58:31] [error] 9906#82520: *4802 Database connection timeout
+[2026/05/10 04:54:57] [error] 1704#37559: *9634 Permission denied
+[2026/05/09 16:19:14] [error] 6722#44551: *3876 Object does not exist
+[2026/05/10 17:22:21] [error] 7528#11007: *5641 Upload failed
+[2026/05/12 03:05:33] [error] 7944#91484: *1239 Memory overflow detected
+[2026/05/09 17:15:49] [error] 6577#77462: *4818 Permission denied
+[2026/05/10 15:28:41] [error] 4845#16831: *6579 Memory overflow detected
+[2026/05/11 08:01:26] [error] 2069#31964: *3471 Redis connection failed
+[2026/05/09 15:47:08] [error] 3177#34778: *3416 Permission denied
+[2026/05/09 20:28:54] [error] 5444#59300: *6132 JWT token invalid
+[2026/05/10 00:39:01] [error] 2490#29754: *1071 Database connection timeout
+[2026/05/09 19:45:02] [error] 8821#45767: *5375 Object does not exist
+[2026/05/12 06:52:44] [error] 3455#52394: *8134 Upload failed
+[2026/05/11 20:57:46] [error] 1025#26794: *9867 Database connection timeout
+[2026/05/09 22:34:20] [error] 8878#56475: *5671 Upload failed
+[2026/05/11 10:16:43] [error] 7044#84274: *5992 JWT token invalid
+[2026/05/10 08:13:40] [error] 1112#87604: *5024 Internal server error
+[2026/05/10 07:23:32] [error] 3450#69329: *8623 JWT token invalid
+[2026/05/09 16:46:34] [error] 1353#57891: *1961 Permission denied
+[2026/05/09 19:16:27] [error] 2404#27959: *8914 Upload failed
+[2026/05/10 15:18:04] [error] 3226#83525: *8307 Redis connection failed
+[2026/05/10 15:06:11] [error] 9066#29470: *9292 Internal server error
+[2026/05/11 19:38:34] [error] 2546#48946: *1789 Upload failed
+[2026/05/12 01:07:47] [error] 2042#15641: *6254 Database connection timeout
+[2026/05/09 20:34:42] [error] 1683#36771: *5770 Permission denied
+[2026/05/12 06:51:42] [error] 1597#73815: *3697 JWT token invalid
+[2026/05/09 20:07:10] [error] 4564#12037: *990 Object does not exist
+[2026/05/12 01:29:36] [error] 4708#20753: *4994 Memory overflow detected
+[2026/05/10 20:38:26] [error] 4313#48728: *7344 Internal server error
+[2026/05/11 18:13:43] [error] 9656#55643: *3535 Redis connection failed
+[2026/05/09 17:08:36] [error] 2054#83792: *1714 Database connection timeout
+[2026/05/11 19:40:28] [error] 1490#44265: *9093 Memory overflow detected
+[2026/05/11 06:23:57] [error] 9649#87754: *7184 Permission denied
+[2026/05/11 01:51:50] [error] 5528#60727: *9404 Upload failed
+[2026/05/11 22:02:15] [error] 8387#97413: *8690 JWT token invalid
+[2026/05/11 15:28:41] [error] 7551#10605: *9295 Redis connection failed
+[2026/05/10 21:54:43] [error] 1862#60065: *7931 Database connection timeout
+[2026/05/10 23:23:01] [error] 9099#32102: *7129 Database connection timeout
+[2026/05/10 14:53:02] [error] 8885#67090: *7995 Memory overflow detected
+[2026/05/09 23:48:54] [error] 3993#27481: *7197 Permission denied
+[2026/05/12 01:17:08] [error] 8630#50682: *8575 Permission denied
+[2026/05/10 23:31:13] [error] 5198#14521: *6259 Object does not exist
+[2026/05/09 20:01:17] [error] 3188#27261: *5492 Permission denied
+[2026/05/11 11:10:56] [error] 5939#67510: *9465 Permission denied
+[2026/05/11 21:28:41] [error] 4021#33166: *7036 Object does not exist
+[2026/05/11 11:59:38] [error] 4354#34427: *5422 Database connection timeout
+[2026/05/11 02:41:10] [error] 1216#67627: *9129 Redis connection failed
+[2026/05/12 07:00:48] [error] 6533#20537: *1376 Upload failed
+[2026/05/11 22:01:15] [error] 7922#53115: *901 Internal server error
+[2026/05/10 15:40:34] [error] 4527#47375: *525 Redis connection failed
+[2026/05/10 01:08:06] [error] 7807#51460: *8809 Memory overflow detected
+[2026/05/12 04:38:16] [error] 8549#34604: *9852 Internal server error
+[2026/05/12 01:39:30] [error] 3812#71141: *1416 Object does not exist
+[2026/05/11 13:42:05] [error] 6828#31031: *4677 JWT token invalid
+[2026/05/10 16:59:10] [error] 3525#47504: *8649 Database connection timeout
+[2026/05/10 05:16:50] [error] 3718#26429: *7117 Upload failed
+[2026/05/09 23:34:11] [error] 9619#44300: *9104 Database connection timeout
+[2026/05/10 20:39:15] [error] 5960#86541: *9686 Memory overflow detected
+[2026/05/10 20:40:58] [error] 5897#28267: *9803 Database connection timeout
+[2026/05/12 02:48:44] [error] 8864#29508: *5485 JWT token invalid
+[2026/05/11 14:48:04] [error] 1537#42186: *60 Internal server error
+[2026/05/09 17:43:17] [error] 8511#58819: *6237 Redis connection failed
+[2026/05/12 08:12:33] [error] 3939#32897: *2380 Memory overflow detected
+[2026/05/11 09:14:33] [error] 8202#61335: *6529 JWT token invalid
+[2026/05/10 13:06:34] [error] 5685#95664: *2121 Memory overflow detected
+[2026/05/10 17:16:11] [error] 6596#19163: *7572 Permission denied
+[2026/05/11 08:07:02] [error] 6498#82819: *67 Internal server error
+[2026/05/09 20:57:59] [error] 4896#66506: *297 Permission denied
+[2026/05/09 15:09:19] [error] 8234#77071: *7424 Database connection timeout
+[2026/05/11 04:47:32] [error] 9252#27693: *6013 Object does not exist
+[2026/05/09 19:30:03] [error] 1550#63043: *7658 JWT token invalid
+[2026/05/10 05:35:45] [error] 2818#92342: *3316 JWT token invalid
+[2026/05/09 19:31:42] [error] 1872#54268: *7049 Redis connection failed
+[2026/05/10 03:51:03] [error] 2551#72227: *2951 Upload failed
+[2026/05/10 22:55:51] [error] 5240#96203: *6596 Memory overflow detected
+[2026/05/11 07:59:56] [error] 8794#74214: *9822 JWT token invalid
+[2026/05/11 22:59:47] [error] 6002#87848: *839 Memory overflow detected
+[2026/05/10 11:53:41] [error] 4609#19912: *3472 Object does not exist
+[2026/05/12 05:00:49] [error] 3527#42445: *8626 Memory overflow detected
+[2026/05/11 02:49:53] [error] 2854#74217: *5025 Memory overflow detected
+[2026/05/09 18:38:04] [error] 3642#72024: *9429 Memory overflow detected
+[2026/05/11 07:44:02] [error] 8508#14195: *3184 Memory overflow detected
+[2026/05/11 22:09:22] [error] 7931#37650: *5247 Permission denied
+[2026/05/11 06:38:21] [error] 1326#33869: *8411 Upload failed
+[2026/05/11 18:32:19] [error] 2252#13201: *2402 Object does not exist
+[2026/05/10 13:51:22] [error] 9606#53489: *7245 Internal server error
+[2026/05/10 04:14:28] [error] 5257#83526: *1450 Upload failed
+[2026/05/12 06:42:04] [error] 4776#33870: *4154 Internal server error
+[2026/05/11 17:09:02] [error] 5304#87614: *2834 JWT token invalid
+[2026/05/09 12:13:57] [error] 1865#21865: *2620 Permission denied
+[2026/05/10 06:25:41] [error] 6328#91316: *8182 Permission denied
+[2026/05/10 16:10:05] [error] 8844#27217: *1643 Upload failed
+[2026/05/10 08:33:18] [error] 4149#86422: *6652 JWT token invalid
+[2026/05/11 12:03:43] [error] 9298#66295: *3203 Redis connection failed
+[2026/05/09 13:58:11] [error] 1089#66909: *385 Memory overflow detected
+[2026/05/10 18:00:56] [error] 6495#87976: *9937 Memory overflow detected
+[2026/05/12 01:53:22] [error] 8204#56817: *8671 Database connection timeout
+[2026/05/11 03:32:54] [error] 8711#37938: *1496 JWT token invalid
+[2026/05/10 02:57:44] [error] 2366#50527: *2634 JWT token invalid
+[2026/05/09 16:26:45] [error] 7306#12627: *7675 Internal server error
+[2026/05/10 22:18:24] [error] 3903#94936: *5393 Permission denied
+[2026/05/12 04:48:57] [error] 5331#79893: *4996 Upload failed
+[2026/05/10 23:06:47] [error] 6335#11663: *3464 Object does not exist
+[2026/05/10 13:22:20] [error] 4795#89108: *4027 JWT token invalid
+[2026/05/11 10:05:53] [error] 1927#57767: *2712 Internal server error
+[2026/05/10 17:03:33] [error] 3033#14963: *7341 Database connection timeout
+[2026/05/10 04:38:26] [error] 7312#19546: *1014 Internal server error
+[2026/05/11 07:09:47] [error] 9181#28701: *7547 Memory overflow detected
+[2026/05/10 21:35:17] [error] 6296#42397: *2709 Database connection timeout
+[2026/05/11 22:16:25] [error] 2841#56510: *3120 Database connection timeout
+[2026/05/10 03:47:18] [error] 9154#22474: *511 Memory overflow detected
+[2026/05/12 07:04:10] [error] 5271#46460: *4513 Upload failed
+[2026/05/10 13:30:10] [error] 6508#38355: *3069 Redis connection failed
+[2026/05/11 18:32:56] [error] 2384#71789: *6362 Database connection timeout
+[2026/05/11 18:56:40] [error] 9831#35535: *420 Internal server error
+[2026/05/09 23:46:19] [error] 4732#48915: *6639 Object does not exist
+[2026/05/11 02:23:11] [error] 9692#33119: *9591 Memory overflow detected
+[2026/05/10 09:20:31] [error] 1533#34546: *378 Memory overflow detected
+[2026/05/12 01:26:24] [error] 8657#73162: *6295 Internal server error
+[2026/05/11 09:09:43] [error] 6022#31793: *4174 Memory overflow detected
+[2026/05/10 02:49:20] [error] 2368#97337: *1956 Permission denied
+[2026/05/09 20:32:02] [error] 3810#28242: *2991 Database connection timeout
+[2026/05/11 10:56:50] [error] 9626#31652: *5251 JWT token invalid
+[2026/05/11 07:31:35] [error] 3330#62568: *7743 Database connection timeout
+[2026/05/10 01:04:00] [error] 1085#58092: *2172 Redis connection failed
+[2026/05/12 00:01:18] [error] 7442#55847: *9116 Upload failed
+[2026/05/10 16:41:00] [error] 7028#49747: *1413 Memory overflow detected
+[2026/05/09 18:11:19] [error] 1309#40257: *4066 Redis connection failed
+[2026/05/11 09:01:48] [error] 8639#66374: *3488 JWT token invalid
+[2026/05/09 12:21:24] [error] 2230#14488: *8966 Object does not exist
+[2026/05/10 20:31:09] [error] 3606#96881: *1339 Permission denied
+[2026/05/09 17:43:13] [error] 8572#94422: *6182 Object does not exist
+[2026/05/11 08:31:52] [error] 2953#98729: *7637 Database connection timeout
+[2026/05/10 00:38:55] [error] 3997#71477: *5786 Redis connection failed
+[2026/05/11 09:10:53] [error] 2040#56256: *5279 Upload failed
+[2026/05/10 21:12:02] [error] 5841#15233: *3683 Permission denied
+[2026/05/11 17:09:33] [error] 4535#93913: *2974 Redis connection failed
+[2026/05/11 10:08:32] [error] 9546#23726: *4673 Redis connection failed
+[2026/05/10 21:41:44] [error] 1993#69540: *9181 Object does not exist
+[2026/05/11 05:38:40] [error] 8510#44550: *1736 Permission denied
+[2026/05/10 11:08:27] [error] 9190#73687: *5341 Database connection timeout
+[2026/05/09 13:02:48] [error] 4981#10569: *986 Permission denied
+[2026/05/11 20:15:16] [error] 3881#31236: *4173 JWT token invalid
+[2026/05/11 22:55:33] [error] 6453#32086: *2038 Redis connection failed
+[2026/05/10 22:37:20] [error] 7968#81604: *3070 Upload failed
+[2026/05/11 07:07:25] [error] 9807#69826: *6148 JWT token invalid
+[2026/05/10 15:07:31] [error] 9716#73390: *7908 JWT token invalid
+[2026/05/12 01:05:34] [error] 9432#99316: *3521 Object does not exist
+[2026/05/09 12:06:27] [error] 4303#82746: *7882 Redis connection failed
+[2026/05/10 13:52:45] [error] 3339#32392: *8391 Upload failed
+[2026/05/09 17:46:22] [error] 7196#88491: *1462 Database connection timeout
+[2026/05/10 01:01:47] [error] 2238#38056: *5700 Internal server error
+[2026/05/10 11:07:59] [error] 7345#68156: *8539 Redis connection failed
+[2026/05/10 05:34:34] [error] 2507#79656: *3046 Upload failed
+[2026/05/11 11:21:42] [error] 3124#52407: *749 Database connection timeout
+[2026/05/09 23:52:17] [error] 4817#79256: *3324 Memory overflow detected
+[2026/05/11 04:20:32] [error] 5755#90831: *2451 Permission denied
+[2026/05/10 20:13:00] [error] 5966#15222: *5068 Upload failed
+[2026/05/09 13:59:03] [error] 6713#95259: *9158 Object does not exist
+[2026/05/11 16:06:25] [error] 3804#57205: *5137 Upload failed
+[2026/05/11 01:20:35] [error] 5098#62504: *5078 Object does not exist
+[2026/05/11 17:21:12] [error] 5169#50718: *4340 Redis connection failed
+[2026/05/09 20:01:07] [error] 5742#41848: *7040 Internal server error
+[2026/05/10 11:05:34] [error] 4449#57393: *1372 Internal server error
+[2026/05/11 04:19:56] [error] 6350#82345: *8978 Upload failed
+[2026/05/12 04:31:01] [error] 8472#47882: *4190 Upload failed
+[2026/05/11 03:33:09] [error] 3537#52471: *1822 Database connection timeout
+[2026/05/11 14:00:47] [error] 5942#29428: *7204 Object does not exist
+[2026/05/10 22:15:59] [error] 3030#47458: *7876 Memory overflow detected
+[2026/05/09 23:32:27] [error] 9828#95680: *2925 Upload failed
+[2026/05/10 16:18:31] [error] 5040#71646: *5930 Memory overflow detected
+[2026/05/12 04:24:26] [error] 8274#87347: *8139 Upload failed
+[2026/05/11 13:52:01] [error] 8392#29641: *8445 Internal server error
+[2026/05/10 01:59:23] [error] 6628#64510: *3065 Object does not exist
+[2026/05/10 20:52:15] [error] 5467#35154: *7663 JWT token invalid
+[2026/05/11 09:26:06] [error] 9065#35510: *764 Database connection timeout
+[2026/05/10 12:20:12] [error] 2451#22931: *1406 Redis connection failed
+[2026/05/10 16:53:43] [error] 9961#55647: *3092 Memory overflow detected
+[2026/05/12 01:39:36] [error] 6323#58108: *6166 Memory overflow detected
+[2026/05/09 18:35:47] [error] 5821#59490: *3232 Redis connection failed
+[2026/05/10 13:53:34] [error] 5010#36864: *4389 Redis connection failed
+[2026/05/12 05:37:46] [error] 2307#50581: *2972 Redis connection failed
+[2026/05/09 21:48:37] [error] 3064#70083: *1584 Database connection timeout
+[2026/05/10 13:52:29] [error] 6572#55297: *3227 Database connection timeout
+[2026/05/11 12:20:14] [error] 1127#61939: *7329 JWT token invalid
+[2026/05/10 21:46:04] [error] 2195#53104: *4353 Redis connection failed
+[2026/05/12 07:13:11] [error] 9159#65670: *1984 Database connection timeout
+[2026/05/12 02:14:44] [error] 1937#22732: *6686 Upload failed
+[2026/05/09 20:07:17] [error] 3990#76723: *6655 Database connection timeout
+[2026/05/10 05:58:16] [error] 6639#70837: *7236 Database connection timeout
+[2026/05/11 15:15:43] [error] 3587#64424: *3633 Permission denied
+[2026/05/10 18:09:46] [error] 4884#49826: *6835 Internal server error
+[2026/05/09 16:35:54] [error] 2475#54428: *3686 Memory overflow detected
+[2026/05/11 21:59:43] [error] 7114#56273: *7298 Internal server error
+[2026/05/10 18:42:19] [error] 6450#13375: *3602 Database connection timeout
+[2026/05/11 19:24:48] [error] 3399#65692: *1761 Redis connection failed
+[2026/05/12 01:18:55] [error] 7688#30712: *4428 Memory overflow detected
+[2026/05/11 12:45:25] [error] 3072#88428: *6264 Redis connection failed
+[2026/05/09 12:29:50] [error] 9678#42643: *5395 Redis connection failed
+[2026/05/10 20:52:11] [error] 4579#99368: *7500 Memory overflow detected
+[2026/05/10 01:39:41] [error] 6631#30140: *15 Database connection timeout
+[2026/05/11 14:52:08] [error] 3318#11292: *3826 Database connection timeout
+[2026/05/12 08:58:31] [error] 8763#45834: *238 Memory overflow detected
+[2026/05/11 10:13:00] [error] 6577#71497: *4356 Upload failed
+[2026/05/10 12:24:38] [error] 1678#30575: *400 Upload failed
+[2026/05/10 03:18:50] [error] 3821#20298: *5671 Permission denied
+[2026/05/12 05:53:42] [error] 7025#48696: *9619 Upload failed
+[2026/05/10 01:54:53] [error] 4886#78644: *2182 Permission denied
+[2026/05/09 13:55:04] [error] 1438#73973: *8681 Permission denied
+[2026/05/10 15:22:29] [error] 3948#45435: *7865 JWT token invalid
+[2026/05/10 18:38:18] [error] 7147#24863: *5607 Internal server error
+[2026/05/10 14:19:09] [error] 5144#82134: *7451 Memory overflow detected
+[2026/05/10 16:24:04] [error] 7141#16642: *688 Object does not exist
+[2026/05/11 22:48:58] [error] 1554#43420: *6572 Internal server error
+[2026/05/10 23:59:00] [error] 1176#70676: *8068 Upload failed
+[2026/05/09 17:38:35] [error] 1969#13031: *7133 JWT token invalid
+[2026/05/09 16:23:21] [error] 2313#70710: *3412 Database connection timeout
+[2026/05/09 23:42:34] [error] 8154#47590: *6910 Object does not exist
+[2026/05/10 08:43:05] [error] 1426#31865: *6060 Memory overflow detected
+[2026/05/09 23:13:01] [error] 2675#35143: *8183 Memory overflow detected
+[2026/05/10 07:03:37] [error] 6476#35543: *6182 Object does not exist
+[2026/05/12 08:36:39] [error] 2983#32947: *5069 JWT token invalid
+[2026/05/10 20:04:02] [error] 2612#36770: *7809 Permission denied
+[2026/05/11 13:39:23] [error] 6488#23935: *2369 Upload failed
+[2026/05/10 07:02:39] [error] 7491#67937: *5466 Upload failed
+[2026/05/10 18:25:51] [error] 8047#34076: *88 Permission denied
+[2026/05/10 06:30:03] [error] 8548#17620: *7256 Redis connection failed
+[2026/05/10 12:07:29] [error] 6608#81007: *9704 Permission denied
+[2026/05/11 14:22:06] [error] 5530#74059: *613 Object does not exist
+[2026/05/10 10:04:54] [error] 2149#59704: *3069 Object does not exist
+[2026/05/12 02:51:42] [error] 3384#68474: *8124 Object does not exist
+[2026/05/10 12:56:55] [error] 8114#51793: *9209 Upload failed
+[2026/05/09 14:40:32] [error] 5999#57366: *5294 Object does not exist
+[2026/05/11 09:41:24] [error] 7124#38246: *7584 Redis connection failed
+[2026/05/11 08:39:13] [error] 2542#13842: *3550 JWT token invalid
+[2026/05/11 16:40:19] [error] 1807#62904: *2049 JWT token invalid
+[2026/05/12 03:36:26] [error] 4498#57142: *1318 Redis connection failed
+[2026/05/11 14:43:51] [error] 1721#82082: *4135 Memory overflow detected
+[2026/05/11 20:48:14] [error] 3510#90134: *9987 Memory overflow detected
+[2026/05/11 00:18:23] [error] 2238#75449: *5873 Memory overflow detected
+[2026/05/11 00:47:15] [error] 4311#72610: *4587 JWT token invalid
+[2026/05/10 12:02:52] [error] 6650#13593: *9124 Permission denied
+[2026/05/10 06:37:55] [error] 8601#29036: *3439 Permission denied
+[2026/05/09 20:55:45] [error] 7451#77020: *5183 Database connection timeout
+[2026/05/11 20:19:55] [error] 1597#76035: *4709 Object does not exist
+[2026/05/10 08:36:44] [error] 1105#84729: *3914 JWT token invalid
+[2026/05/10 05:16:41] [error] 3553#78413: *9448 Database connection timeout
+[2026/05/11 08:34:39] [error] 9017#60541: *5321 Object does not exist
+[2026/05/11 17:58:48] [error] 2020#36306: *4234 Internal server error
+[2026/05/10 08:30:44] [error] 9134#96197: *4499 JWT token invalid
+[2026/05/11 00:07:54] [error] 9325#53286: *5667 Database connection timeout
+[2026/05/10 06:32:42] [error] 6659#61374: *2861 JWT token invalid
+[2026/05/11 21:20:39] [error] 2775#74394: *6806 JWT token invalid
+[2026/05/12 00:40:27] [error] 1533#31122: *9850 Redis connection failed
+[2026/05/11 01:33:40] [error] 9310#76081: *5050 Internal server error
+[2026/05/12 00:03:09] [error] 3252#57530: *7732 JWT token invalid
+[2026/05/09 16:12:55] [error] 2517#66096: *9829 Internal server error
+[2026/05/10 05:11:11] [error] 8197#68023: *5380 Permission denied
+[2026/05/10 11:18:42] [error] 5125#77490: *3617 Redis connection failed
+[2026/05/12 08:05:56] [error] 7262#79091: *7174 Internal server error
+[2026/05/09 15:59:18] [error] 9238#28082: *5209 JWT token invalid
+[2026/05/09 13:21:27] [error] 6625#30900: *8525 Database connection timeout
+[2026/05/10 12:16:35] [error] 7376#48366: *9248 Internal server error
+[2026/05/11 17:34:37] [error] 8618#63731: *4719 Internal server error
+[2026/05/10 06:35:07] [error] 3631#36020: *4349 Permission denied
+[2026/05/11 12:21:31] [error] 6659#28299: *1214 JWT token invalid
+[2026/05/12 00:19:40] [error] 7457#86527: *2210 JWT token invalid
+[2026/05/09 16:47:03] [error] 6874#52774: *907 Memory overflow detected
+[2026/05/10 06:35:04] [error] 1740#65080: *3519 Internal server error
+[2026/05/10 20:09:13] [error] 7633#23224: *8021 Upload failed
+[2026/05/11 09:13:32] [error] 6199#10397: *8726 Permission denied
+[2026/05/11 17:09:55] [error] 9462#93603: *9487 JWT token invalid
+[2026/05/11 00:46:05] [error] 5023#78329: *1671 Memory overflow detected
+[2026/05/11 03:52:07] [error] 7021#32018: *4944 Memory overflow detected
+[2026/05/12 02:45:22] [error] 3853#29595: *401 JWT token invalid
+[2026/05/09 20:23:29] [error] 5098#72664: *5503 Internal server error
+[2026/05/10 08:12:16] [error] 2837#72339: *7682 Object does not exist
+[2026/05/11 06:20:04] [error] 9525#33312: *2037 Object does not exist
+[2026/05/10 13:25:43] [error] 7554#25420: *2889 Redis connection failed
+[2026/05/11 06:52:17] [error] 5824#32088: *7178 Upload failed
+[2026/05/10 18:36:03] [error] 5804#26326: *827 Internal server error
+[2026/05/12 02:44:51] [error] 1158#42510: *9260 Internal server error
+[2026/05/11 09:22:35] [error] 1902#76217: *444 Database connection timeout
+[2026/05/11 12:51:50] [error] 6264#74724: *7224 Redis connection failed
+[2026/05/12 00:05:44] [error] 9647#38808: *4795 Upload failed
+[2026/05/12 06:01:58] [error] 3570#42733: *840 Upload failed
+[2026/05/10 06:10:12] [error] 5349#58974: *1255 Memory overflow detected
+[2026/05/11 11:55:04] [error] 7363#15180: *8750 Object does not exist
+[2026/05/09 20:22:38] [error] 8985#80666: *9376 Upload failed
+[2026/05/11 03:25:32] [error] 1750#99330: *2930 Redis connection failed
+[2026/05/10 08:35:45] [error] 6799#52672: *8408 Internal server error
+[2026/05/10 04:46:39] [error] 1812#63515: *2123 Database connection timeout
+[2026/05/11 10:38:25] [error] 7637#90122: *1985 Permission denied
+[2026/05/11 15:42:55] [error] 3348#50650: *501 Database connection timeout
+[2026/05/10 05:51:38] [error] 7622#48614: *8322 JWT token invalid
+[2026/05/11 22:00:31] [error] 2559#83456: *5045 Object does not exist
+[2026/05/11 12:34:38] [error] 1002#60625: *7316 Object does not exist
+[2026/05/12 02:40:22] [error] 7090#16341: *3618 Upload failed
+[2026/05/11 21:41:08] [error] 1641#53709: *9015 Internal server error
+[2026/05/10 04:39:26] [error] 5889#19543: *2145 Internal server error
+[2026/05/11 11:50:36] [error] 8478#77432: *8882 Upload failed
+[2026/05/11 17:31:21] [error] 7758#82507: *449 Database connection timeout
+[2026/05/11 22:00:35] [error] 5632#75425: *5552 Object does not exist
+[2026/05/10 14:18:48] [error] 5142#15820: *7252 Upload failed
+[2026/05/11 04:15:35] [error] 8761#51021: *5818 JWT token invalid
+[2026/05/10 23:56:12] [error] 2160#63951: *3569 Memory overflow detected
+[2026/05/10 19:08:00] [error] 9262#97800: *2987 Permission denied
+[2026/05/10 06:06:56] [error] 3450#30636: *906 Object does not exist
+[2026/05/11 05:23:54] [error] 5682#26149: *4058 Database connection timeout
+[2026/05/11 22:31:40] [error] 5648#25370: *7378 Memory overflow detected
+[2026/05/10 00:25:24] [error] 6458#62065: *3711 Redis connection failed
+[2026/05/11 03:56:52] [error] 1698#23437: *7355 Upload failed
+[2026/05/09 22:27:26] [error] 1218#35507: *8687 Object does not exist
+[2026/05/10 12:06:09] [error] 1365#40511: *7037 Redis connection failed
+[2026/05/10 22:09:06] [error] 1946#94190: *7262 Memory overflow detected
+[2026/05/11 05:52:48] [error] 7995#35828: *7705 JWT token invalid
+[2026/05/11 23:38:45] [error] 2224#49288: *8622 Memory overflow detected
+[2026/05/10 23:05:33] [error] 5476#98042: *5007 Database connection timeout
+[2026/05/12 02:55:37] [error] 5059#71142: *8251 Memory overflow detected
+[2026/05/09 23:23:05] [error] 8112#63541: *8736 Database connection timeout
+[2026/05/10 07:30:34] [error] 7937#19806: *3080 Memory overflow detected
+[2026/05/11 15:44:50] [error] 5524#29468: *7609 Memory overflow detected
+[2026/05/11 03:42:25] [error] 7628#45081: *8395 Internal server error
+[2026/05/09 18:51:36] [error] 5309#42511: *7838 Memory overflow detected
+[2026/05/10 08:50:09] [error] 5903#79808: *8824 Internal server error
+[2026/05/10 19:52:19] [error] 5945#99297: *7378 Object does not exist
+[2026/05/10 13:49:13] [error] 3469#92354: *3551 JWT token invalid
+[2026/05/10 08:03:50] [error] 6082#74804: *2135 Internal server error
+[2026/05/10 22:12:39] [error] 5987#59067: *4689 Object does not exist
+[2026/05/12 06:31:46] [error] 6796#30850: *529 Database connection timeout
+[2026/05/09 17:19:58] [error] 7059#89382: *1919 JWT token invalid
+[2026/05/11 21:38:50] [error] 5400#12972: *5846 Object does not exist
+[2026/05/11 21:41:01] [error] 6340#15883: *5910 Upload failed
+[2026/05/09 17:52:19] [error] 4036#55851: *7695 Redis connection failed
+[2026/05/10 18:37:54] [error] 8079#29263: *2805 JWT token invalid
+[2026/05/10 20:26:32] [error] 5001#47461: *1604 Database connection timeout
+[2026/05/11 11:30:42] [error] 2478#53399: *4016 Redis connection failed
+[2026/05/09 13:43:06] [error] 1980#59613: *8245 Memory overflow detected
+[2026/05/09 12:41:38] [error] 7716#30973: *1530 JWT token invalid
+[2026/05/10 18:50:39] [error] 6524#95759: *7511 Redis connection failed
+[2026/05/11 18:54:42] [error] 1581#31798: *7926 Database connection timeout
+[2026/05/10 12:38:24] [error] 3740#57419: *6988 Database connection timeout
+[2026/05/12 05:32:20] [error] 8892#37498: *8252 Memory overflow detected
+[2026/05/11 09:57:24] [error] 4690#73509: *9861 Object does not exist
+[2026/05/09 15:56:41] [error] 9653#97690: *9622 Database connection timeout
+[2026/05/10 23:03:18] [error] 5250#41388: *1039 Memory overflow detected
+[2026/05/09 15:16:04] [error] 5464#45184: *7881 Redis connection failed
+[2026/05/10 01:31:29] [error] 6998#59018: *8733 Object does not exist
+[2026/05/10 04:19:32] [error] 4743#88692: *7855 Database connection timeout
+[2026/05/10 11:01:34] [error] 3772#73287: *594 Redis connection failed
+[2026/05/11 15:41:09] [error] 1436#82061: *1458 Redis connection failed
+[2026/05/10 11:21:00] [error] 9230#16374: *9905 Database connection timeout
+[2026/05/09 19:45:23] [error] 6077#82113: *5412 Database connection timeout
+[2026/05/10 04:34:57] [error] 4543#65200: *4727 Upload failed
+[2026/05/10 14:45:21] [error] 3812#11089: *9470 JWT token invalid
+[2026/05/11 07:39:38] [error] 2833#21671: *1774 Database connection timeout
+[2026/05/10 02:22:45] [error] 9993#37506: *8024 JWT token invalid
+[2026/05/10 15:23:53] [error] 3970#24820: *2345 Permission denied
+[2026/05/12 05:59:41] [error] 9116#22734: *6358 Database connection timeout
+[2026/05/09 17:45:10] [error] 5773#40411: *3408 Memory overflow detected
+[2026/05/09 16:13:11] [error] 7326#86923: *9511 Permission denied
+[2026/05/11 21:41:01] [error] 5804#14382: *607 Memory overflow detected
+[2026/05/10 18:35:53] [error] 1919#22695: *7078 Memory overflow detected
+[2026/05/12 08:49:03] [error] 5665#47015: *4439 JWT token invalid
+[2026/05/11 23:43:53] [error] 6889#42432: *6466 Permission denied
+[2026/05/10 05:40:43] [error] 5651#66815: *9094 Database connection timeout
+[2026/05/09 16:28:18] [error] 3782#15587: *5322 Permission denied
+[2026/05/12 06:22:49] [error] 5345#82676: *560 Object does not exist
+[2026/05/11 12:36:59] [error] 7278#99769: *873 Redis connection failed
+[2026/05/12 01:58:17] [error] 5140#64178: *9095 Permission denied
+[2026/05/11 20:59:54] [error] 9715#54079: *2585 Permission denied
+[2026/05/10 15:13:57] [error] 7896#42232: *5377 Permission denied
+[2026/05/11 17:39:26] [error] 4505#37795: *2972 Object does not exist
+[2026/05/10 11:06:12] [error] 2704#85170: *9216 Object does not exist
+[2026/05/12 06:45:46] [error] 1445#91264: *292 Memory overflow detected
+[2026/05/11 01:06:59] [error] 6375#22236: *5365 Internal server error
+[2026/05/11 02:06:43] [error] 5230#15168: *304 Permission denied
+[2026/05/09 22:56:25] [error] 6050#37726: *1110 JWT token invalid
+[2026/05/10 22:18:04] [error] 7791#22913: *5540 Object does not exist
+[2026/05/10 16:53:25] [error] 2228#86024: *554 JWT token invalid
+[2026/05/12 02:18:51] [error] 8119#10177: *2348 Permission denied
+[2026/05/11 22:31:41] [error] 2224#93442: *1609 Database connection timeout
+[2026/05/12 02:56:54] [error] 6071#31040: *1799 Database connection timeout
+[2026/05/10 18:07:13] [error] 4820#32270: *4747 JWT token invalid
+[2026/05/11 02:29:34] [error] 8802#97132: *5608 Internal server error
+[2026/05/11 23:59:51] [error] 7246#51889: *4465 JWT token invalid
+[2026/05/10 22:20:51] [error] 6505#85619: *348 Memory overflow detected
+[2026/05/10 03:24:29] [error] 4814#50886: *4639 Object does not exist
+[2026/05/10 15:00:40] [error] 2233#16036: *7985 Redis connection failed
+[2026/05/10 22:49:27] [error] 7209#52184: *3716 Upload failed
+[2026/05/09 14:31:06] [error] 1590#65030: *8443 JWT token invalid
+[2026/05/11 04:19:45] [error] 5442#40929: *3426 Internal server error
+[2026/05/10 20:17:15] [error] 3825#29436: *8831 Memory overflow detected
+[2026/05/12 04:12:19] [error] 5326#50490: *1152 Internal server error
+[2026/05/11 02:18:07] [error] 7250#46390: *6739 Object does not exist
+[2026/05/12 06:56:49] [error] 3675#40764: *4072 Upload failed
+[2026/05/09 19:56:28] [error] 2145#18830: *8938 JWT token invalid
+[2026/05/11 16:31:23] [error] 7954#99974: *4002 Object does not exist
+[2026/05/11 01:10:02] [error] 4108#66841: *8660 Permission denied
+[2026/05/11 07:25:08] [error] 5817#86791: *2131 Redis connection failed
+[2026/05/10 13:29:24] [error] 9779#50998: *4779 Redis connection failed
+[2026/05/10 04:27:01] [error] 8421#68315: *253 Upload failed
+[2026/05/11 03:26:23] [error] 2471#31590: *4263 Upload failed
+[2026/05/11 07:00:06] [error] 1553#46387: *9707 Memory overflow detected
+[2026/05/10 05:49:17] [error] 8743#80849: *9273 Object does not exist
+[2026/05/10 15:08:46] [error] 5973#24920: *7387 Database connection timeout
+[2026/05/11 21:01:33] [error] 5300#64493: *2575 Object does not exist
+[2026/05/10 22:15:27] [error] 4918#99798: *4836 Internal server error
+[2026/05/09 13:02:22] [error] 5971#87378: *1944 Database connection timeout
+[2026/05/10 05:22:43] [error] 3286#76962: *4811 Permission denied
+[2026/05/09 13:31:13] [error] 1795#18278: *453 Internal server error
+[2026/05/11 02:42:15] [error] 2723#49808: *8103 Object does not exist
+[2026/05/11 12:09:54] [error] 5830#83280: *7091 Permission denied
+[2026/05/09 15:10:08] [error] 2399#31459: *9021 Internal server error
+[2026/05/11 15:46:30] [error] 8411#53488: *4258 JWT token invalid
+[2026/05/11 02:01:10] [error] 3603#37205: *5910 JWT token invalid
+[2026/05/10 00:33:03] [error] 4028#94928: *1685 Redis connection failed
+[2026/05/09 16:33:43] [error] 1491#26834: *274 Memory overflow detected
+[2026/05/09 14:31:10] [error] 7709#83852: *2635 Database connection timeout
+[2026/05/10 17:20:02] [error] 1404#96459: *5790 Internal server error
+[2026/05/11 16:33:12] [error] 2009#37360: *2269 Upload failed
+[2026/05/09 12:53:08] [error] 3625#70510: *4129 Permission denied
+[2026/05/11 21:33:13] [error] 5289#62390: *2534 Upload failed
+[2026/05/12 07:15:53] [error] 7815#61886: *1907 JWT token invalid
+[2026/05/10 01:46:30] [error] 2110#89061: *8238 Upload failed
+[2026/05/10 09:14:06] [error] 9180#60555: *2837 Database connection timeout
+[2026/05/11 06:42:35] [error] 8401#92663: *6383 JWT token invalid
+[2026/05/10 15:41:18] [error] 5876#96877: *9719 Redis connection failed
+[2026/05/10 09:39:41] [error] 1233#72584: *2048 Object does not exist
+[2026/05/10 15:01:08] [error] 6067#73145: *9379 Permission denied
+[2026/05/12 06:14:32] [error] 7874#13614: *3022 Object does not exist
+[2026/05/11 13:55:39] [error] 5763#79351: *4136 Database connection timeout
+[2026/05/11 17:29:33] [error] 6169#78094: *1618 Permission denied
+[2026/05/10 05:47:52] [error] 8497#16217: *107 Database connection timeout
+[2026/05/09 18:07:27] [error] 6198#62249: *2965 Redis connection failed
+[2026/05/11 07:16:28] [error] 2014#50700: *2394 Database connection timeout
+[2026/05/11 02:55:25] [error] 3747#12314: *3268 Memory overflow detected
+[2026/05/11 02:13:44] [error] 1531#75844: *5617 Internal server error
+[2026/05/11 11:49:07] [error] 7011#97956: *7143 Object does not exist
+[2026/05/09 18:13:43] [error] 5391#60133: *2845 JWT token invalid
+[2026/05/11 02:05:11] [error] 3497#69102: *4848 Object does not exist
+[2026/05/10 06:49:38] [error] 3556#75780: *1804 Memory overflow detected
+[2026/05/11 01:43:57] [error] 3364#29955: *1476 JWT token invalid
+[2026/05/09 12:26:09] [error] 7394#21626: *7252 Database connection timeout
+[2026/05/10 17:53:37] [error] 3242#15635: *8967 Redis connection failed
+[2026/05/12 02:38:20] [error] 5515#24410: *2783 Internal server error
+[2026/05/09 12:50:09] [error] 1159#58291: *7284 Object does not exist
+[2026/05/12 04:03:23] [error] 1048#93971: *1640 Redis connection failed
+[2026/05/10 11:23:09] [error] 6024#36748: *5955 Memory overflow detected
+[2026/05/11 15:49:38] [error] 2620#57630: *9529 Permission denied
+[2026/05/09 18:27:07] [error] 9518#70701: *5679 Object does not exist
+[2026/05/11 00:58:54] [error] 4231#68265: *8593 Memory overflow detected
+[2026/05/11 03:08:29] [error] 6770#69260: *6841 Database connection timeout
+[2026/05/12 05:15:04] [error] 6559#54389: *4576 Internal server error
+[2026/05/11 05:36:56] [error] 4132#41488: *8305 Database connection timeout
+[2026/05/11 10:52:12] [error] 6074#94767: *4030 Redis connection failed
+[2026/05/10 14:20:22] [error] 6199#75965: *6036 Internal server error
+[2026/05/09 23:55:30] [error] 7432#68686: *415 JWT token invalid
+[2026/05/11 20:51:21] [error] 3163#35884: *2772 JWT token invalid
+[2026/05/10 23:35:00] [error] 6954#73465: *3380 Permission denied
+[2026/05/11 07:42:05] [error] 7839#84075: *2476 Internal server error
+[2026/05/10 06:10:40] [error] 5389#26653: *2966 JWT token invalid
+[2026/05/09 13:02:03] [error] 9336#23048: *3225 Permission denied
+[2026/05/10 08:24:43] [error] 4639#51225: *2013 Object does not exist
+[2026/05/09 22:08:24] [error] 6074#62286: *6912 JWT token invalid
+[2026/05/11 08:49:02] [error] 9477#56329: *4547 Upload failed
+[2026/05/12 04:35:51] [error] 9942#20392: *1179 Object does not exist
+[2026/05/10 01:15:27] [error] 7595#48767: *705 Database connection timeout
+[2026/05/12 04:49:35] [error] 7796#35651: *8881 JWT token invalid
+[2026/05/10 02:52:18] [error] 1207#90750: *2467 JWT token invalid
+[2026/05/10 19:22:05] [error] 7931#10283: *8865 Database connection timeout
+[2026/05/10 05:56:07] [error] 2730#96351: *3739 Upload failed
+[2026/05/12 00:32:49] [error] 3751#34208: *3041 Database connection timeout
+[2026/05/09 15:21:59] [error] 6781#89619: *4766 JWT token invalid
+[2026/05/10 12:26:32] [error] 1913#45757: *715 Internal server error
+[2026/05/10 12:06:29] [error] 7226#34937: *2300 Permission denied
+[2026/05/10 03:54:12] [error] 4002#27296: *3385 Database connection timeout
+[2026/05/09 12:40:50] [error] 8963#87289: *7434 Memory overflow detected
+[2026/05/09 14:32:38] [error] 7948#55313: *4544 JWT token invalid
+[2026/05/11 22:35:43] [error] 1187#91668: *1510 Permission denied
+[2026/05/09 16:39:23] [error] 6340#35832: *8630 Internal server error
+[2026/05/11 05:01:03] [error] 7953#94311: *7175 Redis connection failed
+[2026/05/10 00:16:58] [error] 9605#79050: *7197 Permission denied
+[2026/05/10 06:47:23] [error] 2964#46662: *373 Upload failed
+[2026/05/11 17:26:29] [error] 2405#82921: *3371 Redis connection failed
+[2026/05/10 15:43:25] [error] 9734#71291: *7755 Object does not exist
+[2026/05/09 13:50:17] [error] 6234#80292: *9946 JWT token invalid
+[2026/05/09 12:15:45] [error] 6795#74739: *4533 Memory overflow detected
+[2026/05/10 13:02:33] [error] 2750#27483: *4097 Memory overflow detected
+[2026/05/11 01:34:14] [error] 4800#51393: *4167 Database connection timeout
+[2026/05/09 19:25:56] [error] 3303#81400: *9734 Internal server error
+[2026/05/10 14:25:39] [error] 1189#28783: *3778 Redis connection failed
+[2026/05/09 12:47:32] [error] 4238#84275: *6228 Upload failed
+[2026/05/11 03:01:19] [error] 5031#70734: *3307 Database connection timeout
+[2026/05/10 05:11:55] [error] 2416#10113: *5505 Memory overflow detected
+[2026/05/09 22:35:19] [error] 9745#36274: *44 Memory overflow detected
+[2026/05/10 12:54:36] [error] 4938#15171: *7800 Database connection timeout
+[2026/05/12 04:43:36] [error] 6328#71822: *2350 Object does not exist
+[2026/05/12 05:55:30] [error] 4172#56552: *9728 Redis connection failed
+[2026/05/11 06:02:46] [error] 7706#54649: *8643 Object does not exist
+[2026/05/10 06:03:00] [error] 9029#78071: *7792 Database connection timeout
+[2026/05/11 17:36:05] [error] 9485#44163: *3352 JWT token invalid
+[2026/05/11 08:00:49] [error] 9704#56564: *63 Database connection timeout
+[2026/05/10 13:22:16] [error] 7916#64766: *6767 Database connection timeout
+[2026/05/10 08:43:42] [error] 3272#51894: *2719 Object does not exist
+[2026/05/12 05:31:20] [error] 5572#17815: *2645 Memory overflow detected
+[2026/05/11 16:09:13] [error] 2187#54173: *5938 Memory overflow detected
+[2026/05/12 03:20:07] [error] 9633#30769: *8411 Object does not exist
+[2026/05/09 20:08:59] [error] 8637#52789: *3869 Memory overflow detected
+[2026/05/09 19:22:53] [error] 4985#23758: *7887 Object does not exist
+[2026/05/09 19:50:27] [error] 7644#41386: *2339 Internal server error
+[2026/05/12 08:04:57] [error] 1651#97741: *498 Database connection timeout
+[2026/05/09 17:11:19] [error] 2547#21761: *6727 Object does not exist
+[2026/05/09 20:29:34] [error] 2501#36081: *4367 Memory overflow detected
+[2026/05/10 17:12:49] [error] 3640#29286: *2823 Internal server error
+[2026/05/11 18:58:02] [error] 3994#70145: *8636 Redis connection failed
+[2026/05/12 05:57:29] [error] 7669#98145: *6529 Internal server error
+[2026/05/12 07:47:36] [error] 8484#77870: *9009 Database connection timeout
+[2026/05/11 09:00:47] [error] 4197#23311: *4390 Permission denied
+[2026/05/12 03:00:57] [error] 4952#88188: *5388 Object does not exist
+[2026/05/12 04:07:34] [error] 1931#19902: *5785 JWT token invalid
+[2026/05/09 19:52:07] [error] 5138#72117: *2344 Upload failed
+[2026/05/11 07:55:45] [error] 2140#54008: *9135 Permission denied
+[2026/05/11 22:51:23] [error] 6318#32669: *5488 Internal server error
+[2026/05/10 04:53:21] [error] 4618#99513: *2207 Upload failed
+[2026/05/11 08:01:54] [error] 8696#11524: *8931 Redis connection failed
+[2026/05/09 12:47:07] [error] 5906#53827: *8902 Upload failed
+[2026/05/11 02:02:32] [error] 8206#92046: *2704 Upload failed
+[2026/05/09 17:55:26] [error] 9454#33149: *6515 Memory overflow detected
+[2026/05/10 06:57:32] [error] 8538#82468: *2669 Database connection timeout
+[2026/05/10 12:12:33] [error] 4829#64655: *144 Upload failed
+[2026/05/12 04:30:55] [error] 5635#85203: *8992 Database connection timeout
+[2026/05/11 06:08:22] [error] 7996#91732: *4448 Permission denied
+[2026/05/12 02:06:02] [error] 5545#36595: *6955 Internal server error
+[2026/05/12 02:45:25] [error] 9094#70520: *8010 Permission denied
+[2026/05/10 01:05:43] [error] 6875#16730: *4878 Internal server error
+[2026/05/11 13:51:54] [error] 4958#65183: *2437 Upload failed
+[2026/05/12 05:05:55] [error] 9268#55738: *206 Object does not exist
+[2026/05/10 00:08:07] [error] 6850#59163: *1052 Object does not exist
+[2026/05/10 16:56:47] [error] 6361#99490: *6456 Redis connection failed
+[2026/05/09 15:07:39] [error] 4357#28319: *630 Internal server error
+[2026/05/11 02:29:48] [error] 9969#44600: *6791 Database connection timeout
+[2026/05/12 08:46:27] [error] 6625#83845: *2399 Redis connection failed
+[2026/05/11 10:42:50] [error] 1028#78415: *3127 Database connection timeout
+[2026/05/11 15:44:20] [error] 8147#41480: *6436 Object does not exist
+[2026/05/11 02:34:40] [error] 6536#40040: *805 Object does not exist
+[2026/05/11 07:40:06] [error] 9554#87581: *1106 Database connection timeout
+[2026/05/10 00:18:00] [error] 6639#30758: *8298 Memory overflow detected
+[2026/05/10 14:15:03] [error] 7290#18924: *7160 Upload failed
+[2026/05/10 18:54:57] [error] 9857#49198: *5686 JWT token invalid
+[2026/05/10 17:01:58] [error] 2089#27516: *8063 Upload failed
+[2026/05/11 03:30:34] [error] 3973#75365: *8681 Memory overflow detected
+[2026/05/10 23:10:15] [error] 2738#97231: *4981 Internal server error
+[2026/05/11 08:36:13] [error] 3515#34635: *3106 Internal server error
+[2026/05/09 23:23:07] [error] 9248#39368: *1164 Redis connection failed
+[2026/05/09 22:27:16] [error] 9060#70962: *2216 Internal server error
+[2026/05/11 00:56:59] [error] 9086#95725: *3119 Redis connection failed
+[2026/05/12 03:31:45] [error] 4866#17257: *5164 Redis connection failed
+[2026/05/11 19:02:01] [error] 5515#62518: *4628 Object does not exist
+[2026/05/11 22:01:00] [error] 2904#66562: *8439 Database connection timeout
+[2026/05/10 13:24:31] [error] 8451#43703: *3653 Database connection timeout
+[2026/05/11 00:47:46] [error] 4127#72092: *4812 Object does not exist
+[2026/05/12 03:52:47] [error] 7031#99167: *9458 JWT token invalid
+[2026/05/11 21:59:00] [error] 7354#75842: *254 Database connection timeout
+[2026/05/09 13:13:18] [error] 6964#75142: *7779 Permission denied
+[2026/05/11 04:46:12] [error] 6746#31688: *354 Permission denied
+[2026/05/10 07:30:30] [error] 8854#82930: *4484 Permission denied
+[2026/05/10 11:33:32] [error] 4636#95741: *1013 Object does not exist
+[2026/05/10 09:13:08] [error] 5481#83991: *3845 Internal server error
+[2026/05/10 04:15:14] [error] 8954#96667: *68 Internal server error
+[2026/05/10 03:56:02] [error] 5458#82683: *6790 Redis connection failed
+[2026/05/10 06:04:53] [error] 3953#96249: *9666 Database connection timeout
+[2026/05/12 03:25:49] [error] 1330#38937: *8645 Redis connection failed
+[2026/05/09 14:27:09] [error] 9924#84922: *1910 Database connection timeout
+[2026/05/10 20:09:07] [error] 3067#83637: *9658 Permission denied
+[2026/05/11 21:45:04] [error] 4073#11266: *8594 JWT token invalid
+[2026/05/09 22:30:18] [error] 5931#64130: *747 Redis connection failed
+[2026/05/12 03:28:02] [error] 1923#31686: *2471 Permission denied
+[2026/05/11 05:45:59] [error] 7364#93095: *7217 Memory overflow detected
+[2026/05/11 18:55:53] [error] 6471#29322: *8791 Upload failed
+[2026/05/09 15:48:32] [error] 9575#46001: *1638 Redis connection failed
+[2026/05/12 04:59:24] [error] 4545#99047: *5399 Object does not exist
+[2026/05/11 11:59:05] [error] 9778#44854: *1938 Redis connection failed
+[2026/05/11 09:50:02] [error] 6581#30419: *6711 Internal server error
+[2026/05/10 08:27:05] [error] 6394#26146: *8167 Memory overflow detected
+[2026/05/10 21:24:45] [error] 3350#58618: *8822 Database connection timeout
+[2026/05/09 16:12:13] [error] 1720#32252: *1749 Permission denied
+[2026/05/11 10:32:07] [error] 3361#72818: *6225 Redis connection failed
+[2026/05/10 00:33:57] [error] 1884#73505: *5985 Internal server error
+[2026/05/10 09:42:21] [error] 7581#59766: *2829 Database connection timeout
+[2026/05/12 05:21:36] [error] 8655#23535: *2361 Permission denied
+[2026/05/09 22:13:41] [error] 4739#90825: *5273 Database connection timeout
+[2026/05/11 05:01:13] [error] 5201#35411: *2837 Memory overflow detected
+[2026/05/10 00:15:06] [error] 6200#84357: *1158 Upload failed
+[2026/05/12 07:00:48] [error] 7081#14615: *7289 Permission denied
+[2026/05/10 21:07:42] [error] 7504#30909: *1551 Internal server error
+[2026/05/11 17:41:38] [error] 4314#61814: *7954 Memory overflow detected
+[2026/05/10 05:12:47] [error] 8730#80412: *3700 Internal server error
+[2026/05/11 23:09:47] [error] 4827#36242: *5590 Object does not exist
+[2026/05/10 22:30:30] [error] 1971#65034: *2415 Memory overflow detected
+[2026/05/10 04:39:09] [error] 6477#25497: *9827 Memory overflow detected
+[2026/05/12 01:25:05] [error] 2233#73560: *6369 Internal server error
+[2026/05/12 07:27:31] [error] 3721#25272: *6164 Permission denied
+[2026/05/10 06:44:05] [error] 9274#39362: *2130 Internal server error
+[2026/05/11 16:32:23] [error] 7590#64446: *6496 Internal server error
+[2026/05/11 08:03:33] [error] 2967#37666: *9120 Memory overflow detected
+[2026/05/11 18:45:15] [error] 3824#50306: *5845 Memory overflow detected
+[2026/05/10 05:40:32] [error] 2415#51314: *1191 JWT token invalid
+[2026/05/10 15:40:21] [error] 6787#63400: *2497 Database connection timeout
+[2026/05/10 12:46:16] [error] 8581#16745: *8648 Database connection timeout
+[2026/05/11 13:03:50] [error] 3858#81514: *6493 Redis connection failed
+[2026/05/11 18:14:29] [error] 9738#24691: *8429 Internal server error
+[2026/05/09 17:58:28] [error] 8036#67738: *1613 Database connection timeout
+[2026/05/09 16:44:56] [error] 3835#91436: *579 Permission denied
+[2026/05/11 03:47:51] [error] 7409#71561: *1804 Redis connection failed
+[2026/05/10 21:38:12] [error] 9070#76601: *167 Database connection timeout
+[2026/05/10 23:33:18] [error] 1973#88314: *2073 Permission denied
+[2026/05/09 13:03:20] [error] 9604#87188: *7870 Redis connection failed
+[2026/05/10 02:05:52] [error] 8404#42214: *1300 Object does not exist
+[2026/05/11 20:15:15] [error] 6739#62069: *6260 Memory overflow detected
+[2026/05/11 03:03:41] [error] 8594#37088: *8526 Database connection timeout
+[2026/05/09 21:31:25] [error] 4880#13454: *1600 Upload failed
+[2026/05/09 19:14:50] [error] 8964#28993: *8456 Database connection timeout
+[2026/05/11 06:11:15] [error] 4270#16010: *6525 Permission denied
+[2026/05/10 17:11:07] [error] 8500#69767: *9171 JWT token invalid
+[2026/05/10 12:16:51] [error] 2179#54237: *5751 Permission denied
+[2026/05/10 23:02:56] [error] 6411#48647: *589 Database connection timeout
+[2026/05/10 01:12:40] [error] 1894#96707: *7641 Database connection timeout
+[2026/05/12 01:02:42] [error] 5997#56204: *8704 Permission denied
+[2026/05/11 13:48:30] [error] 9619#54607: *9916 Permission denied
+[2026/05/11 11:01:35] [error] 3140#28343: *8100 JWT token invalid
+[2026/05/12 04:04:13] [error] 2298#74779: *3803 Internal server error
+[2026/05/10 16:02:39] [error] 3986#97332: *4191 Redis connection failed
+[2026/05/12 07:54:45] [error] 9436#49464: *8796 Redis connection failed
+[2026/05/11 06:31:42] [error] 1915#92949: *9673 JWT token invalid
+[2026/05/11 05:46:57] [error] 8725#65324: *6804 Upload failed
+[2026/05/12 01:50:51] [error] 6401#36505: *2099 Redis connection failed
+[2026/05/09 23:47:14] [error] 9041#64243: *8515 Database connection timeout
+[2026/05/10 10:13:40] [error] 4204#82624: *8293 Redis connection failed
+[2026/05/10 03:51:19] [error] 4976#39313: *5900 Permission denied
+[2026/05/10 04:36:20] [error] 1140#34310: *3606 Permission denied
+[2026/05/09 17:51:25] [error] 6497#82038: *6337 Memory overflow detected
+[2026/05/11 20:05:27] [error] 3536#46573: *3062 Database connection timeout
+[2026/05/10 16:26:15] [error] 8357#10035: *4181 Object does not exist
+[12/05/2026 12:10:11] ERROR | middleware | EXCEPTION at /system-admin/system/ (IP: 127.0.0.1): Could not parse the remainder: ' if config.data_type == 'int' else 'text'' from ''number' if config.data_type == 'int' else 'text''
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/admin/views.py", line 178, in system_management
+    return render(request, 'admin/system/index.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 155, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 197, in compile_nodelist
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 299, in do_extends
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 234, in do_block
+    nodelist = parser.parse(("endblock",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+                    ^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 976, in do_if
+    nodelist = parser.parse(("endif",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 490, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 488, in parse
+    filter_expression = self.compile_filter(token.contents)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 610, in compile_filter
+    return FilterExpression(token, self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 711, in __init__
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: ' if config.data_type == 'int' else 'text'' from ''number' if config.data_type == 'int' else 'text''
+[12/05/2026 12:10:11] ERROR | log | Internal Server Error: /system-admin/system/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/admin/views.py", line 178, in system_management
+    return render(request, 'admin/system/index.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 155, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 197, in compile_nodelist
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 299, in do_extends
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 234, in do_block
+    nodelist = parser.parse(("endblock",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+                    ^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 976, in do_if
+    nodelist = parser.parse(("endif",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 490, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 488, in parse
+    filter_expression = self.compile_filter(token.contents)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 610, in compile_filter
+    return FilterExpression(token, self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 711, in __init__
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: ' if config.data_type == 'int' else 'text'' from ''number' if config.data_type == 'int' else 'text''
+[12/05/2026 12:10:11] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.066s | Path: /system-admin/system/
+[12/05/2026 12:19:55] ERROR | middleware | EXCEPTION at / (IP: 127.0.0.1): Reverse for 'system' not found. 'system' is not a valid view function or pattern name.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 130, in feed_view
+    return render(request, "posts/feed.html", context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 172, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/urls/resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'system' not found. 'system' is not a valid view function or pattern name.
+[12/05/2026 12:19:55] ERROR | log | Internal Server Error: /
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 130, in feed_view
+    return render(request, "posts/feed.html", context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 172, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/urls/resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'system' not found. 'system' is not a valid view function or pattern name.
+[12/05/2026 12:19:55] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.086s | Path: /
+[12/05/2026 12:19:58] ERROR | middleware | EXCEPTION at /system-admin/system/ (IP: 127.0.0.1): Reverse for 'system' not found. 'system' is not a valid view function or pattern name.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/admin/views.py", line 178, in system_management
+    return render(request, 'admin/system/index.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 172, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/urls/resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'system' not found. 'system' is not a valid view function or pattern name.
+[12/05/2026 12:19:58] ERROR | log | Internal Server Error: /system-admin/system/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/admin/views.py", line 178, in system_management
+    return render(request, 'admin/system/index.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 172, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 979, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/urls/base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/urls/resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'system' not found. 'system' is not a valid view function or pattern name.
+[12/05/2026 12:19:58] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.044s | Path: /system-admin/system/

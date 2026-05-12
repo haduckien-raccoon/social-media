@@ -1,0 +1,1192 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+
+:root{
+    --primary:#ff4d6d;
+    --primary-light:#ff758f;
+
+    --bg:#f8fafc;
+    --card:#ffffff;
+
+    --text:#0f172a;
+    --text-soft:#64748b;
+
+    --border:#e2e8f0;
+
+    --danger:#ef4444;
+    --warning:#f59e0b;
+    --success:#22c55e;
+}
+
+/* =========================
+    PAGE
+========================= */
+
+body{
+    background:var(--bg);
+    color:var(--text);
+}
+
+.dashboard-container{
+    position:relative;
+    min-height:100vh;
+}
+
+/* =========================
+    CARDS
+========================= */
+
+.glass-card{
+    background:rgba(255,255,255,.88);
+
+    backdrop-filter:blur(12px);
+
+    border:1px solid rgba(255,255,255,.7);
+
+    border-radius:28px;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.05),
+        0 2px 8px rgba(15,23,42,.03);
+}
+
+/* =========================
+    HEADER
+========================= */
+
+.header-box{
+    position:relative;
+    overflow:hidden;
+}
+
+.header-box::before{
+    content:'';
+
+    position:absolute;
+
+    width:300px;
+    height:300px;
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            rgba(255,77,109,.10),
+            transparent 70%
+        );
+
+    top:-120px;
+    right:-100px;
+}
+
+.section-title{
+    position:relative;
+
+    font-size:2rem;
+    font-weight:900;
+
+    display:flex;
+    align-items:center;
+    gap:14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0f172a,
+            var(--primary)
+        );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.section-subtitle{
+    color:var(--text-soft);
+    font-size:.95rem;
+}
+
+/* =========================
+    BUTTONS
+========================= */
+
+.button-group{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+}
+
+.glow-btn,
+.soft-btn,
+.action-btn{
+    border:none;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    min-height:48px;
+
+    padding:0 22px;
+
+    border-radius:16px;
+
+    font-weight:700;
+
+    transition:.25s ease;
+
+    text-decoration:none;
+}
+
+.glow-btn{
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            var(--primary-light)
+        );
+
+    box-shadow:
+        0 10px 22px rgba(255,77,109,.20);
+}
+
+.glow-btn:hover{
+    color:white;
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 16px 28px rgba(255,77,109,.30);
+}
+
+.soft-btn{
+    background:white;
+
+    color:var(--text);
+
+    border:1px solid var(--border);
+
+    box-shadow:
+        0 4px 10px rgba(15,23,42,.04);
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.soft-btn::before{
+    content:'';
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.6),
+            transparent
+        );
+
+    transform:translateX(-100%);
+
+    transition:.7s;
+}
+
+.soft-btn:hover::before{
+    transform:translateX(100%);
+}
+
+.soft-btn:hover{
+    color:var(--primary);
+
+    background:#fff1f4;
+
+    border-color:#ffc2ce;
+
+    transform:translateY(-2px);
+}
+
+.back-btn{
+    min-width:140px;
+}
+
+.action-btn{
+    min-height:42px;
+
+    padding:0 16px;
+
+    font-size:.85rem;
+
+    background:#fff1f4;
+
+    color:var(--primary);
+
+    border:1px solid #ffd3dc;
+}
+
+.action-btn:hover{
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            var(--primary-light)
+        );
+
+    border-color:transparent;
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 10px 20px rgba(255,77,109,.18);
+}
+
+/* =========================
+    STATS
+========================= */
+
+.stats-card{
+    position:relative;
+
+    overflow:hidden;
+
+    padding:26px;
+}
+
+.stats-card::before{
+    content:'';
+
+    position:absolute;
+
+    width:140px;
+    height:140px;
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            rgba(255,77,109,.08),
+            transparent 70%
+        );
+
+    top:-50px;
+    right:-40px;
+}
+
+.stats-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    margin-bottom:18px;
+}
+
+.stats-icon{
+    width:58px;
+    height:58px;
+
+    border-radius:18px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:1.4rem;
+}
+
+.icon-danger{
+    background:#fff1f2;
+    color:#e11d48;
+}
+
+.icon-warning{
+    background:#fff7ed;
+    color:#d97706;
+}
+
+.icon-success{
+    background:#f0fdf4;
+    color:#16a34a;
+}
+
+.stats-number{
+    position:relative;
+
+    font-size:2.3rem;
+    font-weight:900;
+}
+
+.stats-label{
+    position:relative;
+
+    color:var(--text-soft);
+
+    font-weight:600;
+}
+
+/* =========================
+    FILTER
+========================= */
+
+.filter-card{
+    padding:28px;
+}
+
+.form-label-custom{
+    display:block;
+
+    margin-bottom:10px;
+
+    font-size:.78rem;
+    font-weight:800;
+
+    letter-spacing:.7px;
+
+    color:var(--text-soft);
+}
+
+.search-wrapper{
+    position:relative;
+}
+
+.search-icon{
+    position:absolute;
+
+    top:50%;
+    left:18px;
+
+    transform:translateY(-50%);
+
+    color:#94a3b8;
+}
+
+.custom-input,
+.custom-select{
+    min-height:54px;
+
+    border-radius:18px !important;
+
+    border:1px solid var(--border) !important;
+
+    background:#f8fafc !important;
+
+    color:var(--text);
+
+    transition:.2s ease;
+}
+
+.custom-input{
+    padding-left:48px !important;
+}
+
+.custom-select{
+    padding-left:16px !important;
+}
+
+.custom-input:focus,
+.custom-select:focus{
+    background:white !important;
+
+    border-color:#ffc2ce !important;
+
+    box-shadow:
+        0 0 0 5px rgba(255,77,109,.08) !important;
+}
+
+/* =========================
+    TABLE
+========================= */
+
+.table-wrapper{
+    overflow:hidden;
+}
+
+.table-header{
+    padding:24px 28px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    border-bottom:1px solid var(--border);
+}
+
+.table-custom{
+    margin:0;
+}
+
+.table-custom thead{
+    background:#f8fafc;
+}
+
+.table-custom th{
+    border:none;
+
+    padding:18px;
+
+    font-size:.74rem;
+    font-weight:900;
+
+    color:var(--text-soft);
+
+    letter-spacing:.8px;
+}
+
+.report-row{
+    transition:.25s ease;
+
+    border-top:1px solid var(--border);
+}
+
+.report-row td{
+    padding:20px 18px;
+
+    border:none;
+
+    vertical-align:middle;
+}
+
+.report-row:hover{
+    background:#fcfcfd;
+}
+
+/* =========================
+    TARGET
+========================= */
+
+.target-wrapper{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.target-icon{
+    width:56px;
+    height:56px;
+
+    border-radius:20px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,77,109,.10),
+            rgba(255,77,109,.18)
+        );
+
+    color:var(--primary);
+
+    font-size:1.2rem;
+}
+
+.target-title{
+    font-weight:800;
+    text-transform:uppercase;
+}
+
+.target-id{
+    color:var(--text-soft);
+    font-size:.84rem;
+}
+
+/* =========================
+    BADGES
+========================= */
+
+.custom-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+
+    border-radius:999px;
+
+    padding:8px 14px;
+
+    font-size:.76rem;
+    font-weight:800;
+}
+
+.badge-danger{
+    background:#fff1f2;
+    color:#e11d48;
+}
+
+.status-pending{
+    background:#fff7ed;
+    color:#d97706;
+}
+
+.status-approved{
+    background:#f0fdf4;
+    color:#15803d;
+}
+
+.status-rejected{
+    background:#f1f5f9;
+    color:#64748b;
+}
+
+/* =========================
+    PRIORITY
+========================= */
+
+.priority-high,
+.priority-medium,
+.priority-low{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    min-width:74px;
+
+    border-radius:999px;
+
+    padding:8px 14px;
+
+    font-weight:800;
+}
+
+.priority-high{
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ef4444,
+            #f97316
+        );
+
+    box-shadow:
+        0 10px 20px rgba(239,68,68,.18);
+}
+
+.priority-medium{
+    background:#fff7ed;
+    color:#d97706;
+}
+
+.priority-low{
+    background:#f1f5f9;
+    color:#64748b;
+}
+
+/* =========================
+    EMPTY
+========================= */
+
+.empty-box{
+    padding:90px 20px;
+    text-align:center;
+}
+
+.empty-icon{
+    font-size:5rem;
+    color:#cbd5e1;
+}
+
+.empty-title{
+    margin-top:20px;
+
+    font-size:1.5rem;
+    font-weight:900;
+}
+
+.empty-subtitle{
+    color:var(--text-soft);
+}
+
+/* =========================
+    RESPONSIVE
+========================= */
+
+@media(max-width:992px){
+
+    .section-title{
+        font-size:1.6rem;
+    }
+
+    .table-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:16px;
+    }
+
+}
+
+@media(max-width:768px){
+
+    .button-group{
+        width:100%;
+    }
+
+    .glow-btn,
+    .soft-btn{
+        width:100%;
+    }
+
+}
+
+</style>
+
+<div class="container-fluid py-4 dashboard-container">
+
+    <!-- HEADER -->
+    <div class="glass-card header-box p-4 mb-4">
+
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-4">
+
+            <div>
+
+                <div class="mb-3">
+
+                    <button
+                        onclick="goBack()"
+                        class="btn soft-btn back-btn"
+                    >
+                        <i class="bi bi-arrow-left"></i>
+                        Quay lại
+                    </button>
+
+                </div>
+
+                <div class="section-title">
+                    <i class="bi bi-shield-fill-exclamation"></i>
+                    Moderation Control Center
+                </div>
+
+                <div class="section-subtitle mt-2">
+                    Hệ thống giám sát & xử lý báo cáo vi phạm thời gian thực
+                </div>
+
+            </div>
+
+            <div class="button-group">
+
+                <button class="btn soft-btn">
+                    <i class="bi bi-download"></i>
+                    Export
+                </button>
+
+                <button
+                    class="btn glow-btn"
+                    onclick="refreshPage()"
+                >
+                    <i class="bi bi-arrow-repeat"></i>
+                    Refresh Data
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- STATS -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-4">
+
+            <div class="glass-card stats-card">
+
+                <div class="stats-top">
+
+                    <div class="stats-icon icon-danger">
+                        <i class="bi bi-flag-fill"></i>
+                    </div>
+
+                </div>
+
+                <div class="stats-number text-danger">
+                    {{ reports|length }}
+                </div>
+
+                <div class="stats-label">
+                    Tổng báo cáo
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="glass-card stats-card">
+
+                <div class="stats-top">
+
+                    <div class="stats-icon icon-warning">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+
+                </div>
+
+                <div class="stats-number text-warning">
+                    24
+                </div>
+
+                <div class="stats-label">
+                    Đang chờ xử lý
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="glass-card stats-card">
+
+                <div class="stats-top">
+
+                    <div class="stats-icon icon-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+
+                </div>
+
+                <div class="stats-number text-success">
+                    128
+                </div>
+
+                <div class="stats-label">
+                    Đã xử lý
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FILTER -->
+    <div class="glass-card filter-card mb-4">
+
+        <form method="GET">
+
+            <div class="row g-3 align-items-end">
+
+                <!-- SEARCH -->
+                <div class="col-lg-4">
+
+                    <label class="form-label-custom">
+                        SEARCH
+                    </label>
+
+                    <div class="search-wrapper">
+
+                        <i class="bi bi-search search-icon"></i>
+
+                        <input
+                            type="text"
+                            name="q"
+                            value="{{ query }}"
+                            class="form-control custom-input"
+                            placeholder="Search reports..."
+                        >
+
+                    </div>
+
+                </div>
+
+                <!-- STATUS -->
+                <div class="col-lg-3">
+
+                    <label class="form-label-custom">
+                        STATUS
+                    </label>
+
+                    <select
+                        name="status"
+                        class="form-select custom-select"
+                    >
+
+                        <option value="pending"
+                            {% if status == 'pending' %}selected{% endif %}>
+                            Pending
+                        </option>
+
+                        <option value="handled"
+                            {% if status == 'handled' %}selected{% endif %}>
+                            Handled
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- CATEGORY -->
+                <div class="col-lg-3">
+
+                    <label class="form-label-custom">
+                        CATEGORY
+                    </label>
+
+                    <select
+                        name="category"
+                        class="form-select custom-select"
+                    >
+
+                        <option value="">
+                            All Categories
+                        </option>
+
+                        {% for r_reason in all_reasons %}
+
+                        <option
+                            value="{{ r_reason.id }}"
+                            {% if category == r_reason.id|stringformat:"i" %}selected{% endif %}
+                        >
+
+                            {{ r_reason.name }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <!-- BUTTON -->
+                <div class="col-lg-2">
+
+                    <button class="btn glow-btn w-100">
+
+                        <i class="bi bi-funnel-fill"></i>
+                        Apply
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="glass-card table-wrapper">
+
+        <!-- TABLE HEADER -->
+        <div class="table-header">
+
+            <div>
+
+                <h4 class="fw-bold mb-1">
+                    Reports Queue
+                </h4>
+
+                <div class="section-subtitle">
+                    AI-powered moderation dashboard
+                </div>
+
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+
+                <span class="custom-badge status-pending">
+                    ● Pending
+                </span>
+
+                <span class="custom-badge status-approved">
+                    ● Approved
+                </span>
+
+                <span class="custom-badge status-rejected">
+                    ● Rejected
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+
+            <table class="table table-custom align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>TARGET</th>
+
+                        <th>REPORT DETAILS</th>
+
+                        <th class="text-center">
+                            PRIORITY
+                        </th>
+
+                        <th>REPORTER</th>
+
+                        <th class="text-center">
+                            STATUS
+                        </th>
+
+                        <th class="text-center">
+                            ACTION
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for report in reports %}
+
+                    <tr class="report-row">
+
+                        <!-- TARGET -->
+                        <td>
+
+                            <div class="target-wrapper">
+
+                                <div class="target-icon">
+                                    <i class="bi bi-flag-fill"></i>
+                                </div>
+
+                                <div>
+
+                                    <div class="target-title">
+                                        {{ report.target_type }}
+                                    </div>
+
+                                    <div class="target-id">
+                                        ID #{{ report.target_id }}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                        <!-- DETAILS -->
+                        <td>
+
+                            <div class="d-flex flex-column gap-2">
+
+                                <div>
+
+                                    <span class="custom-badge badge-danger">
+
+                                        {{ report.reason.name|default:"Khác" }}
+
+                                    </span>
+
+                                </div>
+
+                                {% if report.custom_reason %}
+
+                                <div
+                                    class="section-subtitle"
+                                    style="
+                                        max-width:420px;
+                                        overflow:hidden;
+                                        display:-webkit-box;
+                                        -webkit-line-clamp:2;
+                                        -webkit-box-orient:vertical;
+                                    "
+                                >
+
+                                    {{ report.custom_reason }}
+
+                                </div>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                        <!-- PRIORITY -->
+                        <td class="text-center">
+
+                            {% if report.priority_score > 5 %}
+
+                                <span class="priority-high">
+                                    🔥 {{ report.priority_score }}
+                                </span>
+
+                            {% elif report.priority_score > 2 %}
+
+                                <span class="priority-medium">
+                                    ⚠ {{ report.priority_score }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="priority-low">
+                                    {{ report.priority_score }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <!-- REPORTER -->
+                        <td>
+
+                            <div class="fw-bold">
+                                {{ report.reporter.username }}
+                            </div>
+
+                            <div class="section-subtitle">
+                                {{ report.created_at|date:"H:i d/m/Y" }}
+                            </div>
+
+                        </td>
+
+                        <!-- STATUS -->
+                        <td class="text-center">
+
+                            {% if report.status == 'pending' %}
+
+                                <span class="custom-badge status-pending">
+
+                                    <i class="bi bi-hourglass-split"></i>
+                                    Pending
+
+                                </span>
+
+                            {% elif report.status == 'approved' %}
+
+                                <span class="custom-badge status-approved">
+
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Approved
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="custom-badge status-rejected">
+
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    Rejected
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <!-- ACTION -->
+                        <td class="text-center">
+
+                            <a
+                                href="{% url 'custom_admin:report_detail' report.id %}"
+                                class="btn action-btn"
+                            >
+
+                                <i class="bi bi-eye-fill"></i>
+                                View
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6">
+
+                            <div class="empty-box">
+
+                                <div class="empty-icon">
+                                    <i class="bi bi-inboxes"></i>
+                                </div>
+
+                                <div class="empty-title">
+                                    No Reports Found
+                                </div>
+
+                                <div class="empty-subtitle mt-2">
+                                    Không có dữ liệu phù hợp với bộ lọc hiện tại
+                                </div>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function refreshPage(){
+
+    document.body.style.opacity = ".7";
+
+    setTimeout(() => {
+        location.reload();
+    }, 250);
+
+}
+
+function goBack(){
+
+    if(document.referrer){
+        window.history.back();
+    }else{
+        window.location.href = "/";
+    }
+
+}
+
+// Hover glow effect
+document.querySelectorAll('.report-row').forEach(row => {
+
+    row.addEventListener('mousemove', e => {
+
+        const rect = row.getBoundingClientRect();
+
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        row.style.background = `
+            radial-gradient(
+                circle at ${x}px ${y}px,
+                rgba(255,77,109,.05),
+                transparent 40%
+            )
+        `;
+
+    });
+
+    row.addEventListener('mouseleave', () => {
+        row.style.background = '';
+    });
+
+});
+
+</script>
+
+{% endblock %}

@@ -28,6 +28,8 @@ class ContentStatus(models.TextChoices):
     FLAGGED = "flagged", "Flagged"
     BLOCKED = "blocked", "Blocked"
     DELETED = "deleted", "Deleted"
+    REJECTED = "rejected", "Rejected"
+    APPROVED = "approved", "Approved"
 
 class ReportTargetType(models.TextChoices):
     POST = "post", "Post"

@@ -4,6 +4,7 @@ from . import views
 app_name = 'custom_admin'
 
 urlpatterns = [
+    path('', views.dashboard, name='dashboard'),
     path('users/', views.user_management_list, name='user_list'),
     path('users/<int:user_id>/', views.user_management_detail, name='user_detail'),
     path('users/<int:user_id>/toggle-ban/', views.user_management_toggle_ban, name='user_toggle_ban'),
@@ -20,4 +21,12 @@ urlpatterns = [
     path('hashtags/', views.hashtag_list, name='hashtag_list'),
     path('hashtags/<int:tag_id>/', views.hashtag_detail, name='hashtag_detail'),
     path('hashtags/<int:tag_id>/delete/', views.hashtag_delete, name='hashtag_delete'),
+    path('reports/', views.report_list, name='report_list'),
+    path('reports/<int:report_id>/', views.report_detail, name='report_detail'),
+    path('reports/<int:report_id>/action/', views.report_action, name='report_action'),
+    # Trong apps/admin/urls.py
+    path('system/', views.system_management, name='system_management'),
+    path('system/metrics/', views.get_system_metrics, name='system_metrics_api'),
+    # apps/admin/urls.py
+    path('notifications/', views.mass_notification, name='mass_notification'),
 ]

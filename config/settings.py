@@ -86,6 +86,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'apps.admin.middleware.SystemLoggingMiddleware',
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -180,7 +181,7 @@ EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL_USER", "haduckien1709@gmail.com")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_PASSWORD", "app_password_here")
-
+SITE_NAME = os.getenv("SITE_NAME", "Social Media Platform")
 # ---------------------------
 # INTERNATIONALIZATION
 # ---------------------------
@@ -200,3 +201,54 @@ MEDIA_ROOT = BASE_DIR / "images"
 IMAGES_URL = MEDIA_URL
 IMAGES_ROOT = MEDIA_ROOT
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ---------------------------
+# LOGS
+# ---------------------------
+LOGGING_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOGGING_DIR, exist_ok=True)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} | {module} | {message}',
+            'style': '{',
+            'datefmt': '%d/%m/%Y %H:%M:%S'
+        },
+    },
+    'handlers': {
+        # Handler ghi access.log
+        'access_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGGING_DIR, 'access.log'),
+            'maxBytes': 1024 * 1024 * 5, # Tối đa 5MB/file
+            'backupCount': 3, # Giữ lại 3 file cũ nhất
+            'formatter': 'verbose',
+        },
+        # Handler ghi error.log
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGGING_DIR, 'error.log'),
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        # Logger tùy chỉnh cho các truy cập bình thường
+        'system_access': {
+            'handlers': ['access_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Logger mặc định của Django khi có lỗi 500 Server Error
+        'django.request': {
+            'handlers': ['error_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}

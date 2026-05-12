@@ -36,6 +36,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_banned = models.DateTimeField(blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
+    is_owner = models.BooleanField(default=False)
 
     # Override groups & user_permissions to avoid clash
     groups = models.ManyToManyField(
