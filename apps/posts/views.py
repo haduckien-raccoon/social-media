@@ -1,9 +1,11 @@
+from celery import result
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.db.models import Count, Q
 from django.core.exceptions import ValidationError
+from rest_framework import request
 from apps.posts.models import *
 from apps.posts.services import *
 from apps.friends.models import Friend
@@ -19,6 +21,8 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse
 from .models import Post, PostReaction
 from apps.accounts.services import create_user_profile
+from apps.moderation.services import *
+from apps.moderation.models import *
 
 def feed_view(request):
     """
@@ -370,6 +374,33 @@ def create_post_view(request):
         tagged = request.POST.getlist("tagged_users")
         location = request.POST.get("location", "")
 
+        result = moderate_text(content)
+
+        if result["blocked"]:
+
+            # tăng violation score
+            request.user.violation_score += 1
+            request.user.save()
+
+            # save moderation log
+            save_moderation_log(
+                actor=request.user,
+                target_type=ModerationTargetType.POST,
+                target_id=0,
+                result=result,
+                reason="Toxic post content detected"
+            )
+
+            return JsonResponse({
+                "success": False,
+                "error": (
+                    "Nội dung chứa từ vi phạm "
+                    "tiêu chuẩn cộng đồng."
+                ),
+                "violations": result["violations"]
+            }, status=400)
+
+
         try:
             post = create_post(
                 user=request.user,
@@ -416,6 +447,30 @@ def edit_post_view(request, post_id):
 
         print(f"[DEBUG] New Images: {images}")
         print(f"[DEBUG] Delete Img IDs: {delete_image_ids}")
+
+        result = moderate_text(content)
+
+        if result["blocked"]:
+
+            request.user.violation_score += 1
+            request.user.save()
+
+            save_moderation_log(
+                actor=request.user,
+                target_type=ModerationTargetType.POST,
+                target_id=post.id,
+                result=result,
+                reason="Toxic post edit detected"
+            )
+
+            return JsonResponse({
+                "success": False,
+                "error": (
+                    "Nội dung chỉnh sửa chứa "
+                    "từ vi phạm."
+                ),
+                "violations": result["violations"]
+            }, status=400)
 
         try:
             update_post(
@@ -469,6 +524,30 @@ def create_comment_view(request, post_id):
     images = request.FILES.getlist("images")
     files = request.FILES.getlist("files")
 
+    result = moderate_text(content)
+
+    if result["blocked"]:
+
+        request.user.violation_score += 1
+        request.user.save()
+
+        save_moderation_log(
+            actor=request.user,
+            target_type=ModerationTargetType.POST,
+            target_id=post.id,
+            result=result,
+            reason="Toxic post edit detected"
+        )
+
+        return JsonResponse({
+            "success": False,
+            "error": (
+                "Nội dung chỉnh sửa chứa "
+                "từ vi phạm."
+            ),
+            "violations": result["violations"]
+        }, status=400)
+
     try:
         comment = create_comment(
             user=request.user,
@@ -495,6 +574,30 @@ def edit_comment_view(request, comment_id):
     
     if not content:
         return JsonResponse({"error": "Content is required"}, status=400)
+    
+    result = moderate_text(content)
+
+    if result["blocked"]:
+
+        request.user.violation_score += 1
+        request.user.save()
+
+        save_moderation_log(
+            actor=request.user,
+            target_type=ModerationTargetType.POST,
+            target_id=post.id,
+            result=result,
+            reason="Toxic post edit detected"
+        )
+
+        return JsonResponse({
+            "success": False,
+            "error": (
+                "Nội dung chỉnh sửa chứa "
+                "từ vi phạm."
+            ),
+            "violations": result["violations"]
+        }, status=400)
     
     try:
         update_comment(request.user, comment, content)

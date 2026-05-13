@@ -37,6 +37,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_verified = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
     is_owner = models.BooleanField(default=False)
+    violation_score = models.PositiveIntegerField(
+        default=0
+    )
 
     # Override groups & user_permissions to avoid clash
     groups = models.ManyToManyField(

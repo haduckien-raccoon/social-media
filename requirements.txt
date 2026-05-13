@@ -20,3 +20,5 @@ uvicorn[standard]
 cryptography
 psutil
 celery
+pyahocorasick
+pandas

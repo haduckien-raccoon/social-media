@@ -1292,3 +1292,1343 @@ Traceback (most recent call last):
     raise NoReverseMatch(msg)
 django.urls.exceptions.NoReverseMatch: Reverse for 'system' not found. 'system' is not a valid view function or pattern name.
 [12/05/2026 12:19:58] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.044s | Path: /system-admin/system/
+[12/05/2026 14:06:46] ERROR | middleware | EXCEPTION at /images/ (IP: 127.0.0.1): Directory indexes are not allowed here.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 49, in serve
+    raise Http404(_("Directory indexes are not allowed here."))
+django.http.response.Http404: Directory indexes are not allowed here.
+[12/05/2026 14:07:09] ERROR | middleware | EXCEPTION at /images/ (IP: 127.0.0.1): Directory indexes are not allowed here.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 49, in serve
+    raise Http404(_("Directory indexes are not allowed here."))
+django.http.response.Http404: Directory indexes are not allowed here.
+[12/05/2026 14:07:28] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[12/05/2026 14:07:45] ERROR | middleware | EXCEPTION at /images/ (IP: 127.0.0.1): Directory indexes are not allowed here.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 49, in serve
+    raise Http404(_("Directory indexes are not allowed here."))
+django.http.response.Http404: Directory indexes are not allowed here.
+[12/05/2026 20:34:05] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[12/05/2026 20:35:03] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[12/05/2026 20:35:10] ERROR | middleware | EXCEPTION at /accounts/profile/21/ (IP: 127.0.0.1): Trang này không khả dụng hoặc người dùng không tồn tại.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 195, in profile_view
+    raise Http404("Trang này không khả dụng hoặc người dùng không tồn tại.")
+django.http.response.Http404: Trang này không khả dụng hoặc người dùng không tồn tại.
+[12/05/2026 20:35:13] ERROR | middleware | EXCEPTION at /accounts/profile/21/ (IP: 127.0.0.1): Trang này không khả dụng hoặc người dùng không tồn tại.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 195, in profile_view
+    raise Http404("Trang này không khả dụng hoặc người dùng không tồn tại.")
+django.http.response.Http404: Trang này không khả dụng hoặc người dùng không tồn tại.
+[13/05/2026 11:31:19] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:19] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:19] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.053s | Path: /posts/create/
+[13/05/2026 11:31:20] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:20] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:20] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.044s | Path: /posts/create/
+[13/05/2026 11:31:21] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:21] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:21] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.042s | Path: /posts/create/
+[13/05/2026 11:31:22] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:22] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:22] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.043s | Path: /posts/create/
+[13/05/2026 11:31:22] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:22] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:22] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.041s | Path: /posts/create/
+[13/05/2026 11:31:22] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:22] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:22] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.043s | Path: /posts/create/
+[13/05/2026 11:31:22] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:22] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:22] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.042s | Path: /posts/create/
+[13/05/2026 11:31:23] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.041s | Path: /posts/create/
+[13/05/2026 11:31:23] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.044s | Path: /posts/create/
+[13/05/2026 11:31:23] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.041s | Path: /posts/create/
+[13/05/2026 11:31:23] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.045s | Path: /posts/create/
+[13/05/2026 11:31:23] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.048s | Path: /posts/create/
+[13/05/2026 11:31:23] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:23] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.046s | Path: /posts/create/
+[13/05/2026 11:31:24] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:24] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:24] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.128s | Path: /posts/create/
+[13/05/2026 11:31:25] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:25] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:25] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.044s | Path: /posts/create/
+[13/05/2026 11:31:25] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:25] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:25] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.045s | Path: /posts/create/
+[13/05/2026 11:31:26] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:26] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:26] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.043s | Path: /posts/create/
+[13/05/2026 11:31:26] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:26] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:26] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.046s | Path: /posts/create/
+[13/05/2026 11:31:26] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:26] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:26] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.041s | Path: /posts/create/
+[13/05/2026 11:31:26] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:26] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:26] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.077s | Path: /posts/create/
+[13/05/2026 11:31:27] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:27] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 381, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:31:27] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.046s | Path: /posts/create/
+[13/05/2026 11:33:18] ERROR | middleware | EXCEPTION at /posts/create/ (IP: 127.0.0.1): 'User' object has no attribute 'violation_score'
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 382, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:33:18] ERROR | log | Internal Server Error: /posts/create/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 382, in create_post_view
+    request.user.violation_score += 1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'violation_score'
+[13/05/2026 11:33:18] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: test12          | Method: POST  | Status: 500 | Duration: 0.050s | Path: /posts/create/
+[13/05/2026 11:35:44] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[13/05/2026 15:51:29] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
