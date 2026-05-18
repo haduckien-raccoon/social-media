@@ -1,9 +1,196 @@
-<div class="mb-3 d-flex flex-wrap gap-2">
-    <a href="{% url 'custom_admin:user_list' %}" class="btn btn-outline-secondary btn-sm">Users</a>
-    <a href="{% url 'custom_admin:content_posts' %}" class="btn btn-outline-secondary btn-sm">Posts</a>
-    <a href="{% url 'custom_admin:content_comments' %}" class="btn btn-outline-secondary btn-sm">Comments</a>
-    <a href="{% url 'custom_admin:content_media' %}" class="btn btn-outline-secondary btn-sm">Media</a>
-    <a href="{% url 'custom_admin:hashtag_list' %}" class="btn btn-outline-secondary btn-sm">Hashtags</a>
-    <a href="{% url 'custom_admin:content_logs' %}" class="btn btn-outline-secondary btn-sm">Logs</a>
-    <a href="{% url 'custom_admin:report_list' %}" class="btn btn-outline-secondary btn-sm">Reports</a>
+<style>
+/* =========================================
+   MODERN ADMIN NAV
+========================================= */
+
+.admin-nav-wrapper {
+    background: rgba(255,255,255,0.92);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border: 1px solid rgba(226,232,240,0.8);
+
+    border-radius: 24px;
+
+    padding: 16px;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,0.05);
+
+    overflow-x: auto;
+
+    scrollbar-width: thin;
+}
+
+.admin-nav {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    min-width: max-content;
+}
+
+/* NAV BUTTON */
+
+.admin-nav-link {
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    min-height: 48px;
+
+    padding: 0 22px;
+
+    border-radius: 16px;
+
+    background: #ffffff;
+
+    border: 1px solid rgba(226,232,240,0.85);
+
+    color: #475569;
+
+    font-size: 0.92rem;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    white-space: nowrap;
+
+    transition: all 0.25s ease;
+
+    box-shadow:
+        0 2px 6px rgba(15,23,42,0.03);
+}
+
+.admin-nav-link:hover {
+    transform: translateY(-2px);
+
+    background: linear-gradient(
+        135deg,
+        #eef2ff,
+        #f8fafc
+    );
+
+    border-color: rgba(99,102,241,0.35);
+
+    color: #4338ca;
+
+    box-shadow:
+        0 10px 20px rgba(79,70,229,0.12);
+}
+
+/* ACTIVE STATE */
+
+.admin-nav-link.active {
+    background:
+        linear-gradient(
+            135deg,
+            #4f46e5,
+            #7c3aed
+        );
+
+    color: white;
+
+    border-color: transparent;
+
+    box-shadow:
+        0 12px 24px rgba(79,70,229,0.25);
+}
+
+.admin-nav-link.active:hover {
+    color: white;
+}
+
+/* ICON */
+
+.admin-nav-link i {
+    font-size: 1rem;
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+    .admin-nav-wrapper {
+        padding: 12px;
+        border-radius: 20px;
+    }
+
+    .admin-nav-link {
+        min-height: 44px;
+
+        padding: 0 18px;
+
+        font-size: 0.88rem;
+    }
+
+}
+</style>
+
+<div class="admin-nav-wrapper mb-4">
+
+    <div class="admin-nav">
+
+        <a href="{% url 'custom_admin:user_list' %}"
+           class="admin-nav-link {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}">
+
+            <i class="bi bi-people-fill"></i>
+            Users
+
+        </a>
+
+        <a href="{% url 'custom_admin:content_posts' %}"
+           class="admin-nav-link {% if request.resolver_match.url_name == 'content_posts' %}active{% endif %}">
+
+            <i class="bi bi-file-earmark-text-fill"></i>
+            Posts
+
+        </a>
+
+        <a href="{% url 'custom_admin:content_comments' %}"
+           class="admin-nav-link {% if request.resolver_match.url_name == 'content_comments' %}active{% endif %}">
+
+            <i class="bi bi-chat-left-text-fill"></i>
+            Comments
+
+        </a>
+
+        <a href="{% url 'custom_admin:content_media' %}"
+           class="admin-nav-link {% if request.resolver_match.url_name == 'content_media' %}active{% endif %}">
+
+            <i class="bi bi-images"></i>
+            Media
+
+        </a>
+
+        <a href="{% url 'custom_admin:hashtag_list' %}"
+           class="admin-nav-link {% if request.resolver_match.url_name == 'hashtag_list' %}active{% endif %}">
+
+            <i class="bi bi-hash"></i>
+            Hashtags
+
+        </a>
+
+        <a href="{% url 'custom_admin:content_logs' %}"
+           class="admin-nav-link {% if request.resolver_match.url_name == 'content_logs' %}active{% endif %}">
+
+            <i class="bi bi-clock-history"></i>
+            Logs
+
+        </a>
+
+        <a href="{% url 'custom_admin:report_list' %}"
+           class="admin-nav-link {% if request.resolver_match.url_name == 'report_list' %}active{% endif %}">
+
+            <i class="bi bi-flag-fill"></i>
+            Reports
+
+        </a>
+
+    </div>
+
 </div>

@@ -669,6 +669,9 @@ def report_view(request):
         reason_id=reason_id,
         custom_reason=custom_reason
     )
+
+    
+
     return JsonResponse({"success": True})
 
 @require_POST

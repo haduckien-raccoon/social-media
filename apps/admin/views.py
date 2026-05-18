@@ -7,6 +7,7 @@ from django.db.models import Q, Count, Subquery, OuterRef
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.urls import reverse
+from twisted import python
 from apps.accounts.models import User
 from apps.admin.models import SystemConfig
 from django.core.mail import send_mail
@@ -27,6 +28,7 @@ from apps.posts.models import (
 )
 from apps.moderation.models import ContentModerationLog, ModerationTargetType, ModerationAction
 import string
+from django.core.paginator import Paginator
 import random
 from apps.notifications.services import create_notification
 from django.db.models.functions import TruncDate
@@ -229,20 +231,31 @@ def get_system_metrics(request):
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def user_management_list(request):
     """ Xem danh sách user (filter theo email, trạng thái, ngày tạo) """
+
     query = request.GET.get('q', '')
     status = request.GET.get('status', '')
-    
+    page = request.GET.get('page')
+
     users = User.objects.all().order_by('-date_joined')
-    
+
     if query:
-        users = users.filter(Q(email__icontains=query) | Q(username__icontains=query))
+        users = users.filter(
+            Q(email__icontains=query) |
+            Q(username__icontains=query)
+        )
+
     if status == 'active':
         users = users.filter(is_active=True, is_banned=False)
+
     elif status == 'banned':
         users = users.filter(is_banned=True)
-        
+
+    # PHÂN TRANG
+    paginator = Paginator(users, 10)  # 10 user / page
+    users_page = paginator.get_page(page)
+
     return render(request, 'admin/users/list.html', {
-        'users': users,
+        'users': users_page,
         'query': query,
         'status': status
     })
@@ -297,25 +310,181 @@ def user_management_reset_password(request, user_id):
         messages.success(request, f"Mật khẩu mới của {user.email} là: {new_password}. Vui lòng sao chép lại.")
     return redirect('custom_admin:user_detail', user_id=user_id)
 
+
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def user_management_activities(request, user_id):
-    """ Xem lịch sử hoạt động (login, post, report...) """
-    # Hiện tại base database chỉ có login info + report
-    user = get_object_or_404(User, id=user_id)
-    
+    """
+    Dashboard lịch sử hoạt động người dùng
+    - Reports đã gửi
+    - Reports đã xử lý
+    - Search
+    - Filter status
+    - Pagination riêng cho từng bảng
+    """
+
+    target_user = get_object_or_404(User, id=user_id)
+
+    reports_made = []
+    reports_handled = []
+
+    made_page_obj = None
+    handled_page_obj = None
+
+    search_query = request.GET.get('q', '').strip()
+
+    made_status = request.GET.get(
+        'made_status',
+        ''
+    ).strip()
+
+    handled_status = request.GET.get(
+        'handled_status',
+        ''
+    ).strip()
+
     try:
         from apps.posts.models import Report
-        reports_made = Report.objects.filter(reporter=user).order_by('-created_at')
-        reports_handled = Report.objects.filter(handled_by=user).order_by('-handled_at')
+
+        # ==================================================
+        # REPORTS MADE
+        # ==================================================
+
+        reports_made_qs = (
+            Report.objects
+            .filter(reporter=target_user)
+            .select_related(
+                'reason',
+                'reporter',
+                'handled_by'
+            )
+            .order_by('-created_at')
+        )
+
+        if search_query:
+            reports_made_qs = reports_made_qs.filter(
+                Q(target_type__icontains=search_query)
+                |
+                Q(custom_reason__icontains=search_query)
+                |
+                Q(reason__name__icontains=search_query)
+            )
+
+        if made_status:
+            reports_made_qs = reports_made_qs.filter(
+                status=made_status
+            )
+
+        # ==================================================
+        # REPORTS HANDLED
+        # ==================================================
+
+        reports_handled_qs = (
+            Report.objects
+            .filter(handled_by=target_user)
+            .select_related(
+                'reason',
+                'reporter',
+                'handled_by'
+            )
+            .order_by('-handled_at')
+        )
+
+        if search_query:
+            reports_handled_qs = reports_handled_qs.filter(
+                Q(target_type__icontains=search_query)
+                |
+                Q(reporter__username__icontains=search_query)
+            )
+
+        if handled_status:
+            reports_handled_qs = reports_handled_qs.filter(
+                status=handled_status
+            )
+
+        # ==================================================
+        # PAGINATION
+        # ==================================================
+
+        made_paginator = Paginator(
+            reports_made_qs,
+            10
+        )
+
+        handled_paginator = Paginator(
+            reports_handled_qs,
+            10
+        )
+
+        made_page_number = request.GET.get(
+            'made_page',
+            1
+        )
+
+        handled_page_number = request.GET.get(
+            'handled_page',
+            1
+        )
+
+        made_page_obj = made_paginator.get_page(
+            made_page_number
+        )
+
+        handled_page_obj = handled_paginator.get_page(
+            handled_page_number
+        )
+
+        reports_made = made_page_obj.object_list
+        reports_handled = handled_page_obj.object_list
+
+        stats = {
+            'total_reports_made':
+                reports_made_qs.count(),
+
+            'total_reports_handled':
+                reports_handled_qs.count(),
+
+            'resolved_reports':
+                reports_made_qs.filter(
+                    status='resolved'
+                ).count(),
+
+            'pending_reports':
+                reports_made_qs.filter(
+                    status__in=['pending', 'open']
+                ).count(),
+        }
+
     except ImportError:
-        reports_made = []
-        reports_handled = []
-        
-    return render(request, 'admin/users/activities.html', {
-        'target_user': user,
+
+        stats = {
+            'total_reports_made': 0,
+            'total_reports_handled': 0,
+            'resolved_reports': 0,
+            'pending_reports': 0,
+        }
+
+    context = {
+        'target_user': target_user,
+
         'reports_made': reports_made,
         'reports_handled': reports_handled,
-    })
+
+        'made_page_obj': made_page_obj,
+        'handled_page_obj': handled_page_obj,
+
+        'search_query': search_query,
+
+        'made_status': made_status,
+        'handled_status': handled_status,
+
+        'stats': stats,
+    }
+
+    return render(
+        request,
+        'admin/users/activities.html',
+        context
+    )
 
 
 def _log_moderation_action(actor, target_type, target_id, action, reason=""):
@@ -360,7 +529,8 @@ def content_post_list(request):
     elif deleted == "0":
         posts = posts.filter(is_deleted=False)
 
-    paginator = Paginator(posts, 20)
+    # Thay đổi từ 20 thành 10 post trên một trang
+    paginator = Paginator(posts, 10)
     page_obj = paginator.get_page(request.GET.get("page", 1))
 
     post_ids = [post.id for post in page_obj.object_list]
@@ -375,7 +545,7 @@ def content_post_list(request):
         post.violation_count = violation_map.get(post.id, 0)
 
     return render(request, "admin/content/posts.html", {
-        "posts": page_obj,
+        "posts": page_obj, # page_obj này chứa danh sách 10 post của trang hiện tại
         "query": query,
         "status": status,
         "deleted": deleted,
@@ -445,7 +615,8 @@ def content_comment_list(request):
     elif deleted == "0":
         comments = comments.filter(is_deleted=False)
 
-    paginator = Paginator(comments, 20)
+    # Cấu hình hiển thị chính xác 10 bình luận trên mỗi trang
+    paginator = Paginator(comments, 10)
     page_obj = paginator.get_page(request.GET.get("page", 1))
 
     comment_ids = [comment.id for comment in page_obj.object_list]
@@ -503,7 +674,6 @@ def content_comment_action(request, comment_id):
     messages.success(request, "Đã cập nhật trạng thái bình luận.")
     return _redirect_back(request, "custom_admin:content_comments")
 
-
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def content_media_list(request):
     media_type = request.GET.get("type", "all")
@@ -522,30 +692,35 @@ def content_media_list(request):
             "filename": filename,
         }
 
+    # Cấu hình tất cả Paginator thành 10 items trên một trang
     if media_type == "post_image":
         qs = PostImage.objects.select_related("post", "post__author").order_by("-id")
         if query and query.isdigit():
             qs = qs.filter(post__id=int(query))
-        page_obj = Paginator(qs, 20).get_page(request.GET.get("page", 1))
+        page_obj = Paginator(qs, 10).get_page(request.GET.get("page", 1))
         media_items = [build_item("post_image", img, post=img.post, url=img.image.url) for img in page_obj.object_list]
+        
     elif media_type == "comment_image":
         qs = CommentImage.objects.select_related("comment", "comment__user", "comment__post").order_by("-id")
         if query and query.isdigit():
             qs = qs.filter(comment__id=int(query))
-        page_obj = Paginator(qs, 20).get_page(request.GET.get("page", 1))
+        page_obj = Paginator(qs, 10).get_page(request.GET.get("page", 1))
         media_items = [build_item("comment_image", img, comment=img.comment, url=img.image.url) for img in page_obj.object_list]
+        
     elif media_type == "post_file":
         qs = PostFile.objects.select_related("post", "post__author").order_by("-id")
         if query and query.isdigit():
             qs = qs.filter(post__id=int(query))
-        page_obj = Paginator(qs, 20).get_page(request.GET.get("page", 1))
+        page_obj = Paginator(qs, 10).get_page(request.GET.get("page", 1))
         media_items = [build_item("post_file", f, post=f.post, url=f.file.url, filename=f.filename) for f in page_obj.object_list]
+        
     elif media_type == "comment_file":
         qs = CommentFile.objects.select_related("comment", "comment__user", "comment__post").order_by("-id")
         if query and query.isdigit():
             qs = qs.filter(comment__id=int(query))
-        page_obj = Paginator(qs, 20).get_page(request.GET.get("page", 1))
+        page_obj = Paginator(qs, 10).get_page(request.GET.get("page", 1))
         media_items = [build_item("comment_file", f, comment=f.comment, url=f.file.url, filename=f.filename) for f in page_obj.object_list]
+        
     else:
         max_items = 200
         post_images = PostImage.objects.select_related("post", "post__author").order_by("-id")[:max_items]
@@ -564,7 +739,7 @@ def content_media_list(request):
         ]
 
         media_items.sort(key=lambda item: item["id"], reverse=True)
-        paginator = Paginator(media_items, 20)
+        paginator = Paginator(media_items, 10)
         page_obj = paginator.get_page(request.GET.get("page", 1))
         media_items = list(page_obj.object_list)
 
@@ -605,24 +780,6 @@ def content_media_action(request):
 
 
 @user_passes_test(is_admin, login_url='/accounts/login/')
-def content_moderation_logs(request):
-    target_type = request.GET.get("type", "").strip()
-    logs = ContentModerationLog.objects.select_related("actor")
-
-    if target_type:
-        logs = logs.filter(target_type=target_type)
-
-    paginator = Paginator(logs, 30)
-    page_obj = paginator.get_page(request.GET.get("page", 1))
-
-    return render(request, "admin/content/logs.html", {
-        "logs": page_obj,
-        "target_type": target_type,
-        "target_types": ModerationTargetType.choices,
-    })
-
-
-@user_passes_test(is_admin, login_url='/accounts/login/')
 def hashtag_list(request):
     query = request.GET.get("q", "").strip()
 
@@ -645,7 +802,8 @@ def hashtag_list(request):
     if query:
         hashtags = hashtags.filter(tag__icontains=query)
 
-    paginator = Paginator(hashtags, 30)
+    # Thay đổi cấu hình từ 30 thành 10 bản ghi trên một trang
+    paginator = Paginator(hashtags, 10)
     page_obj = paginator.get_page(request.GET.get("page", 1))
 
     return render(request, "admin/hashtags/list.html", {
@@ -688,9 +846,14 @@ def hashtag_delete(request, tag_id):
     messages.success(request, "Đã xóa hashtag.")
     return _redirect_back(request, "custom_admin:hashtag_list")
 
-@user_passes_test(is_admin, login_url='/accounts/login/')
+# Tìm đến đoạn chứa các hàm report_detail, report_list, report_action và thay thế bằng đoạn code sau:
+
+@user_passes_test(lambda u: u.is_authenticated, login_url='/accounts/login/')
 def report_detail(request, report_id):
     report = get_object_or_404(Report.objects.select_related("reporter", "handled_by"), id=report_id)
+    
+    # Kiểm tra xem người dùng hiện tại có phải là Admin/Staff không
+    user_is_admin = is_admin(request.user)
     
     target_content = None
     related_context = None
@@ -699,7 +862,7 @@ def report_detail(request, report_id):
     if report.target_type == ModerationTargetType.POST:
         target_content = Post.objects.filter(id=report.target_id).first()
         if target_content:
-            # Context: Xem các comment gần nhất trên post này quan hệ 1 bình luận thuộc 1 post (quan hệ 1-nhiều)
+            # Context: Xem các comment gần nhất trên post này
             related_context = Comment.objects.filter(post_id=target_content.id).order_by("-created_at")[:5]
             
     elif report.target_type == ModerationTargetType.COMMENT:
@@ -708,7 +871,7 @@ def report_detail(request, report_id):
             # Context: Lấy bài viết chứa comment đó để hiểu bối cảnh
             related_context = target_content.post
 
-    # Lấy các report khác cũng nhắm vào nội dung này để xem admin khác nói gì
+    # Lấy các report khác cũng nhắm vào nội dung này
     similar_reports = Report.objects.filter(
         target_type=report.target_type,
         target_id=report.target_id
@@ -719,33 +882,48 @@ def report_detail(request, report_id):
         "target_content": target_content,
         "related_context": related_context,
         "similar_reports": similar_reports,
+        "user_is_admin": user_is_admin, # Truyền trạng thái quyền admin vào template
+    })
+
+@user_passes_test(is_admin, login_url='/accounts/login/')
+def content_moderation_logs(request):
+    target_type = request.GET.get("type", "").strip()
+    
+    # Bổ sung sắp xếp theo ID giảm dần để xem log mới nhất lên trước
+    logs = ContentModerationLog.objects.select_related("actor").order_by("-id")
+
+    if target_type:
+        logs = logs.filter(target_type=target_type)
+
+    # Điều chỉnh từ 30 thành 10 logs trên mỗi trang
+    paginator = Paginator(logs, 10)
+    page_obj = paginator.get_page(request.GET.get("page", 1))
+
+    return render(request, "admin/content/logs.html", {
+        "logs": page_obj,
+        "target_type": target_type,
+        "target_types": ModerationTargetType.choices,
     })
 
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def report_list(request):
     query = request.GET.get("q", "").strip()
     status = request.GET.get("status", "pending").strip()
-    category_id = request.GET.get("category", "").strip() # Lấy ID thay vì chuỗi tên
+    category_id = request.GET.get("category", "").strip()
 
-    # 1. Luôn lấy danh sách lý do từ DB để hiển thị ở dropdown
     all_reasons = ReportReason.objects.all()
-
-    # Thêm select_related để tối ưu
     reports = Report.objects.select_related("reporter", "handled_by", "reason")
 
-    # 2. Lọc theo trạng thái
     if status == "pending":
         reports = reports.filter(status="pending")
     elif status == "handled":
         reports = reports.exclude(status="pending")
 
-    # 3. LỌC THEO CATEGORY (ID từ Database)
     if category_id and category_id.isdigit():
         reports = reports.filter(reason_id=int(category_id))
-    elif category_id == "custom": # Xử lý trường hợp "Vấn đề khác" (Lý do tùy chỉnh)
+    elif category_id == "custom":
         reports = reports.filter(reason__isnull=True)
 
-    # 4. Tìm kiếm văn bản
     if query:
         query_filter = (
             Q(custom_reason__icontains=query) | 
@@ -756,11 +934,10 @@ def report_list(request):
             query_filter |= Q(id=int(query)) | Q(target_id=int(query))
         reports = reports.filter(query_filter)
 
-    # 5. Auto-priority (Giữ nguyên)
     target_report_counts = Report.objects.filter(
         target_type=OuterRef('target_type'),
         target_id=OuterRef('target_id'),
-        status="pending" 
+        status="pending",
     ).values('target_type', 'target_id').annotate(count=Count('id')).values('count')
 
     reports = reports.annotate(
@@ -770,12 +947,19 @@ def report_list(request):
     paginator = Paginator(reports, 20)
     page_obj = paginator.get_page(request.GET.get("page", 1))
 
+    pending_count = Report.objects.filter(status="pending").count()
+    handled_count = Report.objects.exclude(status="pending").count()
+    total_count = pending_count + handled_count
+
     return render(request, "admin/reports/list.html", {
         "reports": page_obj,
         "query": query,
         "status": status,
         "category": category_id,
-        "all_reasons": all_reasons, # Truyền danh sách từ DB vào Template
+        "all_reasons": all_reasons,
+        "pending_count": pending_count,
+        "handled_count": handled_count,
+        "total_count": total_count,
     })
 
 @user_passes_test(is_admin, login_url='/accounts/login/')
@@ -786,10 +970,9 @@ def report_action(request, report_id):
     report = get_object_or_404(Report, id=report_id)
     action = request.POST.get("action", "").strip() 
     reason = request.POST.get("reason", "").strip()
-    # Thêm cờ xác nhận thay đổi quyết định
     confirm_change = request.POST.get("confirm_change") == "yes"
 
-    # KIỂM TRA: Nếu đã xử lý mà chưa bấm "Thay đổi"
+    # KIỂM TRA: Nếu đã xử lý mà chưa bấm nút xác nhận thay đổi quyết định từ giao diện
     if report.status != "pending" and not confirm_change:
         messages.warning(request, "Báo cáo này đã được xử lý. Vui lòng xác nhận nếu bạn muốn thay đổi quyết định.")
         return redirect('custom_admin:report_detail', report_id=report.id)
@@ -797,7 +980,6 @@ def report_action(request, report_id):
     target_user = None
     target_obj = None
 
-    # Lấy đối tượng mục tiêu (kể cả đã bị đánh dấu xóa is_deleted=True)
     if report.target_type == ModerationTargetType.POST:
         target_obj = Post.objects.filter(id=report.target_id).first()
         if target_obj: target_user = target_obj.author
@@ -805,8 +987,6 @@ def report_action(request, report_id):
         target_obj = Comment.objects.filter(id=report.target_id).first()
         if target_obj: target_user = target_obj.user
 
-    # FIX BAN USER: Nếu không tìm thấy target_obj (do đã xóa cứng), 
-    # ta vẫn nên cho phép admin xử lý report nhưng báo lỗi nếu muốn Ban.
     if action == "BAN_USER" and not target_user:
         messages.error(request, "Không tìm thấy người dùng để khóa (có thể nội dung đã bị xóa hoàn toàn).")
         return redirect('custom_admin:report_detail', report_id=report.id)
@@ -815,7 +995,6 @@ def report_action(request, report_id):
     
     if action == "IGNORE":
         new_status = "rejected"
-        # Nếu thay đổi từ Xóa sang Bỏ qua -> Khôi phục nội dung (Tùy chọn)
         if target_obj and target_obj.is_deleted:
             target_obj.is_deleted = False
             target_obj.status = ContentStatus.NORMAL
@@ -838,13 +1017,11 @@ def report_action(request, report_id):
         new_status = "approved"
         messages.success(request, "Đã cập nhật: Xử lý vi phạm.")
 
-    # Cập nhật thông tin xử lý
     report.status = new_status
     report.handled_by = request.user
     report.handled_at = timezone.now()
     report.save()
 
-    # Đồng bộ các report trùng lặp
     Report.objects.filter(target_type=report.target_type, target_id=report.target_id).update(
         status=new_status,
         handled_by=request.user,
@@ -852,8 +1029,6 @@ def report_action(request, report_id):
     )
 
     return redirect('custom_admin:report_list')
-
-# apps/admin/views.py
 
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def mass_notification(request):

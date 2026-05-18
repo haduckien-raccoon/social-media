@@ -2,6 +2,10 @@ import re
 import json
 import unicodedata
 import ahocorasick
+import socket
+import langid
+import requests
+import config.settings as settings
 
 from apps.moderation.models import (
 	ContentModerationLog,
@@ -206,3 +210,41 @@ def save_moderation_log(
 
 		is_automatic=True
 	)
+
+def ai_help_report(text):
+	#Lấy địa chỉ IP của server:
+	url_server = settings.AI_SERVICE_URL
+	#gửi đến cổng 8082 với đường link: http://<ip_server>:8082/predict
+	url = f"{url_server}/predict"
+	#dùng lang để phân tích thuộc tiếng việt, tiếng anh hay tiếng khác
+	lang, _ = langid.classify(text)
+	#tạo payload để gửi đi
+	if lang == "vi":
+		payload = {
+			"text": text,
+			"language": "vi"
+		}
+	elif lang == "en":
+		payload = {
+			"text": text,
+			"language": "en"
+		}
+	else:
+		#Trả về kết quả lỗi nếu không phải tiếng Việt hoặc tiếng Anh
+		return {
+			"error": "Unsupported language"
+		}
+	#Gửi yêu cầu POST đến AI service
+	try:
+		response = requests.post(
+			url,
+			json=payload,
+			timeout=5
+		)
+		response.raise_for_status()
+		return response.json()
+	except requests.RequestException as e:
+		return {
+			"error": str(e)
+		}
+	

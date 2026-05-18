@@ -1,83 +1,806 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Chi tiết người dùng: {{ target_user.username }}</h2>
-        <a href="{% url 'custom_admin:user_list' %}" class="btn btn-outline-secondary">Quay lại danh sách</a>
-    </div>
-    {% include 'admin/partials/nav.html' %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
+<style>
+:root {
+    --bg-page: #f8fafc;
+    --card-bg: rgba(255,255,255,0.92);
 
-    <div class="row">
-        <!-- Thông tin cơ bản -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header bg-light"><strong>Thông tin tài khoản</strong></div>
-                <div class="card-body">
-                    <p><strong>Email:</strong> {{ target_user.email }}</p>
-                    <p><strong>Username:</strong> {{ target_user.username }}</p>
-                    <p><strong>Ngày tham gia:</strong> {{ target_user.date_joined|date:"d/m/Y H:i" }}</p>
-                    <p><strong>Truy cập cuối:</strong> {{ target_user.last_login|date:"d/m/Y H:i"|default:"Chưa đăng nhập" }}</p>
-                    <p><strong>Quyền hiện tại:</strong> 
-                        {% if target_user.is_staff %} Admin
-                        {% else %} User
-                        {% endif %}
-                    </p>
-                    <p><strong>Trạng thái:</strong> 
-                        {% if target_user.is_banned %} <span class="text-danger">Bị khóa</span>
-                        {% else %}  <span class="text-success">Hoạt động</span> {% endif %}
-                    </p>
-                    
-                    <a href="{% url 'custom_admin:user_activities' target_user.id %}" class="btn btn-primary mt-2">Xem Lịch sử Hoạt động</a>
-                </div>
-            </div>
+    --text-main: #0f172a;
+    --text-soft: #475569;
+    --text-muted: #64748b;
+
+    --primary: #4f46e5;
+    --primary-light: #eef2ff;
+
+    --success: #16a34a;
+    --success-light: #f0fdf4;
+
+    --danger: #dc2626;
+    --danger-light: #fee2e2;
+
+    --warning: #d97706;
+    --warning-light: #fef3c7;
+
+    --dark: #1e293b;
+
+    --border-color: rgba(226,232,240,0.8);
+
+    --shadow-sm:
+        0 4px 12px rgba(15,23,42,0.04);
+
+    --shadow-md:
+        0 10px 30px rgba(15,23,42,0.06);
+
+    --shadow-lg:
+        0 18px 45px rgba(15,23,42,0.08);
+}
+
+/* ===================================
+   PAGE WRAPPER
+=================================== */
+
+.detail-page-wrapper {
+    min-height: auto;
+
+    background:
+        radial-gradient(circle at top right,
+        rgba(79,70,229,0.06),
+        transparent 25%),
+        var(--bg-page);
+
+    padding-bottom: 40px;
+}
+
+/* ===================================
+   CONTAINER
+=================================== */
+
+.custom-container {
+    width: 100%;
+    max-width: 1720px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ===================================
+   HEADER
+=================================== */
+
+.page-header-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+
+    background: rgba(255,255,255,0.96);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 26px;
+
+    padding: 28px 34px;
+
+    box-shadow: var(--shadow-md);
+}
+
+.page-title-area p {
+    margin-bottom: 8px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.page-title-area h2 {
+    margin: 0;
+
+    font-size: 2rem;
+    font-weight: 800;
+
+    color: var(--text-main);
+}
+
+/* ===================================
+   ALERT
+=================================== */
+
+.custom-alert {
+    border-radius: 18px;
+
+    border: 1px solid rgba(226,232,240,0.7);
+
+    padding: 16px 20px;
+
+    font-size: 0.95rem;
+    font-weight: 600;
+
+    box-shadow: var(--shadow-sm);
+}
+
+/* ===================================
+   DASHBOARD GRID
+=================================== */
+
+.dashboard-grid {
+    display: grid;
+
+    grid-template-columns:
+        minmax(760px, 1.4fr)
+        minmax(520px, 1fr);
+
+    gap: 28px;
+
+    align-items: stretch;
+}
+
+/* ===================================
+   CARD
+=================================== */
+
+.custom-card {
+    background: var(--card-bg);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    border: 1px solid rgba(226,232,240,0.75);
+
+    border-radius: 28px;
+
+    overflow: hidden;
+
+    box-shadow: var(--shadow-md);
+
+    transition: all 0.28s ease;
+}
+
+.custom-card:hover {
+    transform: translateY(-4px);
+
+    box-shadow: var(--shadow-lg);
+}
+
+.custom-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 24px 30px;
+
+    background:
+        linear-gradient(to right,
+        #f8fafc,
+        #ffffff);
+
+    border-bottom: 1px solid var(--border-color);
+
+    font-size: 1.08rem;
+    font-weight: 800;
+
+    color: var(--text-main);
+}
+
+.custom-card .card-body {
+    padding: 30px;
+}
+
+/* ===================================
+   INFO GRID
+=================================== */
+
+.info-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 20px;
+}
+
+.info-item {
+    background: #f8fafc;
+
+    border: 1px solid rgba(226,232,240,0.75);
+
+    border-radius: 18px;
+
+    padding: 18px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    min-width: 0;
+}
+
+.info-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+
+    color: var(--text-muted);
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.04em;
+}
+
+.info-value {
+    color: var(--text-main);
+
+    font-size: 1rem;
+    font-weight: 700;
+
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* ===================================
+   BADGES
+=================================== */
+
+.badge-soft {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 7px 12px;
+
+    border-radius: 10px;
+
+    font-size: 0.78rem;
+    font-weight: 700;
+
+    width: fit-content;
+}
+
+.badge-admin {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.badge-user {
+    background: #f1f5f9;
+    color: var(--text-muted);
+}
+
+.badge-active {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.badge-banned {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+/* ===================================
+   ACTIONS
+=================================== */
+
+.action-grid {
+    display: grid;
+    gap: 22px;
+}
+
+.action-block {
+    background: #f8fafc;
+
+    border: 1px solid rgba(226,232,240,0.75);
+
+    border-radius: 22px;
+
+    padding: 22px;
+}
+
+.action-block label {
+    display: block;
+
+    margin-bottom: 14px;
+
+    color: var(--text-muted);
+
+    font-size: 0.82rem;
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.05em;
+}
+
+/* ===================================
+   BUTTONS
+=================================== */
+
+.btn-custom {
+    width: 100%;
+
+    min-height: 52px;
+
+    border: none;
+
+    border-radius: 16px;
+
+    padding: 0 20px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    font-size: 0.93rem;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    white-space: nowrap;
+
+    transition: all 0.25s ease;
+}
+
+.btn-custom:hover {
+    transform: translateY(-2px);
+}
+
+.btn-back {
+    width: auto;
+
+    background: white;
+
+    color: var(--text-soft);
+
+    border: 1px solid var(--border-color);
+
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-back:hover {
+    background: #f1f5f9;
+    color: var(--text-main);
+}
+
+.btn-primary-gradient {
+    background:
+        linear-gradient(135deg,
+        #4f46e5,
+        #7c3aed);
+
+    color: white;
+
+    box-shadow:
+        0 6px 16px rgba(79,70,229,0.22);
+}
+
+.btn-success-gradient {
+    background:
+        linear-gradient(135deg,
+        #16a34a,
+        #10b981);
+
+    color: white;
+}
+
+.btn-danger-gradient {
+    background:
+        linear-gradient(135deg,
+        #dc2626,
+        #f43f5e);
+
+    color: white;
+}
+
+.btn-warning-gradient {
+    background:
+        linear-gradient(135deg,
+        #d97706,
+        #f59e0b);
+
+    color: white;
+}
+
+.btn-dark-gradient {
+    background:
+        linear-gradient(135deg,
+        #1e293b,
+        #334155);
+
+    color: white;
+}
+
+/* ===================================
+   INPUT GROUP
+=================================== */
+
+.custom-input-group {
+    display: flex;
+    gap: 14px;
+    align-items: stretch;
+}
+
+.custom-select {
+    flex: 1;
+
+    min-width: 0;
+
+    height: 52px;
+
+    border-radius: 16px !important;
+
+    border: 1px solid var(--border-color);
+
+    padding: 0 16px;
+
+    font-size: 0.93rem;
+    font-weight: 600;
+
+    color: var(--text-main);
+
+    background: white;
+
+    transition: all 0.2s ease;
+}
+
+.custom-select:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 4px rgba(79,70,229,0.08);
+
+    outline: none;
+}
+
+.custom-input-group .btn-custom {
+    width: 180px;
+    flex-shrink: 0;
+}
+
+/* ===================================
+   RESPONSIVE
+=================================== */
+
+@media (max-width: 1400px) {
+
+    .dashboard-grid {
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(420px, 0.9fr);
+    }
+
+}
+
+@media (max-width: 1200px) {
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .custom-container {
+        padding: 0 14px;
+    }
+
+    .page-header-box {
+        padding: 22px;
+    }
+
+    .page-title-area h2 {
+        font-size: 1.45rem;
+    }
+
+    .custom-card .card-body {
+        padding: 22px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .custom-input-group {
+        flex-direction: column;
+    }
+
+    .custom-input-group .btn-custom {
+        width: 100%;
+    }
+
+}
+</style>
+
+<div class="detail-page-wrapper py-4">
+
+    <div class="custom-container">
+
+        <!-- NAV -->
+        <div class="mb-4">
+            {% include 'admin/partials/nav.html' %}
         </div>
 
-        <!-- Các thao tác quản trị -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header bg-light"><strong>Thao tác Quản trị</strong></div>
-                <div class="card-body">
-                    
-                    <!-- Ban/Unban -->
-                    <form method="POST" action="{% url 'custom_admin:user_toggle_ban' target_user.id %}" class="mb-3">
-                        {% csrf_token %}
-                        {% if target_user.is_banned %}
-                            <button type="submit" class="btn btn-success w-100">Mở khóa (Unban)</button>
-                        {% else %}
-                            <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Bạn có chắc chắn muốn KHÓA tài khoản này?');">Khóa tài khoản (Ban)</button>
-                        {% endif %}
-                    </form>
+        <!-- HEADER -->
+        <div class="page-header-box mb-4">
 
-                    <!-- Phân quyền -->
-                    <form method="POST" action="{% url 'custom_admin:user_set_role' target_user.id %}" class="mb-3">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <select name="role" class="form-select">
-                                <option value="user" {% if not target_user.is_staff %}selected{% endif %}>User Bình thường</option>
-                                <option value="admin" {% if target_user.is_staff %}selected{% endif %}>Admin</option>
-                            </select>
-                            <button class="btn btn-warning" type="submit" onclick="return confirm('Xác nhận thay đổi quyền?');">Cập nhật Quyền</button>
+            <div class="page-title-area">
+                <p>Hồ sơ chi tiết quản trị tài khoản</p>
+
+                <h2>
+                    Chi tiết người dùng:
+                    {{ target_user.username }}
+                </h2>
+            </div>
+
+            <a href="{% url 'custom_admin:user_list' %}"
+               class="btn btn-custom btn-back text-decoration-none">
+
+                <i class="bi bi-arrow-left"></i>
+                Quay lại danh sách
+
+            </a>
+
+        </div>
+
+        <!-- ALERT -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert custom-alert alert-{{ message.tags }} mb-4">
+
+                    <i class="bi bi-info-circle-fill me-2"></i>
+
+                    {{ message }}
+
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- MAIN GRID -->
+        <div class="dashboard-grid">
+
+            <!-- LEFT -->
+            <div>
+
+                <div class="card custom-card h-100">
+
+                    <div class="card-header">
+                        <i class="bi bi-person-badge text-primary"></i>
+                        <span>Thông tin tài khoản</span>
+                    </div>
+
+                    <div class="card-body d-flex flex-column justify-content-between h-100">
+
+                        <div class="info-grid">
+
+                            <div class="info-item">
+                                <div class="info-label">Email</div>
+
+                                <div class="info-value">
+                                    {{ target_user.email }}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Username</div>
+
+                                <div class="info-value">
+                                    {{ target_user.username }}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Ngày tham gia</div>
+
+                                <div class="info-value">
+                                    {{ target_user.date_joined|date:"d/m/Y H:i" }}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Truy cập cuối</div>
+
+                                <div class="info-value">
+                                    {{ target_user.last_login|date:"d/m/Y H:i"|default:"Chưa đăng nhập" }}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Quyền hiện tại</div>
+
+                                <div class="info-value">
+
+                                    {% if target_user.is_staff %}
+                                        <span class="badge-soft badge-admin">
+                                            Admin
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-soft badge-user">
+                                            User
+                                        </span>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Trạng thái</div>
+
+                                <div class="info-value">
+
+                                    {% if target_user.is_banned %}
+                                        <span class="badge-soft badge-banned">
+                                            Bị khóa
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-soft badge-active">
+                                            Hoạt động
+                                        </span>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+
                         </div>
-                    </form>
 
-                    <!-- Reset Password -->
-                    <form method="POST" action="{% url 'custom_admin:user_reset_password' target_user.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-dark w-100" onclick="return confirm('Mật khẩu mới sẽ được tạo ngẫu nhiên và hiển thị trên màn hình. Xác nhận?');">
-                            Reset Password
-                        </button>
-                    </form>
+                        <a href="{% url 'custom_admin:user_activities' target_user.id %}"
+                           class="btn btn-custom btn-primary-gradient mt-4 text-decoration-none">
+
+                            <i class="bi bi-clock-history"></i>
+
+                            Xem Lịch sử Hoạt động
+
+                        </a>
+
+                    </div>
 
                 </div>
+
             </div>
+
+            <!-- RIGHT -->
+            <div>
+
+                <div class="card custom-card h-100">
+
+                    <div class="card-header">
+                        <i class="bi bi-sliders text-danger"></i>
+                        <span>Thao tác Quản trị</span>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="action-grid">
+
+                            <!-- BAN -->
+                            <div class="action-block">
+
+                                <label>
+                                    Trạng thái tài khoản
+                                </label>
+
+                                <form method="POST"
+                                      action="{% url 'custom_admin:user_toggle_ban' target_user.id %}">
+
+                                    {% csrf_token %}
+
+                                    {% if target_user.is_banned %}
+
+                                        <button type="submit"
+                                                class="btn btn-custom btn-success-gradient">
+
+                                            <i class="bi bi-unlock-fill"></i>
+
+                                            Mở khóa (Unban)
+
+                                        </button>
+
+                                    {% else %}
+
+                                        <button type="submit"
+                                                class="btn btn-custom btn-danger-gradient"
+
+                                                onclick="return confirm('Bạn có chắc chắn muốn KHÓA tài khoản này?');">
+
+                                            <i class="bi bi-lock-fill"></i>
+
+                                            Khóa tài khoản (Ban)
+
+                                        </button>
+
+                                    {% endif %}
+
+                                </form>
+
+                            </div>
+
+                            <!-- ROLE -->
+                            <div class="action-block">
+
+                                <label>
+                                    Phân bổ nhóm vai trò
+                                </label>
+
+                                <form method="POST"
+                                      action="{% url 'custom_admin:user_set_role' target_user.id %}">
+
+                                    {% csrf_token %}
+
+                                    <div class="custom-input-group">
+
+                                        <select name="role"
+                                                class="form-select custom-select">
+
+                                            <option value="user"
+                                                {% if not target_user.is_staff %}selected{% endif %}>
+
+                                                User Bình thường
+
+                                            </option>
+
+                                            <option value="admin"
+                                                {% if target_user.is_staff %}selected{% endif %}>
+
+                                                Admin quản trị hệ thống
+
+                                            </option>
+
+                                        </select>
+
+                                        <button class="btn btn-custom btn-warning-gradient"
+                                                type="submit"
+
+                                                onclick="return confirm('Xác nhận thay đổi quyền?');">
+
+                                            <i class="bi bi-shield-check"></i>
+
+                                            Cập nhật
+
+                                        </button>
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+
+                            <!-- PASSWORD -->
+                            <div class="action-block">
+
+                                <label>
+                                    Bảo mật hệ thống
+                                </label>
+
+                                <form method="POST"
+                                      action="{% url 'custom_admin:user_reset_password' target_user.id %}">
+
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="btn btn-custom btn-dark-gradient"
+
+                                            onclick="return confirm('Mật khẩu mới sẽ được tạo ngẫu nhiên và hiển thị trên màn hình. Xác nhận?');">
+
+                                        <i class="bi bi-key-fill"></i>
+
+                                        Khởi tạo lại Reset Password
+
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
+
     </div>
+
 </div>
+
 {% endblock %}

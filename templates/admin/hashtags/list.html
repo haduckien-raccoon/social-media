@@ -1,77 +1,452 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Quản lý Hashtag</h2>
-    {% include 'admin/partials/nav.html' %}
+<style>
+:root {
+    --bg-page: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --primary: #4f46e5;
+    --primary-soft: #eef2ff;
+    --border-color: #e2e8f0;
+    
+    --success: #16a34a;
+    --success-soft: #f0fdf4;
+    --danger: #dc2626;
+    --danger-soft: #fee2e2;
+    
+    --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.03), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+}
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" class="d-flex flex-wrap gap-2">
-                <input type="text" name="q" class="form-control" placeholder="Tìm hashtag..." value="{{ query }}">
-                <button type="submit" class="btn btn-primary">Lọc</button>
-            </form>
+/* BASE & LAYOUT */
+.moderation-wrapper {
+    background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.04), transparent 30%), var(--bg-page);
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.container-custom {
+    max-width: 1550px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* HEADER AREA */
+.page-header-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 16px;
+    flex-wrap: nowrap;
+}
+
+.page-title-area h2 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+    margin-bottom: 2px;
+}
+
+/* CONTROL BOX (FILTERS & CREATION) */
+.control-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.control-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.control-card .card-body {
+    padding: 12px 16px;
+}
+
+.control-card .card-title-sm {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.horizontal-form-flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.flex-input-grow {
+    flex: 1;
+    min-width: 0;
+}
+
+/* DESIGN SYSTEM CONTROLS */
+.custom-control {
+    height: 38px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.88rem;
+    color: var(--text-main);
+    background-color: #fff;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+    outline: none;
+}
+
+/* BUTTONS MODERN SYSTEM */
+.btn-modern {
+    height: 38px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    border-radius: 8px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    padding: 0 16px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary-gradient {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: white;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15);
+}
+.btn-primary-gradient:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(79, 70, 229, 0.25);
+    filter: brightness(1.05);
+    color: white;
+}
+
+.btn-success-gradient {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.15);
+}
+.btn-success-gradient:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(22, 163, 74, 0.25);
+    filter: brightness(1.05);
+    color: white;
+}
+
+/* TABLE MODERN DESIGN */
+.table-card-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.moderation-table {
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.moderation-table thead th {
+    background: #f8fafc;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.moderation-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+.moderation-table tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+
+.moderation-table tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.88rem;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+/* BADGES STYLING */
+.badge-soft-hashtag {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.82rem;
+    display: inline-block;
+}
+
+/* TABLE ACTIONS ROW FORM */
+.row-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-action-sm {
+    height: 28px;
+    padding: 0 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 6px;
+    display:inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-action-edit {
+    border: 1px solid var(--primary);
+    background: transparent;
+    color: var(--primary);
+}
+.btn-action-edit:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-action-delete {
+    border: 1px solid var(--danger);
+    background: transparent;
+    color: var(--danger);
+}
+.btn-action-delete:hover {
+    background: var(--danger);
+    color: white;
+}
+
+/* PAGINATION MODERN */
+.pagination-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 12px 20px;
+    background: #ffffff;
+    border-top: 1px solid var(--border-color);
+}
+
+.custom-pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.custom-pagination .page-item .page-link {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.custom-pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 3px 8px rgba(79, 70, 229, 0.2);
+}
+
+.custom-pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+@media(max-width: 992px) {
+    .control-grid-container {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .page-header-box {
+        flex-wrap: wrap;
+    }
+}
+</style>
+
+<div class="moderation-wrapper py-3">
+    <div class="container-custom">
+
+        <div class="page-header-box">
+            <div class="page-title-area">
+                <h2>Quản lý Hashtag</h2>
+                <p class="text-muted small mb-0">Hệ thống phân loại chủ đề, nhãn xu hướng và theo dõi mức độ tương tác dữ liệu</p>
+            </div>
+            <div class="nav-wrapper">
+                {% include 'admin/partials/nav.html' %}
+            </div>
         </div>
-    </div>
 
-    <div class="card mb-4">
-        <div class="card-header bg-light"><strong>Thêm hashtag mới</strong></div>
-        <div class="card-body">
-            <form method="POST" class="d-flex flex-wrap gap-2">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="create">
-                <input type="text" name="tag" class="form-control" placeholder="#hashtag">
-                <button type="submit" class="btn btn-success">Tạo</button>
-            </form>
+        <div class="control-grid-container">
+            
+            <div class="card control-card">
+                <div class="card-body">
+                    <div class="card-title-sm"><i class="bi bi-search"></i> Tìm kiếm dữ liệu</div>
+                    <form method="GET" class="horizontal-form-flow">
+                        <div class="flex-input-grow">
+                            <input type="text" name="q" class="form-control custom-control w-100" placeholder="Nhập từ khóa tìm tên thẻ hashtag..." value="{{ query }}">
+                        </div>
+                        <button type="submit" class="btn-modern btn-primary-gradient">
+                            <i class="bi bi-funnel-fill"></i> Tìm kiếm
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card control-card">
+                <div class="card-body">
+                    <div class="card-title-sm"><i class="bi bi-plus-circle-fill text-success"></i> Phát hành thẻ mới</div>
+                    <form method="POST" class="horizontal-form-flow">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="create">
+                        <div class="flex-input-grow">
+                            <input type="text" name="tag" class="form-control custom-control w-100" placeholder="Ví dụ: công_nghệ, học_tập (tự động bỏ dấu #)...">
+                        </div>
+                        <button type="submit" class="btn-modern btn-success-gradient">
+                            <i class="bi bi-plus-lg"></i> Tạo nhãn
+                        </button>
+                    </form>
+                </div>
+            </div>
+
         </div>
-    </div>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>ID</th>
-                    <th>Hashtag</th>
-                    <th>Bài viết</th>
-                    <th>Ngày tạo</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for tag in hashtags %}
-                <tr>
-                    <td>{{ tag.id }}</td>
-                    <td>#{{ tag.tag }}</td>
-                    <td>{{ tag.post_count }}</td>
-                    <td>{{ tag.created_at|date:"d/m/Y H:i" }}</td>
-                    <td class="d-flex gap-2">
-                        <a href="{% url 'custom_admin:hashtag_detail' tag.id %}" class="btn btn-sm btn-outline-primary">Sửa</a>
-                        <form method="POST" action="{% url 'custom_admin:hashtag_delete' tag.id %}" onsubmit="return confirm('Xóa hashtag này?');">
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="5" class="text-center">Chưa có hashtag.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <div class="table-card-container">
+            <div class="table-responsive">
+                <table class="table moderation-table align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">Mã ID</th>
+                            <th>Thẻ tên xu hướng (Hashtag)</th>
+                            <th style="width: 180px;">Tổng số bài viết sử dụng</th>
+                            <th style="width: 180px;">Thời gian tạo tệp</th>
+                            <th style="width: 1%; white-space: nowrap; text-align: left; padding-left: 16px;">Hành động quản trị</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tag in hashtags %}
+                        <tr>
+                            <td><strong class="text-secondary">#{{ tag.id }}</strong></td>
+                            <td>
+                                <span class="badge-soft-hashtag">#{{ tag.tag }}</span>
+                            </td>
+                            <td>
+                                <span class="fw-bold {% if tag.post_count > 0 %}text-primary{% else %}text-muted{% endif %}">
+                                    {{ tag.post_count }} bài viết
+                                </span>
+                            </td>
+                            <td class="text-muted">{{ tag.created_at|date:"d/m/Y H:i" }}</td>
+                            <td style="padding-left: 16px;">
+                                <div class="row-actions-group">
+                                    <a href="{% url 'custom_admin:hashtag_detail' tag.id %}" class="btn-action-sm btn-action-edit">
+                                        <i class="bi bi-pencil-square"></i> Cấu hình
+                                    </a>
+                                    <form method="POST" action="{% url 'custom_admin:hashtag_delete' tag.id %}" onsubmit="return confirm('Hệ thống sẽ thực hiện xóa nhãn thẻ này vĩnh viễn khỏi toàn bộ bài viết liên quan. Xác nhận tiếp tục?');" style="margin:0;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        <button type="submit" class="btn-action-sm btn-action-delete">
+                                            <i class="bi bi-trash3-fill"></i> Gỡ bỏ
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="bi bi-tags fs-3 d-block mb-2"></i>
+                                Không tìm thấy nhãn dữ liệu hashtag nào khả dụng theo yêu cầu lọc hiện hành.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-    {% if hashtags.paginator.num_pages > 1 %}
-    <nav>
-        <ul class="pagination">
-            {% if hashtags.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ hashtags.previous_page_number }}&q={{ query }}">Trước</a></li>
+            {% if hashtags.paginator.num_pages > 1 %}
+            <div class="pagination-container">
+                <nav aria-label="Page navigation">
+                    <ul class="custom-pagination">
+                        
+                        {# QUAY VỀ TRANG ĐẦU VÀ TRANG TRƯỚC #}
+                        {% if hashtags.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1&q={{ query }}" title="Đầu trang">
+                                <i class="bi bi-chevron-double-left">first</i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ hashtags.previous_page_number }}&q={{ query }}" title="Trang trước">
+                                <i class="bi bi-chevron-left">-1</i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">{{ hashtags.number }} / {{ hashtags.paginator.num_pages }}</span>
+                        </li>
+                        
+                        {# CHUYỂN ĐẾN TRANG KẾ VÀ TRANG CUỐI #}
+                        {% if hashtags.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ hashtags.next_page_number }}&q={{ query }}" title="Trang sau">
+                                <i class="bi bi-chevron-right">+1</i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ hashtags.paginator.num_pages }}&q={{ query }}" title="Cuối trang">
+                                <i class="bi bi-chevron-double-right">final</i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                    </ul>
+                </nav>
+            </div>
             {% endif %}
-            <li class="page-item active"><span class="page-link">{{ hashtags.number }}/{{ hashtags.paginator.num_pages }}</span></li>
-            {% if hashtags.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ hashtags.next_page_number }}&q={{ query }}">Sau</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
+        </div>
+
+    </div>
 </div>
 {% endblock %}

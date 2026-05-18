@@ -1,99 +1,521 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Moderation - Bài viết</h2>
-    {% include 'admin/partials/nav.html' %}
+<style>
+:root {
+    --bg-page: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --primary: #4f46e5;
+    --primary-soft: #eef2ff;
+    --border-color: #e2e8f0;
+    
+    --success: #16a34a;
+    --success-soft: #f0fdf4;
+    --danger: #dc2626;
+    --danger-soft: #fee2e2;
+    --warning: #d97706;
+    --warning-soft: #fef3c7;
+    --info: #06b6d4;
+    --info-soft: #ecfeff;
+    
+    --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.03), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+}
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" class="d-flex flex-wrap gap-2">
-                <input type="text" name="q" class="form-control" placeholder="Tìm theo nội dung, user, ID..." value="{{ query }}">
-                <select name="status" class="form-select" style="max-width: 200px;">
-                    <option value="">Tất cả trạng thái</option>
-                    {% for value, label in status_choices %}
-                        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-                <select name="deleted" class="form-select" style="max-width: 200px;">
-                    <option value="">Tất cả</option>
-                    <option value="1" {% if deleted == '1' %}selected{% endif %}>Đã xóa mềm</option>
-                    <option value="0" {% if deleted == '0' %}selected{% endif %}>Chưa xóa</option>
-                </select>
-                <button type="submit" class="btn btn-primary">Lọc</button>
-            </form>
+/* =========================
+   BASE & LAYOUT
+========================= */
+.moderation-wrapper {
+    background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.04), transparent 30%), var(--bg-page);
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.container-custom {
+    max-width: 1550px; /* Mở rộng tối đa chiều ngang cho desktop */
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* =========================
+   HEADER (HÀNG NGANG)
+========================= */
+.page-header-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 16px;
+    flex-wrap: nowrap;
+}
+
+.page-title-area h2 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+    margin-bottom: 2px;
+}
+
+/* =========================
+   FILTER BAR (CHỈ 1 HÀNG DUY NHẤT)
+========================= */
+.filter-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+}
+
+.filter-card .card-body {
+    padding: 10px 16px;
+}
+
+.filter-form-horizontal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap; /* Bắt buộc trải ngang trên desktop */
+}
+
+.search-input-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.select-col-status {
+    width: 180px;
+    flex-shrink: 0;
+}
+
+.select-col-deleted {
+    width: 160px;
+    flex-shrink: 0;
+}
+
+.btn-filter-col { 
+    width: 120px; 
+    min-width: 120px; 
+    flex-shrink: 0; 
+}
+
+/* INPUTS & SELECTS MICRO-DESIGN */
+.custom-control {
+    height: 38px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.88rem;
+    color: var(--text-main);
+    background-color: #fff;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+    outline: none;
+}
+
+/* =========================
+   BUTTONS STYLING + EFFECTS
+========================= */
+.btn-modern {
+    height: 38px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    border-radius: 8px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-filter-col .btn-modern { width: 100%; 
+    min-width: 120px; 
+    padding: 0 14px; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
+.btn-primary-gradient {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: white;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15);
+}
+
+.btn-primary-gradient:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(79, 70, 229, 0.25);
+    filter: brightness(1.05);
+    color: white;
+}
+
+/* =========================
+   TABLE DATA DESIGN (HẠ THẤP ĐỘ CAO MỌI ITEM)
+========================= */
+.table-card-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.moderation-table {
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.moderation-table thead th {
+    background: #f8fafc;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 12px; /* Giảm padding dọc tối đa */
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.moderation-table tbody tr {
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.moderation-table tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+
+.moderation-table tbody td {
+    padding: 6px 12px; /* Hạ độ cao của dòng xuống cực nhỏ gọn cho desktop */
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.88rem;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+/* ANTI-OVERFLOW TRUNCATE */
+.text-cell-truncate {
+    max-width: 280px; /* Giới hạn cột nội dung */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.author-truncate {
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* BADGES MODERN */
+.badge-soft {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+.badge-active { background: var(--success-soft); color: var(--success); }
+.badge-danger { background: var(--danger-soft); color: var(--danger); }
+.badge-hashtag { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; margin-right: 2px;}
+
+/* =========================
+   THAO TÁC FORM TRẢI NGANG (COMPACT HORIZONTAL)
+========================= */
+.table-action-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    margin: 0;
+}
+
+.action-select-sm {
+    width: 105px !important;
+    height: 30px !important;
+    padding: 2px 8px !important;
+    font-size: 0.82rem !important;
+    border-radius: 6px !important;
+}
+
+.action-input-sm {
+    width: 150px !important;
+    height: 30px !important;
+    padding: 2px 8px !important;
+    font-size: 0.82rem !important;
+    border-radius: 6px !important;
+}
+
+.btn-apply-sm {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 6px;
+    border: 1px solid var(--primary);
+    background: transparent;
+    color: var(--primary);
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.btn-apply-sm:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
+}
+
+/* =========================
+   PAGINATION MODERN
+========================= */
+.pagination-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 12px 20px;
+    background: #ffffff;
+    border-top: 1px solid var(--border-color);
+}
+
+.custom-pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.custom-pagination .page-item .page-link {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.custom-pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 3px 8px rgba(79, 70, 229, 0.2);
+}
+
+.custom-pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* RESPONSIVE IPAD/MOBILE ONLY */
+@media(max-width: 992px) {
+    .filter-form-horizontal, .page-header-box {
+        flex-wrap: wrap;
+    }
+    .select-col-status, .select-col-deleted, .btn-filter-col {
+        width: 100%;
+    }
+}
+</style>
+
+<div class="moderation-wrapper py-3">
+    <div class="container-custom">
+
+        <div class="page-header-box">
+            <div class="page-title-area">
+                <h2>Moderation - Bài viết</h2>
+                <p class="text-muted small mb-0">Hệ thống kiểm duyệt nội dung và xử lý báo cáo vi phạm</p>
+            </div>
+            <div class="nav-wrapper">
+                {% include 'admin/partials/nav.html' %}
+            </div>
         </div>
-    </div>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>ID</th>
-                    <th>Tác giả</th>
-                    <th>Nội dung</th>
-                    <th>Trạng thái</th>
-                    <th>Xóa mềm</th>
-                    <th>Hashtag</th>
-                    <th>Vi phạm</th>
-                    <th>Ngày tạo</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for post in posts %}
-                <tr>
-                    <td>{{ post.id }}</td>
-                    <td>{{ post.author.username }}</td>
-                    <td>{{ post.content|truncatechars:80 }}</td>
-                    <td>{{ post.status }}</td>
-                    <td>{% if post.is_deleted %}<span class="badge bg-danger">Đã xóa</span>{% else %}<span class="badge bg-success">Hoạt động</span>{% endif %}</td>
-                    <td>
-                        {% if post.hashtags.all %}
-                            {% for hashtag in post.hashtags.all %}
-                                <span class="badge bg-light text-dark">#{{ hashtag.tag }}</span>
+        <div class="card filter-card">
+            <div class="card-body">
+                <form method="GET" class="filter-form-horizontal">
+                    
+                    <div class="search-input-col">
+                        <input type="text" name="q" class="form-control custom-control w-100" placeholder="Tìm theo nội dung, user, ID bài viết..." value="{{ query }}">
+                    </div>
+
+                    <div class="select-col-status">
+                        <select name="status" class="form-select custom-control w-100">
+                            <option value="">Tất cả trạng thái</option>
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
-                        {% else %}
-                            <span class="text-muted">-</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ post.violation_count }}</td>
-                    <td>{{ post.created_at|date:"d/m/Y H:i" }}</td>
-                    <td>
-                        <form method="POST" action="{% url 'custom_admin:content_post_action' post.id %}" class="d-flex flex-column gap-2">
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                            <select name="action" class="form-select form-select-sm">
-                                <option value="flag">Gắn cờ</option>
-                                <option value="unflag">Bỏ cờ</option>
-                                <option value="hide">Ẩn</option>
-                                <option value="delete">Xóa</option>
-                                <option value="restore">Khôi phục</option>
-                            </select>
-                            <input type="text" name="reason" class="form-control form-control-sm" placeholder="Lý do (tuỳ chọn)">
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Áp dụng</button>
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="9" class="text-center">Không có bài viết phù hợp.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        </select>
+                    </div>
 
-    {% if posts.paginator.num_pages > 1 %}
-    <nav>
-        <ul class="pagination">
-            {% if posts.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ posts.previous_page_number }}&q={{ query }}&status={{ status }}&deleted={{ deleted }}">Trước</a></li>
+                    <div class="select-col-deleted">
+                        <select name="deleted" class="form-select custom-control w-100">
+                            <option value="">Tất cả dữ liệu</option>
+                            <option value="1" {% if deleted == '1' %}selected{% endif %}>Đã xóa mềm</option>
+                            <option value="0" {% if deleted == '0' %}selected{% endif %}>Chưa xóa</option>
+                        </select>
+                    </div>
+
+                    <div class="btn-filter-col">
+                        <button type="submit" class="btn btn-modern btn-primary-gradient w-100">
+                            <i class="bi bi-funnel-fill"></i> Lọc
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <div class="table-card-container">
+            <div class="table-responsive">
+                <table class="table moderation-table align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">ID</th>
+                            <th style="width: 140px;">Tác giả</th>
+                            <th>Nội dung bài viết</th>
+                            <th style="width: 110px;">Trạng thái</th>
+                            <th style="width: 110px;">Xóa mềm</th>
+                            <th>Hashtag</th>
+                            <th style="width: 100px;" class="text-center">Vi phạm</th>
+                            <th style="width: 140px;">Ngày tạo</th>
+                            <th style="width: 1%; white-space: nowrap; text-align: left; padding-left: 16px;">Thao tác quản trị</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in posts %}
+                        <tr>
+                            <td><strong class="text-secondary">#{{ post.id }}</strong></td>
+                            <td>
+                                <div class="author-truncate" title="{{ post.author.username }}">
+                                    <strong>{{ post.author.username }}</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-cell-truncate" title="{{ post.content }}">
+                                    {{ post.content|truncatechars:80 }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge-soft badge-active" style="background:#eef2ff; color:#4f46e5;">{{ post.status }}</span>
+                            </td>
+                            <td>
+                                {% if post.is_deleted %}
+                                    <span class="badge-soft badge-danger">Đã xóa</span>
+                                {% else %}
+                                    <span class="badge-soft badge-active">Hoạt động</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="cell-truncate-tags">
+                                    {% if post.hashtags.all %}
+                                        {% for hashtag in post.hashtags.all %}
+                                            <span class="badge-soft badge-hashtag">#{{ hashtag.tag }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted small">-</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="fw-bold {% if post.violation_count > 0 %}text-danger{% else %}text-muted{% endif %}">
+                                    {{ post.violation_count }}
+                                </span>
+                            </td>
+                            <td class="text-muted">{{ post.created_at|date:"d/m/Y H:i" }}</td>
+                            
+                            <td style="padding-left: 16px;">
+                                <form method="POST" action="{% url 'custom_admin:content_post_action' post.id %}" class="table-action-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    
+                                    <select name="action" class="form-select custom-control action-select-sm">
+                                        <option value="flag">Gắn cờ</option>
+                                        <option value="unflag">Bỏ cờ</option>
+                                        <option value="hide">Ẩn bài</option>
+                                        <option value="delete">Xóa</option>
+                                        <option value="restore">Khôi phục</option>
+                                    </select>
+                                    
+                                    <input type="text" name="reason" class="form-control custom-control action-input-sm" placeholder="Lý do xử lý...">
+                                    
+                                    <button type="submit" class="btn-apply-sm">Áp dụng</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                Không tìm thấy bài viết nào phù hợp với bộ lọc hiện tại.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if posts.paginator.num_pages > 1 %}
+            <div class="pagination-container">
+                <nav aria-label="Page navigation">
+                    <ul class="custom-pagination">
+                        
+                        {# NÚT ĐẾN ĐẦU TRANG #}
+                        {% if posts.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1&q={{ query }}&status={{ status }}&deleted={{ deleted }}" title="Đầu trang">
+                                <i class="bi bi-chevron-double-left">first</i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ posts.previous_page_number }}&q={{ query }}&status={{ status }}&deleted={{ deleted }}" title="Trang trước">
+                                <i class="bi bi-chevron-left">-1</i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">{{ posts.number }} / {{ posts.paginator.num_pages }}</span>
+                        </li>
+                        
+                        {# NÚT ĐẾN CUỐI TRANG #}
+                        {% if posts.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ posts.next_page_number }}&q={{ query }}&status={{ status }}&deleted={{ deleted }}" title="Trang sau">
+                                <i class="bi bi-chevron-right">+1</i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ posts.paginator.num_pages }}&q={{ query }}&status={{ status }}&deleted={{ deleted }}" title="Cuối trang">
+                                <i class="bi bi-chevron-double-right">final</i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                    </ul>
+                </nav>
+            </div>
             {% endif %}
-            <li class="page-item active"><span class="page-link">{{ posts.number }}/{{ posts.paginator.num_pages }}</span></li>
-            {% if posts.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ posts.next_page_number }}&q={{ query }}&status={{ status }}&deleted={{ deleted }}">Sau</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
+        </div>
+
+    </div>
 </div>
 {% endblock %}

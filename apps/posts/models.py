@@ -180,6 +180,7 @@ class Report(models.Model):
     status = models.CharField(max_length=20, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
     handled_at = models.DateTimeField(null=True, blank=True)
+    ai_score = models.FloatField(default=0)
 
 # =====================
 # SHARE POST

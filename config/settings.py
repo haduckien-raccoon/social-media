@@ -37,6 +37,7 @@ def _env_float(name, default):
 
 
 APP_BASE_URL = os.getenv("APP_BASE_URL", "http://127.0.0.1:8080").rstrip("/")
+AI_SERVICE_URL = os.getenv("AI_BASE_URL", "http://127.0.0.1:8082").rstrip("/")
 REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = _env_int("REDIS_PORT", 6379)
 REDIS_DB = _env_int("REDIS_DB", 0)

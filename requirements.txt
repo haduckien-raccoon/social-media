@@ -22,3 +22,9 @@ psutil
 celery
 pyahocorasick
 pandas
+langdetect
+scikit-learn 
+joblib 
+numpy
+langid 
+requests

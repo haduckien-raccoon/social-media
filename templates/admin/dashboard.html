@@ -4,770 +4,492 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+:root {
+    --bg: #f8fafc;
+    --card: rgba(255, 255, 255, 0.9);
+    --border: #e2e8f0;
 
-:root{
-    --bg:#f4f7fb;
-    --card:#ffffff;
-    --border:#e2e8f0;
+    --text: #0f172a;
+    --text-soft: #64748b;
 
-    --text:#0f172a;
-    --text-soft:#64748b;
+    --primary: #4f46e5;
+    --primary-soft: #eef2ff;
 
-    --primary:#4f46e5;
-    --primary-soft:#eef2ff;
+    --success: #16a34a;
+    --success-soft: #f0fdf4;
 
-    --success:#16a34a;
-    --success-soft:#f0fdf4;
+    --warning: #d97706;
+    --warning-soft: #fef3c7;
 
-    --warning:#f59e0b;
-    --warning-soft:#fff7ed;
+    --danger: #dc2626;
+    --danger-soft: #fee2e2;
 
-    --danger:#ef4444;
-    --danger-soft:#fef2f2;
-
-    --shadow:
-        0 10px 30px rgba(15,23,42,.06);
+    --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.03), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
 }
 
 /* =========================
-    PAGE
+    PAGE BASE
 ========================= */
-
-.dashboard-page{
+.dashboard-page {
     background:
-        radial-gradient(circle at top right,
-        rgba(79,70,229,.08),
-        transparent 20%),
-
-        radial-gradient(circle at bottom left,
-        rgba(16,185,129,.07),
-        transparent 25%),
-
+        radial-gradient(circle at top right, rgba(79, 70, 229, 0.04), transparent 35%),
+        radial-gradient(circle at bottom left, rgba(22, 163, 74, 0.03), transparent 35%),
         var(--bg);
+    /* Set max height and hide overflow if you want absolute no-scroll, 
+       but min-height is safer for responsiveness */
+    min-height: calc(100vh - 60px); 
+    font-family: system-ui, -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
 
-    min-height:100vh;
+.container-custom {
+    max-width: 1550px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 /* =========================
-    HEADER
+    HEADER BAR
 ========================= */
-
-.dashboard-header{
-    background:rgba(255,255,255,.75);
-
-    backdrop-filter:blur(12px);
-
-    border:1px solid rgba(255,255,255,.9);
-
-    border-radius:28px;
-
-    padding:28px;
-
-    box-shadow:var(--shadow);
+.dashboard-header {
+    background: var(--card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 24px;
+    box-shadow: var(--shadow);
 }
 
-.page-title{
-    font-size:2rem;
-    font-weight:800;
-    color:var(--text);
-
-    display:flex;
-    align-items:center;
-    gap:14px;
+.page-title {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.5px;
 }
 
-.page-title-icon{
-    width:58px;
-    height:58px;
-
-    border-radius:18px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    background:linear-gradient(
-        135deg,
-        #6366f1,
-        #8b5cf6
-    );
-
-    color:white;
-
-    font-size:1.5rem;
-
-    box-shadow:
-        0 10px 24px rgba(99,102,241,.25);
+.page-title-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: white;
+    font-size: 1.15rem;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
-.page-subtitle{
-    color:var(--text-soft);
-    margin-top:6px;
+.page-subtitle {
+    color: var(--text-soft);
+    font-size: 0.88rem;
+    margin-top: 2px;
+}
+
+.refresh-btn {
+    height: 38px;
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    padding: 0 16px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--primary);
+    background: transparent;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.refresh-btn:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+    transform: translateY(-1px);
+}
+
+.btn-open-sm {
+    height: 30px;
+    padding: 0 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 6px;
+    border: 1px solid var(--danger);
+    background: transparent;
+    color: var(--danger);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-open-sm:hover {
+    background: var(--danger);
+    color: white;
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
 }
 
 /* =========================
-    BUTTONS
+    METRICS CARDS
 ========================= */
-
-.refresh-btn{
-    border:none;
-
-    border-radius:18px;
-
-    padding:14px 22px;
-
-    font-weight:700;
-
-    color:white;
-
-    background:linear-gradient(
-        135deg,
-        #6366f1,
-        #8b5cf6
-    );
-
-    transition:.25s ease;
-
-    box-shadow:
-        0 10px 24px rgba(99,102,241,.25);
+.analytics-card {
+    background: var(--card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
 }
 
-.refresh-btn:hover{
-    transform:translateY(-2px);
+.analytics-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px -5px rgba(15, 23, 42, 0.06);
+}
 
-    box-shadow:
-        0 14px 28px rgba(99,102,241,.35);
+.stat-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.icon-primary { background: var(--primary-soft); color: var(--primary); }
+.icon-success { background: var(--success-soft); color: var(--success); }
+.icon-warning { background: var(--warning-soft); color: var(--warning); }
+.icon-danger { background: var(--danger-soft); color: var(--danger); }
+
+.stat-info-block {
+    min-width: 0;
+}
+
+.stat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-soft);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-value {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-desc {
+    color: var(--text-soft);
+    font-size: 0.8rem;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* TREND BADGES */
+.trend-box {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.trend-up { background: var(--success-soft); color: var(--success); }
+.trend-alert { background: var(--danger-soft); color: var(--danger); }
+.trend-neutral { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+/* =========================
+    CHART AREA
+========================= */
+.chart-card-full {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px; /* Giảm margin so với cũ để tối ưu chiều dọc */
+    gap: 16px;
+}
+
+.chart-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.3px;
+}
+
+.chart-subtitle {
+    color: var(--text-soft);
+    font-size: 0.85rem;
+    margin-top: 1px;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    flex-grow: 1; /* Cho phép đồ thị tự động giãn đầy không gian còn lại */
+    min-height: 250px; /* Đảm bảo không bị vỡ trên Mobile */
 }
 
 /* =========================
-    CARDS
+    RESPONSIVE MEDIA
 ========================= */
-
-.analytics-card{
-    background:rgba(255,255,255,.82);
-
-    backdrop-filter:blur(10px);
-
-    border:1px solid rgba(255,255,255,.9);
-
-    border-radius:24px;
-
-    padding:24px;
-
-    box-shadow:var(--shadow);
-
-    transition:.25s ease;
-
-    height:100%;
-}
-
-.analytics-card:hover{
-    transform:translateY(-4px);
-}
-
-/* =========================
-    STATS HORIZONTAL
-========================= */
-
-.stat-card{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    gap:20px;
-
-    min-height:145px;
-}
-
-.stat-left{
-    display:flex;
-    align-items:center;
-    gap:18px;
-}
-
-.stat-icon{
-    width:68px;
-    height:68px;
-
-    border-radius:22px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    font-size:1.7rem;
-
-    flex-shrink:0;
-}
-
-.icon-primary{
-    background:var(--primary-soft);
-    color:var(--primary);
-}
-
-.icon-success{
-    background:var(--success-soft);
-    color:var(--success);
-}
-
-.icon-warning{
-    background:var(--warning-soft);
-    color:var(--warning);
-}
-
-.icon-danger{
-    background:var(--danger-soft);
-    color:var(--danger);
-}
-
-.stat-label{
-    font-size:.78rem;
-
-    font-weight:700;
-
-    text-transform:uppercase;
-
-    letter-spacing:.8px;
-
-    color:var(--text-soft);
-
-    margin-bottom:6px;
-}
-
-.stat-value{
-    font-size:2.3rem;
-
-    font-weight:800;
-
-    color:var(--text);
-
-    line-height:1;
-}
-
-.stat-desc{
-    color:var(--text-soft);
-
-    font-size:.9rem;
-
-    margin-top:8px;
-}
-
-/* =========================
-    TREND
-========================= */
-
-.trend-box{
-    padding:10px 14px;
-
-    border-radius:14px;
-
-    font-size:.85rem;
-
-    font-weight:700;
-
-    white-space:nowrap;
-}
-
-.trend-up{
-    background:#ecfdf3;
-    color:#16a34a;
-}
-
-.trend-alert{
-    background:#fff1f2;
-    color:#e11d48;
-}
-
-/* =========================
-    CHART
-========================= */
-
-.chart-card{
-    padding:28px;
-}
-
-.chart-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    margin-bottom:24px;
-}
-
-.chart-title{
-    font-size:1.15rem;
-    font-weight:800;
-    color:var(--text);
-}
-
-.chart-subtitle{
-    color:var(--text-soft);
-    font-size:.92rem;
-}
-
-.chart-container{
-    position:relative;
-    width:100%;
-    height:420px;
-}
-
-/* =========================
-    RIGHT PANEL
-========================= */
-
-.side-grid{
-    display:grid;
-    gap:24px;
-    height:100%;
-}
-
-.mini-card{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    min-height:180px;
-}
-
-.mini-info{
-    flex:1;
-}
-
-.mini-number{
-    font-size:3rem;
-    font-weight:800;
-    line-height:1;
-}
-
-.action-btn{
-    border:none;
-
-    border-radius:14px;
-
-    padding:10px 18px;
-
-    font-weight:700;
-
-    transition:.2s ease;
-}
-
-.action-btn:hover{
-    transform:translateY(-2px);
-}
-
-.btn-danger-soft{
-    background:#fff1f2;
-    color:#e11d48;
-}
-
-.btn-danger-soft:hover{
-    background:#ffe4e6;
-}
-
-/* =========================
-    RESPONSIVE
-========================= */
-
-@media(max-width:1200px){
-
-    .stat-card{
-        flex-direction:column;
-        align-items:flex-start;
+@media(max-width: 992px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 12px;
     }
-
-}
-
-@media(max-width:992px){
-
-    .dashboard-header{
-        flex-direction:column;
-        align-items:flex-start !important;
-        gap:20px;
+    .refresh-btn {
+        width: 100%;
+        justify-content: center;
     }
-
+    .chart-container {
+        min-height: 350px; /* Đồ thị cao hơn một chút khi xuống màn hình nhỏ */
+    }
 }
 
+@media(max-width: 576px) {
+    .analytics-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .trend-box, .btn-open-sm {
+        align-self: flex-end;
+    }
+}
 </style>
 
-<div class="dashboard-page py-4">
+<div class="dashboard-page py-3">
+    <div class="container-custom">
 
-    <div class="container-fluid">
-
-        <!-- HEADER -->
-        <div class="dashboard-header d-flex justify-content-between align-items-center mb-4">
-
-            <div>
-
+        <div class="dashboard-header d-flex justify-content-between align-items-center mb-3">
+            <div class="min-w-0">
                 <div class="page-title">
-
                     <div class="page-title-icon">
                         <i class="bi bi-grid-1x2-fill"></i>
                     </div>
-
-                    <div>
-                        System Analytics
-                    </div>
-
+                    <div class="text-truncate">System Analytics</div>
                 </div>
-
-                <div class="page-subtitle">
-                    Dashboard theo dõi hoạt động hệ thống thời gian thực
+                <div class="page-subtitle text-truncate">
+                    Tổng quan dữ liệu và theo dõi lưu lượng tăng trưởng hệ thống thời gian thực
                 </div>
-
             </div>
-
-            <button class="refresh-btn"
-                    onclick="location.reload()">
-
-                <i class="bi bi-arrow-repeat me-2"></i>
-                Refresh Data
-
+            <button class="refresh-btn" onclick="location.reload()">
+                <i class="bi bi-arrow-repeat"></i>
+                <span>Làm mới dữ liệu</span>
             </button>
-
         </div>
 
-        <!-- TOP STATS -->
-        <div class="row g-4 mb-4">
-
-            <div class="col-xxl-3 col-lg-6">
-
-                <div class="analytics-card stat-card">
-
-                    <div class="stat-left">
-
-                        <div class="stat-icon icon-primary">
-                            <i class="bi bi-people-fill"></i>
-                        </div>
-
-                        <div>
-
-                            <div class="stat-label">
-                                Tổng Users
-                            </div>
-
-                            <div class="stat-value">
-                                {{ total_users }}
-                            </div>
-
-                            <div class="stat-desc">
-                                Người dùng toàn hệ thống
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="trend-box trend-up">
-                        +12%
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="col-xxl-3 col-lg-6">
-
-                <div class="analytics-card stat-card">
-
-                    <div class="stat-left">
-
-                        <div class="stat-icon icon-danger">
-                            <i class="bi bi-person-plus-fill"></i>
-                        </div>
-
-                        <div>
-
-                            <div class="stat-label">
-                                User mới
-                            </div>
-
-                            <div class="stat-value">
-                                +{{ new_users_today }}
-                            </div>
-
-                            <div class="stat-desc">
-                                Đăng ký trong hôm nay
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="trend-box trend-alert">
-                        Live
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- MAIN -->
-        <div class="row g-4 align-items-stretch">
-
-            <!-- CHART -->
-            <div class="col-xl-8">
-
-                <div class="analytics-card chart-card h-100">
-
-                    <div class="chart-header">
-
-                        <div>
-
-                            <div class="chart-title">
-                                Growth Analytics
-                            </div>
-
-                            <div class="chart-subtitle">
-                                Lưu lượng tăng trưởng trong 7 ngày gần nhất
-                            </div>
-
-                        </div>
-
-                        <span class="trend-box trend-up">
-                            Real-time
-                        </span>
-
-                    </div>
-
-                    <div class="chart-container">
-
-                        <canvas id="growthChart"></canvas>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- SIDE -->
-            <div class="col-xl-4">
-
-                <div class="side-grid">
-
-                    <!-- POSTS -->
-                    <div class="analytics-card mini-card">
-
-                        <div class="mini-info">
-
-                            <div class="d-flex align-items-center gap-3 mb-4">
-
+        <div class="row g-3 flex-grow-1">
+            
+            <div class="col-xl-5 col-lg-12">
+                <div class="row g-3 h-100">
+                    <div class="col-sm-6 col-12">
+                        <div class="analytics-card">
+                            <div class="stat-left">
                                 <div class="stat-icon icon-primary">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                                <div class="stat-info-block">
+                                    <div class="stat-label">Tổng thành viên</div>
+                                    <div class="stat-value">{{ total_users }}</div>
+                                    <div class="stat-desc">Tài khoản đăng ký</div>
+                                </div>
+                            </div>
+                            <div class="trend-box trend-up"><i class="bi bi-graph-up-arrow me-1"></i>+12%</div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-12">
+                        <div class="analytics-card">
+                            <div class="stat-left">
+                                <div class="stat-icon icon-success">
+                                    <i class="bi bi-person-plus-fill"></i>
+                                </div>
+                                <div class="stat-info-block">
+                                    <div class="stat-label">Thành viên mới</div>
+                                    <div class="stat-value">+{{ new_users_today }}</div>
+                                    <div class="stat-desc">Ghi nhận trong ngày</div>
+                                </div>
+                            </div>
+                            <div class="trend-box trend-neutral">Live</div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-12">
+                        <div class="analytics-card">
+                            <div class="stat-left">
+                                <div class="stat-icon icon-warning">
                                     <i class="bi bi-file-post-fill"></i>
                                 </div>
-
-                                <div>
-
-                                    <div class="stat-label">
-                                        Total Posts
-                                    </div>
-
-                                    <div class="text-muted small">
-                                        Nội dung toàn hệ thống
-                                    </div>
-
+                                <div class="stat-info-block">
+                                    <div class="stat-label">Tổng bài viết</div>
+                                    <div class="stat-value">{{ total_posts }}</div>
+                                    <div class="stat-desc">Nội dung hệ thống</div>
                                 </div>
-
                             </div>
-
-                            <div class="mini-number text-primary">
-                                {{ total_posts }}
-                            </div>
-
+                            <div class="trend-box trend-up"><i class="bi bi-plus-lg me-1"></i>{{ posts_today }}</div>
                         </div>
-
-                        <div class="trend-box trend-up">
-                            +{{ posts_today }}
-                        </div>
-
                     </div>
 
-                    <!-- REPORT -->
-                    <div class="analytics-card mini-card"
-                         style="
-                            background:
-                            linear-gradient(
-                                135deg,
-                                #fff,
-                                #fff5f5
-                            );
-                         ">
-
-                        <div class="mini-info">
-
-                            <div class="d-flex align-items-center gap-3 mb-4">
-
+                    <div class="col-sm-6 col-12">
+                        <div class="analytics-card">
+                            <div class="stat-left">
                                 <div class="stat-icon icon-danger">
                                     <i class="bi bi-flag-fill"></i>
                                 </div>
-
-                                <div>
-
-                                    <div class="stat-label text-danger">
-                                        Pending Reports
-                                    </div>
-
-                                    <div class="text-muted small">
-                                        Báo cáo cần xử lý
-                                    </div>
-
+                                <div class="stat-info-block">
+                                    <div class="stat-label">Báo cáo chờ duyệt</div>
+                                    <div class="stat-value text-danger">{{ pending_reports }}</div>
+                                    <div class="stat-desc">Yêu cầu cần xử lý</div>
                                 </div>
-
                             </div>
-
-                            <div class="mini-number text-danger">
-                                {{ pending_reports }}
+                            <div>
+                                <a href="{% url 'custom_admin:report_list' %}" class="btn-open-sm">
+                                    <span>Xử lý</span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
                             </div>
-
                         </div>
-
-                        <div>
-
-                            <a href="{% url 'custom_admin:report_list' %}"
-                               class="action-btn btn-danger-soft text-decoration-none">
-
-                                <i class="bi bi-arrow-right-circle me-1"></i>
-                                Open
-
-                            </a>
-
-                        </div>
-
                     </div>
-
                 </div>
-
             </div>
 
-        </div>
+            <div class="col-xl-7 col-lg-12">
+                <div class="chart-card-full h-100">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Growth Analytics</div>
+                            <div class="chart-subtitle">Biểu đồ lưu lượng tương tác tăng trưởng trong 7 ngày gần nhất</div>
+                        </div>
+                        <span class="trend-box trend-neutral"><i class="bi bi-clock-history me-1"></i>Real-time</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+            </div>
 
-    </div>
-
+        </div> </div>
 </div>
 
 <script>
-
 document.addEventListener("DOMContentLoaded", function () {
-
     const ctx = document.getElementById('growthChart');
-
     const labels = JSON.parse('{{ chart_labels|safe }}');
     const userData = JSON.parse('{{ chart_users|safe }}');
     const postData = JSON.parse('{{ chart_posts|safe }}');
 
     new Chart(ctx, {
-
         type: 'line',
-
         data: {
-
             labels: labels,
-
             datasets: [
-
                 {
                     label: 'Đăng ký mới',
-
                     data: userData,
-
                     borderColor: '#4f46e5',
-
-                    backgroundColor: 'rgba(79,70,229,.08)',
-
+                    backgroundColor: 'rgba(79, 70, 229, 0.04)',
                     borderWidth: 3,
-
-                    tension: .4,
-
+                    tension: 0.35,
                     fill: true,
-
-                    pointRadius: 4,
-
+                    pointRadius: 3,
                     pointHoverRadius: 6
                 },
-
                 {
                     label: 'Bài đăng mới',
-
                     data: postData,
-
                     borderColor: '#16a34a',
-
-                    backgroundColor: 'rgba(22,163,74,.08)',
-
+                    backgroundColor: 'rgba(22, 163, 74, 0.04)',
                     borderWidth: 3,
-
-                    tension: .4,
-
+                    tension: 0.35,
                     fill: true,
-
-                    pointRadius: 4,
-
+                    pointRadius: 3,
                     pointHoverRadius: 6
                 }
-
             ]
-
         },
-
         options: {
-
             responsive: true,
-
-            maintainAspectRatio: false,
-
+            maintainAspectRatio: false, /* Rất quan trọng để biểu đồ tự co giãn theo container chứa nó */
             interaction: {
                 mode: 'index',
                 intersect: false
             },
-
             plugins: {
-
                 legend: {
-
                     position: 'top',
-
                     labels: {
                         usePointStyle: true,
-                        padding: 20
+                        boxWidth: 6,
+                        boxHeight: 6,
+                        padding: 24,
+                        font: { size: 12, weight: '600' }
                     }
-
                 }
-
             },
-
             scales: {
-
                 x: {
-
-                    grid: {
-                        display: false
-                    }
-
+                    grid: { display: false },
+                    ticks: { font: { size: 11, weight: '500' }, color: '#64748b' }
                 },
-
                 y: {
-
                     beginAtZero: true,
-
-                    ticks: {
-                        stepSize: 1
-                    },
-
-                    grid: {
-                        color: 'rgba(148,163,184,.12)'
-                    }
-
+                    ticks: { stepSize: 1, font: { size: 11 }, color: '#64748b' },
+                    grid: { color: 'rgba(148, 163, 184, 0.06)' }
                 }
-
             }
-
         }
-
     });
-
 });
-
 </script>
 
 {% endblock %}

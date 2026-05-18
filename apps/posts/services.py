@@ -11,6 +11,7 @@ from apps.accounts.models import User
 from apps.friends.models import Friend
 from apps.posts.models import *
 from apps.notifications.services import create_notification
+from apps.moderation.services import *
 
 # =====================================================
 # 1. WEBSOCKET HELPER - REALTIME BROADCAST
@@ -739,14 +740,35 @@ def report_target(user, target_type, target_id, reason_id=None, custom_reason=""
     reason = None
     if reason_id:
         reason = ReportReason.objects.filter(id=reason_id).first()
+
+    #dùng ai service để phân tích nội dung báo cáo
+    #tìm nội dung của bài viết bình luận bị báo cáo
+    #B1 kiểm tra xem bài viết đã có report nào đã gửi rồi AI_score chưa, nếu có rồi thì không cần gọi service nữa
+    existing_report = Report.objects.filter(target_type=target_type, target_id=target_id).order_by('-created_at').first()
+    if existing_report and existing_report.ai_score is not None:
+        ai_result = {"score": existing_report.ai_score}
+    else:
+        target_content = get_target_content(target_type, target_id)
+        ai_result = ai_help_report(target_content)
     report = Report.objects.create(
         reporter=user,
         target_type=target_type,
         target_id=target_id,
         reason=reason,
-        custom_reason=custom_reason
+        custom_reason=custom_reason,
+        ai_score = ai_result.get("score", 0),
     )
     return report
+
+def get_target_content(target_type, target_id):
+    """Lấy nội dung của bài viết hoặc bình luận dựa trên target_type và target_id"""
+    if target_type == "post":
+        post = Post.objects.filter(id=target_id).first()
+        return post.content if post else ""
+    elif target_type == "comment":
+        comment = Comment.objects.filter(id=target_id).first()
+        return comment.content if comment else ""
+    return ""
 
 def tag_user(post, user):
     """Tag người dùng vào bài viết"""

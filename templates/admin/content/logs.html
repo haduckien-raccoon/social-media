@@ -1,65 +1,984 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Moderation Logs</h2>
-    {% include 'admin/partials/nav.html' %}
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" class="d-flex flex-wrap gap-2">
-                <select name="type" class="form-select" style="max-width: 220px;">
-                    <option value="">Tất cả loại</option>
-                    {% for value, label in target_types %}
-                        <option value="{{ value }}" {% if target_type == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" class="btn btn-primary">Lọc</button>
-            </form>
+<style>
+:root {
+    --bg-page: #f8fafc;
+    --card-bg: #ffffff;
+
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --text-soft: #475569;
+
+    --primary: #4f46e5;
+    --primary-soft: #eef2ff;
+
+    --border-color: #e2e8f0;
+
+    --shadow:
+        0 10px 30px rgba(15, 23, 42, 0.04),
+        0 4px 12px rgba(15, 23, 42, 0.03);
+}
+
+/* =====================================
+   PAGE
+===================================== */
+
+html,
+body {
+    overflow-x: hidden;
+}
+
+.moderation-wrapper {
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(79, 70, 229, 0.05),
+            transparent 30%
+        ),
+        var(--bg-page);
+
+    padding: 16px 0 24px;
+
+    overflow-x: hidden;
+}
+
+.container-custom {
+
+    width: 100%;
+    max-width: 100%;
+
+    overflow-y: hidden;
+
+    margin: 0 auto;
+
+    padding: 0 18px;
+
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+/* =====================================
+   HEADER
+===================================== */
+
+.page-header-box {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: 16px;
+
+    margin-bottom: 16px;
+
+    flex-wrap: wrap;
+}
+
+.page-title-area {
+    flex: 1;
+    min-width: 0;
+}
+
+.page-title-area h2 {
+
+    margin: 0;
+
+    font-size: 1.55rem;
+    font-weight: 800;
+
+    color: var(--text-main);
+
+    letter-spacing: -0.4px;
+
+    line-height: 1.2;
+}
+
+.page-title-area p {
+
+    margin-top: 6px;
+
+    color: var(--text-muted);
+
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    line-height: 1.5;
+}
+
+.nav-wrapper {
+    max-width: 100%;
+}
+
+/* =====================================
+   FILTER
+===================================== */
+
+.filter-card {
+
+    background: var(--card-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 18px;
+
+    box-shadow: var(--shadow);
+
+    margin-bottom: 18px;
+
+    overflow: hidden;
+}
+
+.filter-card .card-body {
+    padding: 16px;
+}
+
+.filter-form-horizontal {
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+}
+
+.select-col-type {
+    flex: 1 1 300px;
+    min-width: 0;
+}
+
+.btn-filter-col {
+
+    width: 160px;
+
+    flex-shrink: 0;
+}
+
+/* =====================================
+   INPUTS
+===================================== */
+
+.custom-control {
+
+    width: 100%;
+
+    height: 46px;
+
+    border-radius: 12px;
+
+    border: 1px solid var(--border-color);
+
+    padding: 0 16px;
+
+    font-size: 0.92rem;
+    font-weight: 600;
+
+    color: var(--text-main);
+
+    background: white;
+
+    transition: all 0.2s ease;
+}
+
+.custom-control:focus {
+
+    outline: none;
+
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 4px rgba(79, 70, 229, 0.10);
+}
+
+/* =====================================
+   BUTTONS
+===================================== */
+
+.btn-modern {
+
+    width: 100%;
+
+    height: 46px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    font-size: 0.9rem;
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    transition: all 0.22s ease;
+}
+
+.btn-primary-gradient {
+
+    background:
+        linear-gradient(
+            135deg,
+            #4f46e5,
+            #6366f1
+        );
+
+    color: white;
+
+    box-shadow:
+        0 8px 20px rgba(79, 70, 229, 0.20);
+}
+
+.btn-primary-gradient:hover {
+
+    transform: translateY(-2px);
+
+    color: white;
+
+    box-shadow:
+        0 12px 24px rgba(79, 70, 229, 0.28);
+}
+
+/* =====================================
+   TABLE CARD
+===================================== */
+
+.table-card-container {
+
+    background: var(--card-bg);
+
+    border: 1px solid var(--border-color);
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    box-shadow: var(--shadow);
+
+    width: 100%;
+}
+
+/* KHÔNG CHO TABLE TRÀN RA NGOÀI */
+.table-responsive {
+
+    width: 100%;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+/* =====================================
+   TABLE
+===================================== */
+
+.moderation-table {
+
+    width: 100%;
+
+    margin-bottom: 0;
+
+    border-collapse: separate;
+    border-spacing: 0;
+
+    table-layout: fixed;
+
+    vertical-align: middle;
+}
+
+/* HEADER */
+
+.moderation-table thead th {
+
+    background: #f8fafc;
+
+    color: var(--text-muted);
+
+    font-size: 0.74rem;
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+
+    padding: 14px 12px;
+
+    border-bottom: 1px solid var(--border-color);
+
+    text-align: center;
+
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* BODY */
+
+.moderation-table tbody td {
+
+    padding: 14px 12px;
+
+    border-bottom: 1px solid #edf2f7;
+
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    color: var(--text-main);
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* HOVER */
+
+.moderation-table tbody tr {
+
+    transition:
+        background 0.18s ease,
+        transform 0.18s ease;
+}
+
+.moderation-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+/* =====================================
+   COLUMN WIDTHS
+===================================== */
+
+.col-id {
+    width: 7%;
+}
+
+.col-actor {
+    width: 15%;
+}
+
+.col-target {
+    width: 16%;
+}
+
+.col-action {
+    width: 12%;
+}
+
+.col-reason {
+    width: 34%;
+}
+
+.col-date {
+    width: 16%;
+}
+
+/* =====================================
+   BADGES
+===================================== */
+
+.badge-soft {
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    padding: 6px 10px;
+
+    border-radius: 999px;
+
+    font-size: 0.74rem;
+    font-weight: 700;
+
+    max-width: 100%;
+
+    flex-wrap: wrap;
+
+    word-break: break-word;
+}
+
+.badge-actor {
+
+    background: #f1f5f9;
+
+    color: #334155;
+
+    border: 1px solid #cbd5e1;
+}
+
+.badge-target {
+
+    background: var(--primary-soft);
+
+    color: var(--primary);
+}
+
+/* =====================================
+   ACTION TEXT
+===================================== */
+
+.action-text {
+
+    font-size: 0.76rem;
+    font-weight: 800;
+
+    color: #0f172a;
+
+    letter-spacing: 0.3px;
+
+    text-transform: uppercase;
+
+    word-break: break-word;
+}
+
+/* =====================================
+   REASON
+===================================== */
+
+.reason-cell-wrap {
+
+    width: 100%;
+
+    text-align: left;
+
+    white-space: normal;
+
+    word-break: break-word;
+
+    overflow-wrap: anywhere;
+
+    line-height: 1.5;
+
+    color: var(--text-soft);
+
+    font-size: 0.88rem;
+}
+
+/* =====================================
+   EMPTY
+===================================== */
+
+.empty-box {
+
+    padding: 50px 18px;
+
+    text-align: center;
+}
+
+.empty-box i {
+
+    font-size: 2.6rem;
+
+    color: #cbd5e1;
+
+    margin-bottom: 14px;
+}
+
+.empty-box h5 {
+
+    font-size: 1rem;
+    font-weight: 800;
+
+    color: var(--text-main);
+
+    margin-bottom: 8px;
+}
+
+.empty-box p {
+
+    margin: 0;
+
+    color: var(--text-muted);
+}
+
+/* =====================================
+   PAGINATION
+===================================== */
+
+.pagination-container {
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    padding: 16px 18px;
+
+    border-top: 1px solid var(--border-color);
+
+    background: white;
+
+    overflow-x: auto;
+}
+
+.custom-pagination {
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    list-style: none;
+
+    padding: 0;
+    margin: 0;
+}
+
+.custom-pagination .page-item .page-link {
+
+    min-width: 38px;
+    height: 38px;
+
+    padding: 0 12px;
+
+    border-radius: 10px;
+
+    border: 1px solid var(--border-color);
+
+    background: white;
+
+    color: var(--text-main);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-decoration: none;
+
+    font-size: 0.85rem;
+    font-weight: 700;
+
+    transition: all 0.2s ease;
+}
+
+.custom-pagination .page-item .page-link:hover {
+
+    background: var(--primary-soft);
+
+    color: var(--primary);
+
+    border-color: var(--primary);
+}
+
+.custom-pagination .page-item.active .page-link {
+
+    background:
+        linear-gradient(
+            135deg,
+            #4f46e5,
+            #6366f1
+        );
+
+    color: white;
+
+    border-color: transparent;
+
+    box-shadow:
+        0 8px 20px rgba(79, 70, 229, 0.18);
+}
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media (max-width: 1200px) {
+
+    .moderation-table {
+        min-width: 1000px;
+    }
+}
+
+@media (max-width: 992px) {
+
+    .page-header-box,
+    .filter-form-horizontal {
+
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-filter-col {
+        width: 100%;
+    }
+
+    .page-title-area h2 {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .container-custom {
+        padding: 0 12px;
+    }
+
+    .moderation-wrapper {
+        padding-top: 12px;
+    }
+
+    .filter-card .card-body {
+        padding: 14px;
+    }
+
+    .moderation-table {
+        min-width: 900px;
+    }
+
+    .moderation-table thead th,
+    .moderation-table tbody td {
+        padding: 12px 10px;
+    }
+
+    .pagination-container {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .moderation-table {
+        min-width: 820px;
+    }
+
+    .page-title-area h2 {
+        font-size: 1.25rem;
+    }
+
+    .page-title-area p {
+        font-size: 0.84rem;
+    }
+
+    .custom-control,
+    .btn-modern {
+        height: 44px;
+    }
+}
+</style>
+
+<div class="moderation-wrapper">
+
+    <div class="container-custom">
+
+        <!-- HEADER -->
+        <div class="page-header-box">
+
+            <div class="page-title-area">
+
+                <h2>
+                    Moderation Logs
+                </h2>
+
+                <p>
+                    Hệ thống ghi nhận và lưu trữ toàn bộ lịch sử tác vụ kiểm duyệt của Quản trị viên
+                </p>
+
+            </div>
+
+            <div class="nav-wrapper">
+                {% include 'admin/partials/nav.html' %}
+            </div>
+
         </div>
+
+        <!-- FILTER -->
+        <div class="card filter-card">
+
+            <div class="card-body">
+
+                <form method="GET"
+                      class="filter-form-horizontal">
+
+                    <div class="select-col-type">
+
+                        <select name="type"
+                                class="form-select custom-control">
+
+                            <option value="">
+                                Tất cả phân loại mục tiêu kiểm duyệt
+                            </option>
+
+                            {% for value, label in target_types %}
+
+                                <option value="{{ value }}"
+                                    {% if target_type == value %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ label }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="btn-filter-col">
+
+                        <button type="submit"
+                                class="btn btn-modern btn-primary-gradient">
+
+                            <i class="bi bi-funnel-fill"></i>
+
+                            Lọc dữ liệu
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-card-container">
+
+            <div class="table-responsive">
+
+                <table class="table moderation-table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="col-id">
+                                Mã ID
+                            </th>
+
+                            <th class="col-actor">
+                                Người thực hiện
+                            </th>
+
+                            <th class="col-target">
+                                Đối tượng xử lý
+                            </th>
+
+                            <th class="col-action">
+                                Hành động
+                            </th>
+
+                            <th class="col-reason">
+                                Lý do hệ thống / Ghi chú chi tiết
+                            </th>
+
+                            <th class="col-date">
+                                Thời gian ghi nhận
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for log in logs %}
+
+                        <tr>
+
+                            <td>
+                                <strong class="text-secondary">
+                                    #{{ log.id }}
+                                </strong>
+                            </td>
+
+                            <td>
+
+                                {% if log.actor %}
+
+                                    <span class="badge-soft badge-actor">
+
+                                        <i class="bi bi-person-fill"></i>
+
+                                        {{ log.actor.username }}
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="text-muted small">
+                                        - System -
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge-soft badge-target">
+
+                                    {{ log.target_type }}
+
+                                    <strong>
+                                        #{{ log.target_id }}
+                                    </strong>
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <span class="action-text">
+                                    {{ log.action }}
+                                </span>
+
+                            </td>
+
+                            <td class="text-start">
+
+                                <div class="reason-cell-wrap"
+                                     title="{{ log.reason|default:'-' }}">
+
+                                    {{ log.reason|default:"<span class='text-muted small fst-italic'>Không để lại lý do</span>"|safe }}
+
+                                </div>
+
+                            </td>
+
+                            <td class="text-muted">
+
+                                <i class="bi bi-clock me-1"></i>
+
+                                {{ log.created_at|date:"d/m/Y H:i" }}
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td colspan="6">
+
+                                <div class="empty-box">
+
+                                    <i class="bi bi-journal-x"></i>
+
+                                    <h5>
+                                        Không có dữ liệu
+                                    </h5>
+
+                                    <p>
+                                        Hệ thống chưa ghi nhận bất kỳ nhật ký kiểm duyệt nào phù hợp.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- PAGINATION -->
+            {% if logs.paginator.num_pages > 1 %}
+
+            <div class="pagination-container">
+
+                <nav aria-label="Page navigation">
+
+                    <ul class="custom-pagination">
+
+                        {% if logs.has_previous %}
+
+                        <li class="page-item">
+
+                            <a class="page-link"
+                               href="?page=1&type={{ target_type }}"
+                               title="Đầu trang">
+
+                                <i class="bi bi-chevron-double-left">first</i>
+
+                            </a>
+
+                        </li>
+
+                        <li class="page-item">
+
+                            <a class="page-link"
+                               href="?page={{ logs.previous_page_number }}&type={{ target_type }}"
+                               title="Trang trước">
+
+                                <i class="bi bi-chevron-left">-1</i>
+
+                            </a>
+
+                        </li>
+
+                        {% endif %}
+
+                        <li class="page-item active">
+
+                            <span class="page-link">
+
+                                {{ logs.number }}
+                                /
+                                {{ logs.paginator.num_pages }}
+
+                            </span>
+
+                        </li>
+
+                        {% if logs.has_next %}
+
+                        <li class="page-item">
+
+                            <a class="page-link"
+                               href="?page={{ logs.next_page_number }}&type={{ target_type }}"
+                               title="Trang sau">
+
+                                <i class="bi bi-chevron-right">+1</i>
+
+                            </a>
+
+                        </li>
+
+                        <li class="page-item">
+
+                            <a class="page-link"
+                               href="?page={{ logs.paginator.num_pages }}&type={{ target_type }}"
+                               title="Cuối trang">
+
+                                <i class="bi bi-chevron-double-right">final</i>
+
+                            </a>
+
+                        </li>
+
+                        {% endif %}
+
+                    </ul>
+
+                </nav>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>ID</th>
-                    <th>Actor</th>
-                    <th>Target</th>
-                    <th>Action</th>
-                    <th>Lý do</th>
-                    <th>Thời gian</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for log in logs %}
-                <tr>
-                    <td>{{ log.id }}</td>
-                    <td>{% if log.actor %}{{ log.actor.username }}{% else %}-{% endif %}</td>
-                    <td>{{ log.target_type }} #{{ log.target_id }}</td>
-                    <td>{{ log.action }}</td>
-                    <td>{{ log.reason|default:"-" }}</td>
-                    <td>{{ log.created_at|date:"d/m/Y H:i" }}</td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="6" class="text-center">Chưa có log nào.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    {% if logs.paginator.num_pages > 1 %}
-    <nav>
-        <ul class="pagination">
-            {% if logs.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page={{ logs.previous_page_number }}&type={{ target_type }}">Trước</a></li>
-            {% endif %}
-            <li class="page-item active"><span class="page-link">{{ logs.number }}/{{ logs.paginator.num_pages }}</span></li>
-            {% if logs.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ logs.next_page_number }}&type={{ target_type }}">Sau</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% endif %}
 </div>
+
 {% endblock %}
