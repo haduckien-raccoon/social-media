@@ -1,82 +1,57 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root {
     --bg: #f8fafc;
-    --card: rgba(255, 255, 255, 0.9);
+    --card: #ffffff;
     --border: #e2e8f0;
-
     --text: #0f172a;
     --text-soft: #64748b;
-
     --primary: #4f46e5;
     --primary-soft: #eef2ff;
-
     --success: #16a34a;
     --success-soft: #f0fdf4;
-
     --warning: #d97706;
     --warning-soft: #fef3c7;
-
     --danger: #dc2626;
     --danger-soft: #fee2e2;
-
-    --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.03), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-/* =========================
-    PAGE BASE
-========================= */
-.dashboard-page {
-    background:
-        radial-gradient(circle at top right, rgba(79, 70, 229, 0.04), transparent 35%),
-        radial-gradient(circle at bottom left, rgba(22, 163, 74, 0.03), transparent 35%),
-        var(--bg);
-    /* Set max height and hide overflow if you want absolute no-scroll, 
-       but min-height is safer for responsiveness */
-    min-height: calc(100vh - 60px); 
+/* phá bỏ hoàn toàn giới hạn chiều dọc của container cũ */
+.dashboard-force-wide {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px !important;
+    box-sizing: border-box;
+    background: var(--bg);
     font-family: system-ui, -apple-system, sans-serif;
-    display: flex;
-    flex-direction: column;
 }
 
-.container-custom {
-    max-width: 1550px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 20px;
-    flex-grow: 1;
+/* ==========================================
+   HEADER ROW (DÀN NGANG CHUẨN)
+========================================== */
+.custom-header-block {
     display: flex;
-    flex-direction: column;
-}
-
-/* =========================
-    HEADER BAR
-========================= */
-.dashboard-header {
+    justify-content: space-between;
+    align-items: center;
     background: var(--card);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 16px 24px;
+    margin-bottom: 20px;
     box-shadow: var(--shadow);
 }
-
-.page-title {
-    font-size: 1.45rem;
-    font-weight: 800;
-    color: var(--text);
+.header-left-side {
     display: flex;
     align-items: center;
-    gap: 12px;
-    letter-spacing: -0.5px;
+    gap: 16px;
 }
-
-.page-title-icon {
+.header-icon-box {
     width: 42px;
     height: 42px;
     border-radius: 10px;
@@ -85,348 +60,269 @@
     justify-content: center;
     background: linear-gradient(135deg, #4f46e5, #6366f1);
     color: white;
-    font-size: 1.15rem;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    font-size: 1.2rem;
 }
-
-.page-subtitle {
+.header-title-text {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text);
+    margin: 0;
+}
+.header-subtitle-text {
     color: var(--text-soft);
     font-size: 0.88rem;
-    margin-top: 2px;
+    margin: 2px 0 0 0;
 }
-
-.refresh-btn {
+.custom-refresh-btn {
     height: 38px;
     border: 1px solid var(--primary);
+    background: transparent;
+    color: var(--primary);
     border-radius: 8px;
     padding: 0 16px;
     font-weight: 600;
-    font-size: 0.88rem;
-    color: var(--primary);
-    background: transparent;
-    transition: all 0.2s ease;
-    display: inline-flex;
+    cursor: pointer;
+    display: flex;
     align-items: center;
-    gap: 6px;
-    white-space: nowrap;
+    gap: 8px;
+    transition: all 0.2s;
 }
-
-.refresh-btn:hover {
+.custom-refresh-btn:hover {
     background: var(--primary);
     color: white;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
-    transform: translateY(-1px);
 }
 
-.btn-open-sm {
-    height: 30px;
-    padding: 0 12px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    border-radius: 6px;
-    border: 1px solid var(--danger);
-    background: transparent;
-    color: var(--danger);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.2s ease;
+/* ==========================================
+   METRICS ROW: ÉP DÀN NGANG TUYỆT ĐỐI BẰNG FLEX
+========================================== */
+.metrics-flex-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important; /* Không cho phép xuống hàng trên Desktop */
+    gap: 16px !important;
+    width: 100% !important;
+    margin-bottom: 20px !important;
 }
-
-.btn-open-sm:hover {
-    background: var(--danger);
-    color: white;
-    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
+.metric-flex-item {
+    flex: 1 !important; /* Chia đều 4 cột khít khịt */
+    min-width: 0; /* Chống vỡ chữ */
 }
-
-/* =========================
-    METRICS CARDS
-========================= */
-.analytics-card {
+.custom-analytics-card {
     background: var(--card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px 20px;
+    border-radius: 12px;
+    padding: 20px;
     box-shadow: var(--shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    height: 100%;
 }
-
-.analytics-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 20px -5px rgba(15, 23, 42, 0.06);
-}
-
-.stat-left {
+.card-main-content {
     display: flex;
     align-items: center;
     gap: 14px;
     min-width: 0;
 }
-
-.stat-icon {
+.card-icon-avatar {
     width: 48px;
     height: 48px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     flex-shrink: 0;
 }
+.c-icon-primary { background: var(--primary-soft); color: var(--primary); }
+.c-icon-success { background: var(--success-soft); color: var(--success); }
+.c-icon-warning { background: var(--warning-soft); color: var(--warning); }
+.c-icon-danger { background: var(--danger-soft); color: var(--danger); }
 
-.icon-primary { background: var(--primary-soft); color: var(--primary); }
-.icon-success { background: var(--success-soft); color: var(--success); }
-.icon-warning { background: var(--warning-soft); color: var(--warning); }
-.icon-danger { background: var(--danger-soft); color: var(--danger); }
-
-.stat-info-block {
-    min-width: 0;
-}
-
-.stat-label {
-    font-size: 0.72rem;
+.card-text-block { min-width: 0; }
+.card-text-label {
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
     color: var(--text-soft);
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-bottom: 4px;
 }
-
-.stat-value {
-    font-size: 1.65rem;
+.card-text-value {
+    font-size: 1.75rem;
     font-weight: 800;
     color: var(--text);
     line-height: 1.1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
-
-.stat-desc {
+.card-text-desc {
+    font-size: 0.82rem;
     color: var(--text-soft);
-    font-size: 0.8rem;
-    margin-top: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-top: 4px;
 }
 
-/* TREND BADGES */
-.trend-box {
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-.trend-up { background: var(--success-soft); color: var(--success); }
-.trend-alert { background: var(--danger-soft); color: var(--danger); }
-.trend-neutral { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-
-/* =========================
-    CHART AREA
-========================= */
-.chart-card-full {
+/* ==========================================
+   CHART ROW
+========================================== */
+.chart-custom-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: 24px;
     box-shadow: var(--shadow);
-    display: flex;
-    flex-direction: column;
+    width: 100%;
 }
-
-.chart-header {
+.chart-custom-header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px; /* Giảm margin so với cũ để tối ưu chiều dọc */
-    gap: 16px;
+    align-items: center;
+    margin-bottom: 20px;
 }
-
-.chart-title {
-    font-size: 1.05rem;
+.chart-main-title {
+    font-size: 1.1rem;
     font-weight: 800;
     color: var(--text);
-    letter-spacing: -0.3px;
 }
-
-.chart-subtitle {
-    color: var(--text-soft);
+.chart-main-subtitle {
     font-size: 0.85rem;
-    margin-top: 1px;
+    color: var(--text-soft);
 }
-
-.chart-container {
+.chart-canvas-holder {
     position: relative;
     width: 100%;
-    flex-grow: 1; /* Cho phép đồ thị tự động giãn đầy không gian còn lại */
-    min-height: 250px; /* Đảm bảo không bị vỡ trên Mobile */
+    height: 380px; /* Độ cao chuẩn để biểu đồ trải rộng mượt mà */
 }
 
-/* =========================
-    RESPONSIVE MEDIA
-========================= */
-@media(max-width: 992px) {
-    .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start !important;
-        gap: 12px;
-    }
-    .refresh-btn {
-        width: 100%;
-        justify-content: center;
-    }
-    .chart-container {
-        min-height: 350px; /* Đồ thị cao hơn một chút khi xuống màn hình nhỏ */
-    }
+.custom-btn-danger {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.custom-btn-danger:hover {
+    background: var(--danger);
+    color: white;
 }
 
-@media(max-width: 576px) {
-    .analytics-card {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-    .trend-box, .btn-open-sm {
-        align-self: flex-end;
-    }
+/* Responsive hạ cấp xuống dòng cho Tablet & Mobile */
+@media (max-width: 1024px) {
+    .metrics-flex-row { flex-wrap: wrap !important; }
+    .metric-flex-item { flex: 1 0 calc(50% - 16px) !important; }
+}
+@media (max-width: 576px) {
+    .metrics-flex-row { flex-direction: column !important; }
+    .metric-flex-item { flex: 1 0 100% !important; }
+    .custom-header-block { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .custom-refresh-btn { width: 100%; justify-content: center; }
 }
 </style>
 
-<div class="dashboard-page py-3">
-    <div class="container-custom">
-
-        <div class="dashboard-header d-flex justify-content-between align-items-center mb-3">
-            <div class="min-w-0">
-                <div class="page-title">
-                    <div class="page-title-icon">
-                        <i class="bi bi-grid-1x2-fill"></i>
-                    </div>
-                    <div class="text-truncate">System Analytics</div>
-                </div>
-                <div class="page-subtitle text-truncate">
-                    Tổng quan dữ liệu và theo dõi lưu lượng tăng trưởng hệ thống thời gian thực
-                </div>
+<div class="dashboard-force-wide">
+    
+    <div class="custom-header-block">
+        <div class="header-left-side">
+            <div class="header-icon-box">
+                <i class="bi bi-grid-1x2-fill"></i>
             </div>
-            <button class="refresh-btn" onclick="location.reload()">
-                <i class="bi bi-arrow-repeat"></i>
-                <span>Làm mới dữ liệu</span>
-            </button>
+            <div>
+                <h2 class="header-title-text">System Analytics</h2>
+                <p class="header-subtitle-text">Tổng quan dữ liệu và theo dõi lưu lượng tăng trưởng hệ thống thời gian thực</p>
+            </div>
+        </div>
+        <button class="custom-refresh-btn" onclick="location.reload()">
+            <i class="bi bi-arrow-repeat"></i>
+            <span>Làm mới dữ liệu</span>
+        </button>
+    </div>
+
+    <div class="metrics-flex-row">
+        
+        <div class="metric-flex-item">
+            <div class="custom-analytics-card">
+                <div class="card-main-content">
+                    <div class="card-icon-avatar c-icon-primary">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="card-text-block">
+                        <div class="card-text-label">Tổng thành viên</div>
+                        <div class="card-text-value">{{ total_users }}</div>
+                        <div class="card-text-desc">Hôm nay: <strong class="text-primary">+{{ new_users_today }}</strong></div>
+                    </div>
+                </div>
+                <div class="trend-box trend-up"><i class="bi bi-graph-up-arrow me-1"></i>{{ user_growth_percentage | floatformat:2 }}%</div>
+            </div>
         </div>
 
-        <div class="row g-3 flex-grow-1">
-            
-            <div class="col-xl-5 col-lg-12">
-                <div class="row g-3 h-100">
-                    <div class="col-sm-6 col-12">
-                        <div class="analytics-card">
-                            <div class="stat-left">
-                                <div class="stat-icon icon-primary">
-                                    <i class="bi bi-people-fill"></i>
-                                </div>
-                                <div class="stat-info-block">
-                                    <div class="stat-label">Tổng thành viên</div>
-                                    <div class="stat-value">{{ total_users }}</div>
-                                    <div class="stat-desc">Tài khoản đăng ký</div>
-                                </div>
-                            </div>
-                            <div class="trend-box trend-up"><i class="bi bi-graph-up-arrow me-1"></i>+12%</div>
-                        </div>
+        <div class="metric-flex-item">
+            <div class="custom-analytics-card">
+                <div class="card-main-content">
+                    <div class="card-icon-avatar c-icon-warning">
+                        <i class="bi bi-file-post-fill"></i>
                     </div>
-
-                    <div class="col-sm-6 col-12">
-                        <div class="analytics-card">
-                            <div class="stat-left">
-                                <div class="stat-icon icon-success">
-                                    <i class="bi bi-person-plus-fill"></i>
-                                </div>
-                                <div class="stat-info-block">
-                                    <div class="stat-label">Thành viên mới</div>
-                                    <div class="stat-value">+{{ new_users_today }}</div>
-                                    <div class="stat-desc">Ghi nhận trong ngày</div>
-                                </div>
-                            </div>
-                            <div class="trend-box trend-neutral">Live</div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-12">
-                        <div class="analytics-card">
-                            <div class="stat-left">
-                                <div class="stat-icon icon-warning">
-                                    <i class="bi bi-file-post-fill"></i>
-                                </div>
-                                <div class="stat-info-block">
-                                    <div class="stat-label">Tổng bài viết</div>
-                                    <div class="stat-value">{{ total_posts }}</div>
-                                    <div class="stat-desc">Nội dung hệ thống</div>
-                                </div>
-                            </div>
-                            <div class="trend-box trend-up"><i class="bi bi-plus-lg me-1"></i>{{ posts_today }}</div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-12">
-                        <div class="analytics-card">
-                            <div class="stat-left">
-                                <div class="stat-icon icon-danger">
-                                    <i class="bi bi-flag-fill"></i>
-                                </div>
-                                <div class="stat-info-block">
-                                    <div class="stat-label">Báo cáo chờ duyệt</div>
-                                    <div class="stat-value text-danger">{{ pending_reports }}</div>
-                                    <div class="stat-desc">Yêu cầu cần xử lý</div>
-                                </div>
-                            </div>
-                            <div>
-                                <a href="{% url 'custom_admin:report_list' %}" class="btn-open-sm">
-                                    <span>Xử lý</span>
-                                    <i class="bi bi-chevron-right"></i>
-                                </a>
-                            </div>
-                        </div>
+                    <div class="card-text-block">
+                        <div class="card-text-label">Tổng bài viết</div>
+                        <div class="card-text-value">{{ total_posts }}</div>
+                        <div class="card-text-desc">Hôm nay: <strong class="text-warning">+{{ posts_today }}</strong></div>
                     </div>
                 </div>
+                <div class="trend-box trend-up"><i class="bi bi-plus-lg"></i> {{ posts_today }}</div>
             </div>
+        </div>
 
-            <div class="col-xl-7 col-lg-12">
-                <div class="chart-card-full h-100">
-                    <div class="chart-header">
-                        <div>
-                            <div class="chart-title">Growth Analytics</div>
-                            <div class="chart-subtitle">Biểu đồ lưu lượng tương tác tăng trưởng trong 7 ngày gần nhất</div>
-                        </div>
-                        <span class="trend-box trend-neutral"><i class="bi bi-clock-history me-1"></i>Real-time</span>
+        <div class="metric-flex-item">
+            <div class="custom-analytics-card">
+                <div class="card-main-content">
+                    <div class="card-icon-avatar c-icon-danger">
+                        <i class="bi bi-flag-fill"></i>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="growthChart"></canvas>
+                    <div class="card-text-block">
+                        <div class="card-text-label">Báo cáo chờ duyệt</div>
+                        <div class="card-text-value text-danger">{{ pending_reports }}</div>
+                        <div class="card-text-desc">Yêu cầu cần xử lý gấp</div>
                     </div>
                 </div>
+                <div>
+                    <a href="{% url 'custom_admin:report_list' %}" class="custom-btn-danger">
+                        <span>Xử lý</span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
             </div>
+        </div>
 
-        </div> </div>
+    </div>
+
+    <div class="chart-custom-card">
+        <div class="chart-custom-header">
+            <div>
+                <div class="chart-main-title">Growth Analytics</div>
+                <div class="chart-main-subtitle">Biểu đồ lưu lượng tương tác tăng trưởng trong 7 ngày gần nhất</div>
+            </div>
+            <span class="trend-box trend-neutral"><i class="bi bi-clock-history me-1"></i>Real-time</span>
+        </div>
+        <div class="chart-canvas-holder">
+            <canvas id="growthChart"></canvas>
+        </div>
+    </div>
+
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const ctx = document.getElementById('growthChart');
-    const labels = JSON.parse('{{ chart_labels|safe }}');
-    const userData = JSON.parse('{{ chart_users|safe }}');
-    const postData = JSON.parse('{{ chart_posts|safe }}');
+    
+    // Đọc dữ liệu an toàn từ Django, bổ sung mảng mặc định nếu dữ liệu rỗng để Chart không bị trống trơn
+    const rawLabels = JSON.parse('{{ chart_labels|safe }}');
+    const rawUserData = JSON.parse('{{ chart_users|safe }}');
+    const rawPostData = JSON.parse('{{ chart_posts|safe }}');
+    
+    const labels = rawLabels.length ? rawLabels : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const userData = rawUserData.length ? rawUserData : [0, 0, 0, 0, 0, 0, 0];
+    const postData = rawPostData.length ? rawPostData : [0, 0, 0, 0, 0, 0, 0];
 
     new Chart(ctx, {
         type: 'line',
@@ -437,29 +333,29 @@ document.addEventListener("DOMContentLoaded", function () {
                     label: 'Đăng ký mới',
                     data: userData,
                     borderColor: '#4f46e5',
-                    backgroundColor: 'rgba(79, 70, 229, 0.04)',
-                    borderWidth: 3,
+                    backgroundColor: 'rgba(79, 70, 229, 0.03)',
+                    borderWidth: 3.5,
                     tension: 0.35,
                     fill: true,
-                    pointRadius: 3,
+                    pointRadius: 4,
                     pointHoverRadius: 6
                 },
                 {
                     label: 'Bài đăng mới',
                     data: postData,
                     borderColor: '#16a34a',
-                    backgroundColor: 'rgba(22, 163, 74, 0.04)',
-                    borderWidth: 3,
+                    backgroundColor: 'rgba(22, 163, 74, 0.03)',
+                    borderWidth: 3.5,
                     tension: 0.35,
                     fill: true,
-                    pointRadius: 3,
+                    pointRadius: 4,
                     pointHoverRadius: 6
                 }
             ]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, /* Rất quan trọng để biểu đồ tự co giãn theo container chứa nó */
+            maintainAspectRatio: false,
             interaction: {
                 mode: 'index',
                 intersect: false
@@ -471,7 +367,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         usePointStyle: true,
                         boxWidth: 6,
                         boxHeight: 6,
-                        padding: 24,
+                        padding: 20,
                         font: { size: 12, weight: '600' }
                     }
                 }
@@ -483,8 +379,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 y: {
                     beginAtZero: true,
-                    ticks: { stepSize: 1, font: { size: 11 }, color: '#64748b' },
-                    grid: { color: 'rgba(148, 163, 184, 0.06)' }
+                    ticks: { font: { size: 11 }, color: '#64748b', precision: 0 },
+                    grid: { color: 'rgba(148, 163, 184, 0.08)' }
                 }
             }
         }

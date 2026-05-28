@@ -1,0 +1,116 @@
+{
+  "language": "vi",
+  "model_name": "toxic_vi_language_aware_optimized",
+  "random_state": 42,
+  "train_size": 15387,
+  "valid_size": 3297,
+  "test_size": 3298,
+  "best_cv_f1_macro": 0.7959702035565254,
+  "best_params": {
+    "features__word__tfidf__ngram_range": "(1, 3)",
+    "features__word__tfidf__max_features": "50000",
+    "features__syllable__tfidf__max_features": "30000",
+    "features__char__tfidf__ngram_range": "(2, 6)",
+    "features__char__tfidf__max_features": "30000",
+    "features__accentless_char__tfidf__max_features": "25000",
+    "clf__class_weight": "balanced",
+    "clf__C": "0.25",
+    "clf": "LinearSVC(max_iter=8000, random_state=42)"
+  },
+  "threshold_metric": "f1_toxic",
+  "threshold": 0.305,
+  "valid_metrics": {
+    "threshold": 0.305,
+    "accuracy": 0.8926296633303002,
+    "f1_macro": 0.823541631389245,
+    "f1_toxic": 0.713128038897893,
+    "precision_toxic": 0.6918238993710691,
+    "recall_toxic": 0.7357859531772575,
+    "classification_report": {
+      "safe": {
+        "precision": 0.9406238256294626,
+        "recall": 0.9273805113004817,
+        "f1-score": 0.933955223880597,
+        "support": 2699.0
+      },
+      "toxic": {
+        "precision": 0.6918238993710691,
+        "recall": 0.7357859531772575,
+        "f1-score": 0.713128038897893,
+        "support": 598.0
+      },
+      "accuracy": 0.8926296633303002,
+      "macro avg": {
+        "precision": 0.8162238625002658,
+        "recall": 0.8315832322388697,
+        "f1-score": 0.823541631389245,
+        "support": 3297.0
+      },
+      "weighted avg": {
+        "precision": 0.8954972390651558,
+        "recall": 0.8926296633303002,
+        "f1-score": 0.8939022494736644,
+        "support": 3297.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        2503,
+        196
+      ],
+      [
+        158,
+        440
+      ]
+    ],
+    "roc_auc": 0.9246552978249096,
+    "pr_auc": 0.7787740234121084
+  },
+  "test_metrics": {
+    "threshold": 0.305,
+    "accuracy": 0.8920557913887205,
+    "f1_macro": 0.8234365986392103,
+    "f1_toxic": 0.7133655394524959,
+    "precision_toxic": 0.687888198757764,
+    "recall_toxic": 0.7408026755852842,
+    "classification_report": {
+      "safe": {
+        "precision": 0.9415975885455916,
+        "recall": 0.9255555555555556,
+        "f1-score": 0.9335076578259246,
+        "support": 2700.0
+      },
+      "toxic": {
+        "precision": 0.687888198757764,
+        "recall": 0.7408026755852842,
+        "f1-score": 0.7133655394524959,
+        "support": 598.0
+      },
+      "accuracy": 0.8920557913887205,
+      "macro avg": {
+        "precision": 0.8147428936516778,
+        "recall": 0.8331791155704199,
+        "f1-score": 0.8234365986392103,
+        "support": 3298.0
+      },
+      "weighted avg": {
+        "precision": 0.8955944911856398,
+        "recall": 0.8920557913887205,
+        "f1-score": 0.8935910457012095,
+        "support": 3298.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        2499,
+        201
+      ],
+      [
+        155,
+        443
+      ]
+    ],
+    "roc_auc": 0.9240316487055618,
+    "pr_auc": 0.7814043820743196
+  }
+}

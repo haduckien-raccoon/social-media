@@ -3050,3 +3050,333 @@ Traceback (most recent call last):
   File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
     raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
 django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/posts/images/102230194_wzCLDub.jpg” does not exist
+[19/05/2026 09:24:22] ERROR | middleware | EXCEPTION at /system-admin/ (IP: 127.0.0.1): name 'datetime' is not defined
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/admin/views.py", line 54, in dashboard
+    seven_days_ago = today - datetime.timedelta(days=7)
+                             ^^^^^^^^
+NameError: name 'datetime' is not defined. Did you forget to import 'datetime'
+[19/05/2026 09:24:22] ERROR | log | Internal Server Error: /system-admin/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/admin/views.py", line 54, in dashboard
+    seven_days_ago = today - datetime.timedelta(days=7)
+                             ^^^^^^^^
+NameError: name 'datetime' is not defined. Did you forget to import 'datetime'
+[19/05/2026 09:24:22] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.023s | Path: /system-admin/
+[19/05/2026 09:27:49] ERROR | middleware | EXCEPTION at /system-admin/ (IP: 127.0.0.1): Could not parse some characters: new_users_today| / total_users * 100| | floatformat:2
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/admin/views.py", line 102, in dashboard
+    return render(request, 'admin/dashboard.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 155, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 197, in compile_nodelist
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 299, in do_extends
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 234, in do_block
+    nodelist = parser.parse(("endblock",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 490, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 488, in parse
+    filter_expression = self.compile_filter(token.contents)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 610, in compile_filter
+    return FilterExpression(token, self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 683, in __init__
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: Could not parse some characters: new_users_today| / total_users * 100| | floatformat:2
+[19/05/2026 09:27:49] ERROR | log | Internal Server Error: /system-admin/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/admin/views.py", line 102, in dashboard
+    return render(request, 'admin/dashboard.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 155, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 197, in compile_nodelist
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 299, in do_extends
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 519, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 517, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 234, in do_block
+    nodelist = parser.parse(("endblock",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 490, in parse
+    raise self.error(token, e)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 488, in parse
+    filter_expression = self.compile_filter(token.contents)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 610, in compile_filter
+    return FilterExpression(token, self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/template/base.py", line 683, in __init__
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: Could not parse some characters: new_users_today| / total_users * 100| | floatformat:2
+[19/05/2026 09:27:49] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.065s | Path: /system-admin/
+[19/05/2026 09:41:58] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[19/05/2026 11:38:52] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[19/05/2026 11:40:05] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[19/05/2026 12:32:14] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[28/05/2026 12:58:59] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[28/05/2026 13:16:47] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist

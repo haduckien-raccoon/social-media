@@ -37,6 +37,8 @@ import json
 import psutil
 from dotenv import load_dotenv
 load_dotenv()
+import datetime
+from django.utils.timezone import make_aware
 
 def is_admin(user):
     return user.is_authenticated and user.is_staff
@@ -45,76 +47,62 @@ def generate_random_password(length=12):
     characters = string.ascii_letters + string.digits + string.punctuation
     return ''.join(random.choice(characters) for _ in range(length))
 
-# Thêm hàm view này vào views.py của bạn
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def dashboard(request):
     """ View tổng quan hệ thống (Dashboard Analytics) """
-    today = timezone.now().date()
-    thirty_days_ago = today - timedelta(days=30)
-    seven_days_ago = today - timedelta(days=7)
-
-    # 1. USER METRICS (Dựa vào ngày tạo và lần đăng nhập cuối)
-    total_users = User.objects.count()
-    new_users_today = User.objects.filter(date_joined__date=today).count()
     
-    # DAU (Daily Active Users): User đăng nhập trong hôm nay
-    dau = User.objects.filter(last_login__date=today).count()
-    # MAU (Monthly Active Users): User đăng nhập trong 30 ngày qua
-    mau = User.objects.filter(last_login__date__gte=thirty_days_ago).count()
+    # Lấy ngày hiện tại theo múi giờ local cấu hình trong settings (Asia/Ho_Chi_Minh)
+    today = timezone.localdate()
+    seven_days_ago = today - datetime.timedelta(days=7)
 
-    # 2. CONTENT METRICS
+    # 1. METRICS TỔNG KHÁT
+    total_users = User.objects.count()
     total_posts = Post.objects.count()
-    posts_today = Post.objects.filter(created_at__date=today).count()
     pending_reports = Report.objects.filter(status='pending').count()
 
-    # 3. BIỂU ĐỒ: Tăng trưởng User trong 7 ngày qua
-    users_growth_data = (
-        User.objects.filter(date_joined__date__gte=seven_days_ago)
-        .annotate(date=TruncDate('date_joined'))
-        .values('date')
-        .annotate(count=Count('id'))
-        .order_by('date')
-    )
+    # 2. XỬ LÝ DATE-TIME RANGE ĐỂ TÍNH TOÁN TRONG NGÀY (Chống phân tách __date lỗi trên DB)
+    start_of_today = make_aware(datetime.datetime.combine(today, datetime.time.min))
+    end_of_today = make_aware(datetime.datetime.combine(today, datetime.time.max))
     
-    # 4. BIỂU ĐỒ: Số bài viết mới trong 7 ngày qua
-    posts_growth_data = (
-        Post.objects.filter(created_at__date__gte=seven_days_ago)
-        .annotate(date=TruncDate('created_at'))
-        .values('date')
-        .annotate(count=Count('id'))
-        .order_by('date')
-    )
+    new_users_today = User.objects.filter(date_joined__range=(start_of_today, end_of_today)).count()
+    posts_today = Post.objects.filter(created_at__range=(start_of_today, end_of_today)).count()
 
-    # Xử lý dữ liệu thô thành format JSON để đưa vào Chart.js
-    dates_labels = [(seven_days_ago + timedelta(days=i)).strftime('%d/%m') for i in range(8)]
-    
-    # Tạo dictionary mặc định đếm = 0 cho các ngày
-    user_counts_dict = {label: 0 for label in dates_labels}
-    post_counts_dict = {label: 0 for label in dates_labels}
+    # 3. LẤY DỮ LIỆU BIỂU ĐỒ TRONG 7 NGÀY QUA
+    # Sử dụng vòng lặp đếm trực tiếp: Chạy nhanh, chính xác 100% trên cả SQLite/MySQL local
+    dates_labels = []
+    user_counts = []
+    post_counts = []
 
-    for entry in users_growth_data:
-        date_str = entry['date'].strftime('%d/%m')
-        if date_str in user_counts_dict:
-            user_counts_dict[date_str] = entry['count']
+    for i in range(8):  # Chạy từ 7 ngày trước đến hôm nay (tổng cộng 8 ngày)
+        current_date = seven_days_ago + datetime.timedelta(days=i)
+        label = current_date.strftime('%d/%m')
+        dates_labels.append(label)
+        
+        # Tạo khoảng thời gian từ 00:00:00 đến 23:59:59 của ngày đó
+        start_date = make_aware(datetime.datetime.combine(current_date, datetime.time.min))
+        end_date = make_aware(datetime.datetime.combine(current_date, datetime.time.max))
+        
+        # Đếm số lượng
+        user_counts.append(User.objects.filter(date_joined__range=(start_date, end_date)).count())
+        post_counts.append(Post.objects.filter(created_at__range=(start_date, end_date)).count())
 
-    for entry in posts_growth_data:
-        date_str = entry['date'].strftime('%d/%m')
-        if date_str in post_counts_dict:
-            post_counts_dict[date_str] = entry['count']
+    if total_users > 0:
+        user_growth_percentage = (new_users_today / total_users) * 100
+    else:
+        user_growth_percentage = 0
 
     context = {
         'total_users': total_users,
         'new_users_today': new_users_today,
-        'dau': dau,
-        'mau': mau,
         'total_posts': total_posts,
         'posts_today': posts_today,
         'pending_reports': pending_reports,
-        
-        # Dữ liệu JSON cho biểu đồ
+        'user_growth_percentage': user_growth_percentage,
+
+        # Xuất trực tiếp chuỗi JSON sạch sang template
         'chart_labels': json.dumps(dates_labels),
-        'chart_users': json.dumps(list(user_counts_dict.values())),
-        'chart_posts': json.dumps(list(post_counts_dict.values())),
+        'chart_users': json.dumps(user_counts),
+        'chart_posts': json.dumps(post_counts),
     }
     
     return render(request, 'admin/dashboard.html', context)

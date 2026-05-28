@@ -5,158 +5,222 @@
 
 <style>
     :root { 
-        --bg-main: #f8fafc; 
+        --bg-main: #f1f5f9; 
         --card-bg: #ffffff; 
         --border: #e2e8f0; 
-        --primary: #0d6efd; 
-        --success: #10b981;
-        --warning: #f59e0b;
-        --danger: #ef4444;
+        --primary: #4f46e5; /* Đổi sang màu Indigo hiện đại */
+        --primary-glow: rgba(79, 70, 229, 0.15);
+        --success: #10b981; /* Emerald green */
+        --success-glow: rgba(16, 185, 129, 0.15);
+        --warning: #f59e0b; /* Vivid amber */
+        --warning-glow: rgba(245, 158, 11, 0.15);
+        --danger: #f43f5e; /* Rose red */
+        --danger-glow: rgba(244, 63, 94, 0.15);
     }
     
-    body { background-color: var(--bg-main); color: #1e293b; }
+    body { background-color: var(--bg-main); color: #0f172a; font-family: system-ui, -apple-system, sans-serif; }
     
     .system-wrapper { min-height: 100vh; }
     
-    /* Box tổng */
+    /* Box tổng nâng cấp hiệu ứng nổi khối */
     .custom-card { 
         background: var(--card-bg); 
         border: 1px solid var(--border); 
-        border-radius: 16px; 
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+        border-radius: 20px; 
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
     }
     
-    /* Navigation Tabs */
-    .nav-tabs .nav-link { color: #64748b; font-weight: 600; padding: 16px 24px; border: none; border-bottom: 3px solid transparent; transition: 0.2s; }
-    .nav-tabs .nav-link:hover { color: var(--primary); }
-    .nav-tabs .nav-link.active { color: var(--primary); background: transparent; border-color: transparent transparent var(--primary) transparent; }
+    /* Navigation Tabs High-tech */
+    .nav-tabs .nav-link { 
+        color: #64748b; 
+        font-weight: 700; 
+        padding: 18px 28px; 
+        border: none; 
+        border-bottom: 3px solid transparent; 
+        transition: all 0.3s ease; 
+    }
+    .nav-tabs .nav-link:hover { color: var(--primary); background: rgba(79, 70, 229, 0.04); }
+    .nav-tabs .nav-link.active { 
+        color: var(--primary); 
+        background: transparent; 
+        border-color: transparent transparent var(--primary) transparent; 
+    }
     
-    /* Linux Monitor Style CSS */
+    /* Linux Monitor Box - Nâng cấp Glow Effect & Border tương tác */
     .monitor-box {
         background: #ffffff;
         border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 20px;
-        transition: transform 0.2s;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        border-radius: 20px;
+        padding: 24px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
     }
-    .monitor-box:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
     
-    /* Font monospace (kiểu code/terminal) cho các con số */
+    /* Hiệu ứng di chuột phát quang theo từng khối màu đặc sắc */
+    .monitor-cpu:hover { transform: translateY(-5px); box-shadow: 0 20px 30px var(--primary-glow); border-color: var(--primary); }
+    .monitor-ram:hover { transform: translateY(-5px); box-shadow: 0 20px 30px var(--success-glow); border-color: var(--success); }
+    .monitor-disk:hover { transform: translateY(-5px); box-shadow: 0 20px 30px var(--warning-glow); border-color: var(--warning); }
+    .monitor-info:hover { transform: translateY(-5px); box-shadow: 0 20px 30px rgba(100, 116, 139, 0.15); border-color: #94a3b8; }
+    
+    /* Hộp bao bọc Icon tinh tế hơn */
+    .icon-badge {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    .ib-primary { background: rgba(79, 70, 229, 0.1); color: var(--primary); }
+    .ib-success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .ib-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+    .ib-info { background: rgba(148, 163, 184, 0.15); color: #475569; }
+
+    /* Font gõ chữ số dạng Gradient chuyển màu cực đỉnh */
     .tech-font {
         font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-        font-weight: 700;
-        letter-spacing: -0.5px;
+        font-weight: 800;
+        letter-spacing: -1px;
     }
-    .metric-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 700; }
+    #cpu-val { background: linear-gradient(135deg, #4f46e5, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    #ram-val { background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    #disk-val { background: linear-gradient(135deg, #f59e0b, #d97706); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    #swap-val { background: linear-gradient(135deg, #f43f5e, #be123c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .metric-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.2px; color: #64748b; font-weight: 700; }
     
-    /* Khu vực vẽ biểu đồ */
+    /* Khu vực vẽ biểu đồ mềm mại */
     .chart-container-live { position: relative; height: 280px; width: 100%; margin-top: 10px; }
     
-    /* Terminal Logs */
+    /* Thiết kế lại thanh tiến trình mượt mà, bo tròn hoàn toàn */
+    .progress { height: 8px !important; background-color: #f1f5f9; border-radius: 10px; overflow: hidden; }
+    .progress-bar { border-radius: 10px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    /* Terminal Logs chất nghệ thuật hơn */
     .terminal-box { 
-        background: #0f172a; 
+        background: #090d16; 
         color: #38bdf8; 
-        font-family: 'Courier New', monospace; 
-        font-size: 0.85rem; 
-        padding: 20px; 
-        border-radius: 12px; 
+        font-family: 'Fira Code', 'Courier New', monospace; 
+        font-size: 0.88rem; 
+        padding: 24px; 
+        border-radius: 16px; 
         height: 600px; 
         overflow-y: auto; 
         white-space: pre-wrap; 
-        box-shadow: inset 0 4px 6px rgba(0,0,0,0.3);
+        box-shadow: inset 0 4px 20px rgba(0,0,0,0.5);
+        border: 1px solid #1e293b;
     }
+    .terminal-box::-webkit-scrollbar { width: 8px; }
+    .terminal-box::-webkit-scrollbar-track { background: #090d16; }
+    .terminal-box::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    .terminal-box::-webkit-scrollbar-thumb:hover { background: #334155; }
 </style>
 
-<div class="system-wrapper py-4 pb-5">
-    <div class="container-fluid">
-        <div class="mb-4 d-flex justify-content-between align-items-center">
+<div class="system-wrapper py-5 pb-5">
+    <div class="container-fluid px-md-4">
+        <div class="mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
             <div>
-                <h3 class="fw-bold text-dark mb-1"><i class="bi bi-pc-display-horizontal text-primary me-2"></i>System Monitor</h3>
+                <h3 class="fw-extrabold text-dark mb-1 d-flex align-items-center"><i class="bi bi-cpu text-primary me-2 fs-2"></i>System Monitor</h3>
                 <p class="text-muted m-0">Giám sát tài nguyên máy chủ theo thời gian thực (Real-time OS Monitoring)</p>
             </div>
-            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill shadow-sm">
-                <span class="spinner-grow spinner-grow-sm me-1" role="status" style="width: 0.5rem; height: 0.5rem;"></span> System Online
-            </span>
+            <div>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center fw-bold" style="font-size: 0.9rem;">
+                    <span class="spinner-grow spinner-grow-sm me-2" role="status" style="width: 0.6rem; height: 0.6rem;"></span> Live System Monitoring
+                </span>
+            </div>
         </div>
 
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 shadow-sm border-0">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 shadow-sm border-0 px-4 py-3">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
             {% endfor %}
         {% endif %}
 
-        <div class="custom-card overflow-hidden">
+        <div class="custom-card overflow-hidden border-0">
             <ul class="nav nav-tabs bg-light border-bottom px-3" id="sysTabs" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#monitor"><i class="bi bi-activity me-2"></i>Performance Monitor</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#logs"><i class="bi bi-terminal me-2"></i>Access & Error Logs</button></li>
             </ul>
 
-            <div class="tab-content p-4">
+            <div class="tab-content p-4 bg-white">
                 
                 <div class="tab-pane fade show active" id="monitor">
                     
                     <div class="row g-4 mb-4">
                         <div class="col-xl-3 col-md-6">
-                            <div class="monitor-box h-100">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <div class="metric-title"><i class="bi bi-cpu-fill text-primary me-1"></i> CPU Usage</div>
-                                    <span class="badge bg-light text-muted border" id="cpu-cores">-- Cores</span>
+                            <div class="monitor-box monitor-cpu h-100">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="icon-badge ib-primary"><i class="bi bi-cpu-fill"></i></div>
+                                        <div class="metric-title">CPU Usage</div>
+                                    </div>
+                                    <span class="badge bg-slate-100 text-muted border px-2 py-1" id="cpu-cores">-- Cores</span>
                                 </div>
-                                <div class="d-flex align-items-end gap-2">
-                                    <div class="tech-font text-dark" style="font-size: 2.5rem; line-height: 1;" id="cpu-val">0.0%</div>
+                                <div class="d-flex align-items-end gap-2 mt-4">
+                                    <div class="tech-font" style="font-size: 2.8rem; line-height: 1;" id="cpu-val">0.0%</div>
                                 </div>
-                                <div class="progress mt-3" style="height: 6px;">
-                                    <div class="progress-bar bg-primary" id="cpu-bar" style="width: 0%;"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-3 col-md-6">
-                            <div class="monitor-box h-100">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <div class="metric-title"><i class="bi bi-memory text-success me-1"></i> Memory (RAM)</div>
-                                    <span class="badge bg-light text-muted border" id="ram-text">-- GB / -- GB</span>
-                                </div>
-                                <div class="d-flex align-items-end gap-2">
-                                    <div class="tech-font text-dark" style="font-size: 2.5rem; line-height: 1;" id="ram-val">0.0%</div>
-                                </div>
-                                <div class="progress mt-3" style="height: 6px;">
-                                    <div class="progress-bar bg-success" id="ram-bar" style="width: 0%;"></div>
+                                <div class="progress mt-4">
+                                    <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" id="cpu-bar" style="width: 0%;"></div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-xl-3 col-md-6">
-                            <div class="monitor-box h-100">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <div class="metric-title"><i class="bi bi-device-hdd-fill text-warning me-1"></i> Storage (/)</div>
-                                    <span class="badge bg-light text-muted border" id="disk-text">-- GB / -- GB</span>
+                            <div class="monitor-box monitor-ram h-100">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="icon-badge ib-success"><i class="bi bi-memory"></i></div>
+                                        <div class="metric-title">Memory (RAM)</div>
+                                    </div>
+                                    <span class="badge bg-slate-100 text-muted border px-2 py-1" id="ram-text">-- GB / -- GB</span>
                                 </div>
-                                <div class="d-flex align-items-end gap-2">
-                                    <div class="tech-font text-dark" style="font-size: 2.5rem; line-height: 1;" id="disk-val">0.0%</div>
+                                <div class="d-flex align-items-end gap-2 mt-4">
+                                    <div class="tech-font" style="font-size: 2.8rem; line-height: 1;" id="ram-val">0.0%</div>
                                 </div>
-                                <div class="progress mt-3" style="height: 6px;">
-                                    <div class="progress-bar bg-warning" id="disk-bar" style="width: 0%;"></div>
+                                <div class="progress mt-4">
+                                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" id="ram-bar" style="width: 0%;"></div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-xl-3 col-md-6">
-                            <div class="monitor-box h-100 bg-light border-0">
-                                <div class="metric-title mb-3"><i class="bi bi-info-square-fill text-secondary me-1"></i> Server Info</div>
-                                <div class="d-flex flex-column gap-2">
-                                    <div class="d-flex justify-content-between border-bottom pb-1">
+                            <div class="monitor-box monitor-disk h-100">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="icon-badge ib-warning"><i class="bi bi-device-hdd-fill"></i></div>
+                                        <div class="metric-title">Storage (/)</div>
+                                    </div>
+                                    <span class="badge bg-slate-100 text-muted border px-2 py-1" id="disk-text">-- GB / -- GB</span>
+                                </div>
+                                <div class="d-flex align-items-end gap-2 mt-4">
+                                    <div class="tech-font" style="font-size: 2.8rem; line-height: 1;" id="disk-val">0.0%</div>
+                                </div>
+                                <div class="progress mt-4">
+                                    <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" id="disk-bar" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6">
+                            <div class="monitor-box monitor-info h-100 bg-light bg-opacity-50 border-dashed">
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <div class="icon-badge ib-info"><i class="bi bi-info-square-fill"></i></div>
+                                    <div class="metric-title">Server Info</div>
+                                </div>
+                                <div class="d-flex flex-column gap-2 mt-2">
+                                    <div class="d-flex justify-content-between border-bottom border-light pb-2">
                                         <span class="text-muted small">OS</span>
                                         <span class="fw-bold text-dark small text-end">{{ server_status.os }}</span>
                                     </div>
-                                    <div class="d-flex justify-content-between border-bottom pb-1">
+                                    <div class="d-flex justify-content-between border-bottom border-light pb-2">
                                         <span class="text-muted small">Python</span>
                                         <span class="fw-bold text-dark small">{{ server_status.python }}</span>
                                     </div>
-                                    <div class="d-flex justify-content-between">
+                                    <div class="d-flex justify-content-between pt-1">
                                         <span class="text-muted small">Swap Usage</span>
-                                        <span class="fw-bold text-danger small tech-font" id="swap-val">0.0%</span>
+                                        <span class="fw-bold tech-font small" id="swap-val" style="font-size: 1rem;">0.0%</span>
                                     </div>
                                 </div>
                             </div>
@@ -166,18 +230,18 @@
                     <div class="row g-4">
                         <div class="col-lg-6">
                             <div class="monitor-box p-4">
-                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                                    <h6 class="fw-bold m-0 text-dark">CPU History</h6>
-                                    <span class="text-muted small">Cập nhật mỗi 2s</span>
+                                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                                    <h6 class="fw-bold m-0 text-dark"><i class="bi bi-cpu text-primary me-2"></i>CPU History</h6>
+                                    <span class="badge bg-light text-secondary rounded-pill px-3 py-1 small">Cập nhật mỗi 2s</span>
                                 </div>
                                 <div class="chart-container-live"><canvas id="cpuChart"></canvas></div>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="monitor-box p-4">
-                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                                    <h6 class="fw-bold m-0 text-dark">Memory History</h6>
-                                    <span class="text-muted small">Cập nhật mỗi 2s</span>
+                                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                                    <h6 class="fw-bold m-0 text-dark"><i class="bi bi-memory text-success me-2"></i>Memory History</h6>
+                                    <span class="badge bg-light text-secondary rounded-pill px-3 py-1 small">Cập nhật mỗi 2s</span>
                                 </div>
                                 <div class="chart-container-live"><canvas id="ramChart"></canvas></div>
                             </div>
@@ -186,7 +250,7 @@
                 </div>
 
                 <div class="tab-pane fade" id="config">
-                    <div class="alert alert-light border shadow-sm d-flex align-items-center gap-3 mb-4">
+                    <div class="alert alert-light border shadow-sm d-flex align-items-center gap-3 mb-4 rounded-4">
                         <i class="bi bi-info-circle-fill fs-4 text-primary"></i>
                         <div>Các thông số dưới đây được lưu trực tiếp vào Database, không cần khởi động lại máy chủ khi thay đổi.</div>
                     </div>
@@ -217,8 +281,8 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold m-0"><i class="bi bi-card-list text-muted me-2"></i>200 Dòng nhật ký gần nhất</h6>
                         <div class="btn-group shadow-sm">
-                            <a href="?log=access#logs" class="btn btn-sm {% if log_type == 'access' %}btn-primary{% else %}btn-light border{% endif %} fw-medium">Access Log</a>
-                            <a href="?log=error#logs" class="btn btn-sm {% if log_type == 'error' %}btn-danger{% else %}btn-light border{% endif %} fw-medium">Error Log</a>
+                            <a href="?log=access#logs" class="btn btn-sm {% if log_type == 'access' %}btn-primary{% else %}btn-light border{% endif %} fw-medium px-3">Access Log</a>
+                            <a href="?log=error#logs" class="btn btn-sm {% if log_type == 'error' %}btn-danger{% else %}btn-light border{% endif %} fw-medium px-3">Error Log</a>
                         </div>
                     </div>
                     <div class="terminal-box" id="termBox">{{ log_content }}</div>
@@ -248,7 +312,7 @@ document.addEventListener("DOMContentLoaded", function() {
             y: { min: 0, max: 100, grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', font: {family: 'monospace'} } }, 
             x: { display: false } 
         },
-        elements: { point: { radius: 0 }, line: { borderWidth: 2 } } // Ẩn dấu chấm, làm nét đường
+        elements: { point: { radius: 0 }, line: { borderWidth: 2.5 } } // Ẩn dấu chấm, làm nét đường dày hơn chút
     };
     
     const maxPoints = 40; // Hiển thị 40 mốc thời gian trên màn hình
@@ -259,19 +323,19 @@ document.addEventListener("DOMContentLoaded", function() {
     // Khởi tạo Canvas CPU
     const cpuCtx = document.getElementById('cpuChart').getContext('2d');
     let cpuGradient = cpuCtx.createLinearGradient(0, 0, 0, 300);
-    cpuGradient.addColorStop(0, 'rgba(13, 110, 253, 0.4)');
-    cpuGradient.addColorStop(1, 'rgba(13, 110, 253, 0.0)');
+    cpuGradient.addColorStop(0, 'rgba(79, 70, 229, 0.3)');
+    cpuGradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
     
     const cpuChart = new Chart(cpuCtx, {
         type: 'line', 
-        data: { labels: emptyLabels, datasets: [{ data: cpuData, borderColor: '#0d6efd', backgroundColor: cpuGradient, fill: true, tension: 0.4 }] }, 
+        data: { labels: emptyLabels, datasets: [{ data: cpuData, borderColor: '#4f46e5', backgroundColor: cpuGradient, fill: true, tension: 0.4 }] }, 
         options: commonChartOpts
     });
 
     // Khởi tạo Canvas RAM
     const ramCtx = document.getElementById('ramChart').getContext('2d');
     let ramGradient = ramCtx.createLinearGradient(0, 0, 0, 300);
-    ramGradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+    ramGradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
     ramGradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
     const ramChart = new Chart(ramCtx, {
