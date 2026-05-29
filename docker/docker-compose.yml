@@ -88,25 +88,7 @@ services:
     profiles:
       - test
     restart: "no"
-  
-  ai-service:
-    build:
-      context: /media/haduckien/E/Studying/HK6/python_programming/ai_services
-      dockerfile: docker/Dockerfile
-    ports:
-      - "8082:8082"
-    volumes:
-      # 1. Đồng bộ code từ máy vào container để tự động nhận code mới khi bạn sửa (Hot-reload)
-      - /media/haduckien/E/Studying/HK6/python_programming/ai_services:/app
-      
-      # 2. Tạo Volume lưu Cache tải Model AI (như Hugging Face, Pip cache...) để tránh tải lại file nặng khi khởi động lại
-      - ai_models_cache:/root/.cache
-    
-    # Ghi đè command mặc định để thêm flag `--reload` cho FastAPI hoạt động mượt mà khi dev
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8082", "--reload"]
-    restart: unless-stopped
 
 volumes:
   mysql_data:
   redis_data:
-  ai_models_cache:
