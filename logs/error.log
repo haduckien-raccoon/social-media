@@ -3380,3 +3380,177 @@ Traceback (most recent call last):
   File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
     raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
 django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[29/05/2026 15:42:17] ERROR | middleware | EXCEPTION at /accounts/profile/18/ (IP: 127.0.0.1): Trang này không khả dụng hoặc người dùng không tồn tại.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 195, in profile_view
+    raise Http404("Trang này không khả dụng hoặc người dùng không tồn tại.")
+django.http.response.Http404: Trang này không khả dụng hoặc người dùng không tồn tại.
+[29/05/2026 15:42:21] ERROR | middleware | EXCEPTION at /accounts/profile/18/ (IP: 127.0.0.1): Trang này không khả dụng hoặc người dùng không tồn tại.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 195, in profile_view
+    raise Http404("Trang này không khả dụng hoặc người dùng không tồn tại.")
+django.http.response.Http404: Trang này không khả dụng hoặc người dùng không tồn tại.
+[29/05/2026 17:05:24] ERROR | middleware | EXCEPTION at /friends/suggestions/ (IP: 127.0.0.1): {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input '#': expected ',', 'GROUP BY', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FILTER', 'FINISH', 'FOR', 'FOREACH', 'INSERT', 'LET', 'LIMIT', 'MATCH', 'MERGE', 'NEXT', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SHOW', 'SKIP', 'TERMINATE', 'UNION', 'UNWIND', 'USE', 'WHERE', 'WITH' or <EOF> (line 65, column 5 (offset: 1939))
+"    # OPTIONAL MATCH (me)-[view:VIEWED_PROFILE]->(candidate)"
+     ^}
+neo4j.exceptions.GqlError: {gql_status: 42I06} {gql_status_description: error: syntax error or access rule violation - invalid input. Invalid input '#', expected: ',', 'GROUP BY', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FILTER', 'FINISH', 'FOR', 'FOREACH', 'INSERT', 'LET', 'LIMIT', 'MATCH', 'MERGE', 'NEXT', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SHOW', 'SKIP', 'TERMINATE', 'UNION', 'UNWIND', 'USE', 'WHERE', 'WITH' or <EOF>.} {message: 42I06: Invalid input '#', expected: ',', 'GROUP BY', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FILTER', 'FINISH', 'FOR', 'FOREACH', 'INSERT', 'LET', 'LIMIT', 'MATCH', 'MERGE', 'NEXT', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SHOW', 'SKIP', 'TERMINATE', 'UNION', 'UNWIND', 'USE', 'WHERE', 'WITH' or <EOF>.} {diagnostic_record: {'_classification': 'CLIENT_ERROR', '_position': {'offset': 1939, 'column': 5, 'line': 65}, 'OPERATION': '', 'OPERATION_CODE': '0', 'CURRENT_SCHEMA': '/'}} {raw_classification: CLIENT_ERROR}
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/friends/views.py", line 43, in all_suggestions_view
+    suggestions = get_friend_suggestions(request.user, limit=50) # Lấy nhiều hơn
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/friends/services.py", line 359, in get_friend_suggestions
+    return get_friend_suggestions_from_neo4j(user=user, limit=limit)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/friends/neo4j_recommendations.py", line 504, in get_friend_suggestions_from_neo4j
+    records = Neo4jClient.execute(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/friends/neo4j_client.py", line 21, in execute
+    records, _, _ = cls.driver().execute_query(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 978, in execute_query
+    return session._run_transaction(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/session.py", line 588, in _run_transaction
+    result = transaction_function(tx, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 1314, in _work
+    res = tx.run(query, parameters)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/transaction.py", line 206, in run
+    result._tx_ready_run(query, parameters)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 177, in _tx_ready_run
+    self._run(query, parameters, None, None, None, None, None, None)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 236, in _run
+    self._attach()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 430, in _attach
+    self._connection.fetch_message()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 193, in inner
+    func(*args, **kwargs)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt.py", line 863, in fetch_message
+    res = self._process_message(tag, fields)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt5.py", line 1208, in _process_message
+    response.on_failure(summary_metadata or {})
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 263, in on_failure
+    raise self._hydrate_error(metadata)
+neo4j.exceptions.CypherSyntaxError: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input '#': expected ',', 'GROUP BY', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FILTER', 'FINISH', 'FOR', 'FOREACH', 'INSERT', 'LET', 'LIMIT', 'MATCH', 'MERGE', 'NEXT', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SHOW', 'SKIP', 'TERMINATE', 'UNION', 'UNWIND', 'USE', 'WHERE', 'WITH' or <EOF> (line 65, column 5 (offset: 1939))
+"    # OPTIONAL MATCH (me)-[view:VIEWED_PROFILE]->(candidate)"
+     ^}
+[29/05/2026 17:05:24] ERROR | log | Internal Server Error: /friends/suggestions/
+neo4j.exceptions.GqlError: {gql_status: 42I06} {gql_status_description: error: syntax error or access rule violation - invalid input. Invalid input '#', expected: ',', 'GROUP BY', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FILTER', 'FINISH', 'FOR', 'FOREACH', 'INSERT', 'LET', 'LIMIT', 'MATCH', 'MERGE', 'NEXT', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SHOW', 'SKIP', 'TERMINATE', 'UNION', 'UNWIND', 'USE', 'WHERE', 'WITH' or <EOF>.} {message: 42I06: Invalid input '#', expected: ',', 'GROUP BY', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FILTER', 'FINISH', 'FOR', 'FOREACH', 'INSERT', 'LET', 'LIMIT', 'MATCH', 'MERGE', 'NEXT', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SHOW', 'SKIP', 'TERMINATE', 'UNION', 'UNWIND', 'USE', 'WHERE', 'WITH' or <EOF>.} {diagnostic_record: {'_classification': 'CLIENT_ERROR', '_position': {'offset': 1939, 'column': 5, 'line': 65}, 'OPERATION': '', 'OPERATION_CODE': '0', 'CURRENT_SCHEMA': '/'}} {raw_classification: CLIENT_ERROR}
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/friends/views.py", line 43, in all_suggestions_view
+    suggestions = get_friend_suggestions(request.user, limit=50) # Lấy nhiều hơn
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/friends/services.py", line 359, in get_friend_suggestions
+    return get_friend_suggestions_from_neo4j(user=user, limit=limit)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/friends/neo4j_recommendations.py", line 504, in get_friend_suggestions_from_neo4j
+    records = Neo4jClient.execute(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/friends/neo4j_client.py", line 21, in execute
+    records, _, _ = cls.driver().execute_query(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 978, in execute_query
+    return session._run_transaction(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/session.py", line 588, in _run_transaction
+    result = transaction_function(tx, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 1314, in _work
+    res = tx.run(query, parameters)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/transaction.py", line 206, in run
+    result._tx_ready_run(query, parameters)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 177, in _tx_ready_run
+    self._run(query, parameters, None, None, None, None, None, None)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 236, in _run
+    self._attach()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 430, in _attach
+    self._connection.fetch_message()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 193, in inner
+    func(*args, **kwargs)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt.py", line 863, in fetch_message
+    res = self._process_message(tag, fields)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt5.py", line 1208, in _process_message
+    response.on_failure(summary_metadata or {})
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 263, in on_failure
+    raise self._hydrate_error(metadata)
+neo4j.exceptions.CypherSyntaxError: {code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input '#': expected ',', 'GROUP BY', 'ORDER BY', 'CALL', 'CREATE', 'LOAD CSV', 'DELETE', 'DETACH', 'FILTER', 'FINISH', 'FOR', 'FOREACH', 'INSERT', 'LET', 'LIMIT', 'MATCH', 'MERGE', 'NEXT', 'NODETACH', 'OFFSET', 'OPTIONAL', 'REMOVE', 'RETURN', 'SET', 'SHOW', 'SKIP', 'TERMINATE', 'UNION', 'UNWIND', 'USE', 'WHERE', 'WITH' or <EOF> (line 65, column 5 (offset: 1939))
+"    # OPTIONAL MATCH (me)-[view:VIEWED_PROFILE]->(candidate)"
+     ^}
+[29/05/2026 17:05:24] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.131s | Path: /friends/suggestions/

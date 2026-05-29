@@ -236,7 +236,6 @@ def sync_profile_view_to_neo4j(search_history):
     query = """
     MATCH (u:User {id: $user_id})
     MATCH (target:User {id: $target_user_id})
-    MERGE (u)-[r:VIEWED_PROFILE]->(target)
     ON CREATE SET r.count = 1,
                   r.first_seen_at = datetime($created_at)
     ON MATCH SET r.count = coalesce(r.count, 0) + 1
@@ -252,89 +251,219 @@ def sync_profile_view_to_neo4j(search_history):
     )
 
 
-def get_friend_suggestions_from_neo4j(user: User, limit: int = 10) -> list[Neo4jSuggestedUser]:
-    """
-    Neo4j-only recommendation query.
+# def get_friend_suggestions_from_neo4j(user: User, limit: int = 10) -> list[Neo4jSuggestedUser]:
+#     """
+#     Neo4j-only recommendation query.
 
-    MySQL is NOT used for candidate search, mutual friends, pending request filtering,
-    block filtering, or scoring. The returned objects contain display data from Neo4j.
-    """
+#     MySQL is NOT used for candidate search, mutual friends, pending request filtering,
+#     block filtering, or scoring. The returned objects contain display data from Neo4j.
+#     """
 
-    # Ensure current user node exists even if initial sync was not run yet.
-    sync_user_to_neo4j(user)
+#     # Ensure current user node exists even if initial sync was not run yet.
+#     sync_user_to_neo4j(user)
 
+#     query = """
+#     MATCH (me:User {id: $user_id})
+
+#     CALL {
+#         WITH me
+#         MATCH (me)-[:FRIEND_WITH]-(mutual:User)-[:FRIEND_WITH]-(candidate:User)
+#         RETURN candidate
+
+#         UNION
+
+#         WITH me
+#         MATCH (me)-[:MEMBER_OF]->(:Group)<-[:MEMBER_OF]-(candidate:User)
+#         RETURN candidate
+
+#         UNION
+
+#         WITH me
+#         MATCH (me)-[:VIEWED_PROFILE]->(candidate:User)
+#         RETURN candidate
+
+#         UNION
+
+#         WITH me
+#         MATCH (candidate:User)
+#         WHERE me.school <> "" AND candidate.school = me.school
+#         RETURN candidate
+
+#         UNION
+
+#         WITH me
+#         MATCH (candidate:User)
+#         WHERE me.province <> "" AND candidate.province = me.province
+#         RETURN candidate
+#     }
+
+#     WITH DISTINCT me, candidate
+#     WHERE candidate.id <> me.id
+#       AND coalesce(candidate.is_active, false) = true
+#       AND coalesce(candidate.is_banned, false) = false
+#       AND NOT (me)-[:FRIEND_WITH]-(candidate)
+#       AND NOT (me)-[:SENT_REQUEST {status: "pending"}]->(candidate)
+#       AND NOT (candidate)-[:SENT_REQUEST {status: "pending"}]->(me)
+#       AND NOT (me)-[:BLOCKED]->(candidate)
+#       AND NOT (candidate)-[:BLOCKED]->(me)
+
+#     OPTIONAL MATCH (me)-[:FRIEND_WITH]-(mutual:User)-[:FRIEND_WITH]-(candidate)
+#     WITH me, candidate, count(DISTINCT mutual) AS mutual_count
+
+#     OPTIONAL MATCH (me)-[view:VIEWED_PROFILE]->(candidate)
+#     WITH me, candidate, mutual_count, coalesce(view.count, 0) AS profile_view_count
+
+#     OPTIONAL MATCH (me)-[:MEMBER_OF]->(g:Group)<-[:MEMBER_OF]-(candidate)
+#     WITH me, candidate, mutual_count, profile_view_count, count(DISTINCT g) AS common_group_count
+
+#     WITH candidate,
+#          mutual_count,
+#          profile_view_count,
+#          common_group_count,
+#          CASE WHEN me.school <> "" AND me.school = candidate.school THEN 1 ELSE 0 END AS same_school,
+#          CASE WHEN me.province <> "" AND me.province = candidate.province THEN 1 ELSE 0 END AS same_province
+
+#     WITH candidate,
+#          mutual_count,
+#          profile_view_count,
+#          common_group_count,
+#          same_school,
+#          same_province,
+#          mutual_count * 10
+#            + common_group_count * 3
+#            + profile_view_count * 2
+#            + same_school * 4
+#            + same_province * 2 AS score
+
+#     RETURN candidate.id AS id,
+#            candidate.username AS username,
+#            candidate.email AS email,
+#            candidate.full_name AS full_name,
+#            candidate.avatar AS avatar,
+#            candidate.school AS school,
+#            candidate.province AS province,
+#            candidate.town AS town,
+#            mutual_count,
+#            common_group_count,
+#            profile_view_count,
+#            same_school,
+#            same_province,
+#            score
+#     ORDER BY score DESC, mutual_count DESC, common_group_count DESC
+#     LIMIT $limit
+#     """
+
+#     records = Neo4jClient.execute(query, user_id=user.id, limit=int(limit or 10))
+
+#     return [
+#         Neo4jSuggestedUser(
+#             id=record["id"],
+#             username=record.get("username") or "",
+#             email=record.get("email") or "",
+#             full_name=record.get("full_name") or "",
+#             avatar=record.get("avatar") or "",
+#             school=record.get("school") or "",
+#             province=record.get("province") or "",
+#             town=record.get("town") or "",
+#             mutual_count=int(record.get("mutual_count") or 0),
+#             common_group_count=int(record.get("common_group_count") or 0),
+#             profile_view_count=int(record.get("profile_view_count") or 0),
+#             same_school=int(record.get("same_school") or 0),
+#             same_province=int(record.get("same_province") or 0),
+#             score=float(record.get("score") or 0),
+#             relation_status="none",
+#         )
+#         for record in records
+#     ]
+def get_friend_suggestions_from_neo4j(user, limit=10) -> list[Neo4jSuggestedUser]:
     query = """
     MATCH (me:User {id: $user_id})
 
-    CALL {
-        WITH me
+    CALL (me) {
+        // Nguồn 1: bạn của bạn
         MATCH (me)-[:FRIEND_WITH]-(mutual:User)-[:FRIEND_WITH]-(candidate:User)
-        RETURN candidate
+        RETURN candidate, 5 AS source_bonus
 
         UNION
 
-        WITH me
+        // Nguồn 2: cùng group
         MATCH (me)-[:MEMBER_OF]->(:Group)<-[:MEMBER_OF]-(candidate:User)
-        RETURN candidate
+        RETURN candidate, 3 AS source_bonus
 
         UNION
 
-        WITH me
-        MATCH (me)-[:VIEWED_PROFILE]->(candidate:User)
-        RETURN candidate
-
-        UNION
-
-        WITH me
+        // Nguồn 4: cùng trường
         MATCH (candidate:User)
-        WHERE me.school <> "" AND candidate.school = me.school
-        RETURN candidate
+        WHERE coalesce(me.school, "") <> ""
+          AND candidate.school = me.school
+        RETURN candidate, 1 AS source_bonus
 
         UNION
 
-        WITH me
+        // Nguồn 5: cùng tỉnh/thành
         MATCH (candidate:User)
-        WHERE me.province <> "" AND candidate.province = me.province
-        RETURN candidate
+        WHERE coalesce(me.province, "") <> ""
+          AND candidate.province = me.province
+        RETURN candidate, 1 AS source_bonus
+
+        UNION
+
+        // Nguồn 6: fallback cho admin/user mới
+        // Lấy tất cả user hợp lệ sơ bộ, sau đó lọc kỹ ở ngoài.
+        MATCH (candidate:User)
+        RETURN candidate, 0 AS source_bonus
     }
 
-    WITH DISTINCT me, candidate
+    WITH me, candidate, max(source_bonus) AS source_bonus
+
     WHERE candidate.id <> me.id
       AND coalesce(candidate.is_active, false) = true
       AND coalesce(candidate.is_banned, false) = false
+
+      // Không gợi ý người đã là bạn
       AND NOT (me)-[:FRIEND_WITH]-(candidate)
+
+      // Không gợi ý người đang có request pending 2 chiều
       AND NOT (me)-[:SENT_REQUEST {status: "pending"}]->(candidate)
       AND NOT (candidate)-[:SENT_REQUEST {status: "pending"}]->(me)
+
+      // Không gợi ý người bị block 2 chiều
       AND NOT (me)-[:BLOCKED]->(candidate)
       AND NOT (candidate)-[:BLOCKED]->(me)
 
     OPTIONAL MATCH (me)-[:FRIEND_WITH]-(mutual:User)-[:FRIEND_WITH]-(candidate)
-    WITH me, candidate, count(DISTINCT mutual) AS mutual_count
+    WITH me, candidate, source_bonus, count(DISTINCT mutual) AS mutual_count
 
-    OPTIONAL MATCH (me)-[view:VIEWED_PROFILE]->(candidate)
-    WITH me, candidate, mutual_count, coalesce(view.count, 0) AS profile_view_count
 
     OPTIONAL MATCH (me)-[:MEMBER_OF]->(g:Group)<-[:MEMBER_OF]-(candidate)
-    WITH me, candidate, mutual_count, profile_view_count, count(DISTINCT g) AS common_group_count
+    WITH me, candidate, source_bonus, mutual_count, count(DISTINCT g) AS common_group_count
 
     WITH candidate,
+         source_bonus,
          mutual_count,
-         profile_view_count,
          common_group_count,
-         CASE WHEN me.school <> "" AND me.school = candidate.school THEN 1 ELSE 0 END AS same_school,
-         CASE WHEN me.province <> "" AND me.province = candidate.province THEN 1 ELSE 0 END AS same_province
+         CASE
+            WHEN coalesce(me.school, "") <> ""
+             AND me.school = candidate.school
+            THEN 1 ELSE 0
+         END AS same_school,
+         CASE
+            WHEN coalesce(me.province, "") <> ""
+             AND me.province = candidate.province
+            THEN 1 ELSE 0
+         END AS same_province
 
     WITH candidate,
+         source_bonus,
          mutual_count,
-         profile_view_count,
          common_group_count,
          same_school,
          same_province,
          mutual_count * 10
            + common_group_count * 3
-           + profile_view_count * 2
            + same_school * 4
-           + same_province * 2 AS score
+           + same_province * 2
+           + source_bonus AS score
 
     RETURN candidate.id AS id,
            candidate.username AS username,
@@ -346,33 +475,23 @@ def get_friend_suggestions_from_neo4j(user: User, limit: int = 10) -> list[Neo4j
            candidate.town AS town,
            mutual_count,
            common_group_count,
-           profile_view_count,
            same_school,
            same_province,
+           source_bonus,
            score
-    ORDER BY score DESC, mutual_count DESC, common_group_count DESC
+    ORDER BY score DESC,
+             mutual_count DESC,
+             common_group_count DESC,
+             same_school DESC,
+             same_province DESC,
+             candidate.id ASC
     LIMIT $limit
     """
 
-    records = Neo4jClient.execute(query, user_id=user.id, limit=int(limit or 10))
+    records = Neo4jClient.execute(
+        query,
+        user_id=user.id,
+        limit=limit,
+    )
 
-    return [
-        Neo4jSuggestedUser(
-            id=record["id"],
-            username=record.get("username") or "",
-            email=record.get("email") or "",
-            full_name=record.get("full_name") or "",
-            avatar=record.get("avatar") or "",
-            school=record.get("school") or "",
-            province=record.get("province") or "",
-            town=record.get("town") or "",
-            mutual_count=int(record.get("mutual_count") or 0),
-            common_group_count=int(record.get("common_group_count") or 0),
-            profile_view_count=int(record.get("profile_view_count") or 0),
-            same_school=int(record.get("same_school") or 0),
-            same_province=int(record.get("same_province") or 0),
-            score=float(record.get("score") or 0),
-            relation_status="none",
-        )
-        for record in records
-    ]
+    return [record.data() for record in records]
