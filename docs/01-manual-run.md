@@ -37,11 +37,12 @@ CHANNEL_LAYER_BACKEND=redis
 ## 4. Migrate
 ```bash
 python manage.py migrate
+python manage.py sync_feed_neo4j (dong bo graph va mysql)
 ```
 
 ## 5. Chạy app
 ```bash
-uvicorn config.asgi:application --host 127.0.0.1 --port 8080
+uvicorn config.asgi:application --host 127.0.0.1 --port 8080 --workers 2
 ```
 
 Truy cập: `http://127.0.0.1:8080`

@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Case, When, IntegerField
 from django.core.exceptions import ValidationError
 from rest_framework import request
 from apps.posts.models import *
@@ -23,79 +23,100 @@ from .models import Post, PostReaction
 from apps.accounts.services import create_user_profile
 from apps.moderation.services import *
 from apps.moderation.models import *
+from apps.posts.neo4j_feed import (
+    get_recommended_feed_post_ids,
+    mark_feed_posts_seen,
+)
+from apps.groups.services import *
+MAX_CLIENT_SEEN_IDS = 200
+
+def _parse_seen_post_ids(raw_value):
+    if not raw_value:
+        return []
+
+    result = []
+    for value in str(raw_value).split(","):
+        try:
+            result.append(int(value))
+        except (TypeError, ValueError):
+            continue
+
+    return result
+
 
 def feed_view(request):
     """
-    Bảng tin cá nhân (Lazy Loading)
-    Đã fix logic chuẩn xác: 
-    - Không chung nhóm -> Không thấy bài nhóm.
-    - Không kết bạn -> Không thấy bài friends (nhưng vẫn thấy bài nhóm nếu chung nhóm).
+    Recommended feed using Neo4j for post ranking.
+
+    Neo4j:
+        - selects/ranks post IDs by graph relationships
+        - applies time decay, seen penalty, hashtag fatigue
+
+    MySQL:
+        - hydrates selected post IDs
+        - keeps existing template, annotations, prefetches, and lazy loading
     """
-    # 1. Lấy danh sách ID bạn bè
-    friends_ids = get_friend_ids(request.user)
+    page_number = int(request.GET.get("page", 1) or 1)
+    per_page = 5
 
-    # ==========================================
-    # LUỒNG 1: BÀI VIẾT CÁ NHÂN (Ngoài tường nhà)
-    # ==========================================
-    # Điều kiện: KHÔNG thuộc nhóm NÀO + Thỏa mãn quyền riêng tư
-    personal_posts_q = Q(group_context__isnull=True) & (
-        Q(privacy="public") | 
-        Q(privacy="friends", author__id__in=friends_ids) | 
-        Q(privacy="only_me", author=request.user)
+    seen_post_ids = _parse_seen_post_ids(
+        request.GET.get("seen_post_ids", "")
     )
 
-    # ==========================================
-    # LUỒNG 2: BÀI VIẾT NHÓM
-    # ==========================================
-    # Điều kiện: THUỘC nhóm + Đã duyệt + User đang xem là thành viên hợp lệ HOẶC chủ nhóm
-    # (Bỏ qua check bạn bè ở đây, vì đã chung nhóm là thấy bài)
-    group_posts_q = Q(
-        group_context__isnull=False,
-        group_context__is_deleted=False,
-        group_context__status="approved"
-    ) & (
-        Q(group_context__group__members__user=request.user, group_context__group__members__status="approved") |
-        Q(group_context__group__owner=request.user)
+    feed_result = get_recommended_feed_post_ids(
+        user=request.user,
+        page=page_number,
+        per_page=per_page,
+        seen_post_ids=seen_post_ids,
     )
 
-    # Gộp 2 luồng lại: Lấy bài cá nhân hợp lệ HOẶC bài nhóm hợp lệ
-    final_feed_filter = personal_posts_q | group_posts_q
+    post_ids = feed_result["post_ids"]
+    has_next = feed_result["has_next"]
 
-    # ==========================================
-    # KẾT HỢP QUERY TỔNG (1 QUERY DUY NHẤT)
-    # ==========================================
-    posts = (
-        Post.objects
-        .filter(is_deleted=False)
-        .filter(final_feed_filter)
-        .distinct()  # Bắt buộc có distinct() vì ta có JOIN với bảng GroupMember (Many-to-Many)
-        .select_related("author", "author__profile")
-        .prefetch_related(
-            "images", "files", "comments", "shared_post",
-            "hashtags", "tagged_users__user", "group_context__group",
-            "shared_post__original_post", "shared_post__original_post__author",
-            "shared_post__original_post__author__profile", "shared_post__original_post__images"
+    if not post_ids:
+        post_list = []
+    else:
+        preserved_order = Case(
+            *[
+                When(id=post_id, then=position)
+                for position, post_id in enumerate(post_ids)
+            ],
+            output_field=IntegerField(),
         )
-        .annotate(
-            reaction_count=Count("reactions", distinct=True),
-            comment_count=Count("comments", filter=Q(comments__is_deleted=False), distinct=True),
-            share_count=Count("shares", distinct=True),
+
+        posts = (
+            Post.objects
+            .filter(id__in=post_ids, is_deleted=False)
+            .select_related("author", "author__profile")
+            .prefetch_related(
+                "images",
+                "files",
+                "comments",
+                "shared_post",
+                "hashtags",
+                "tagged_users__user",
+                "group_context__group",
+                "shared_post__original_post",
+                "shared_post__original_post__author",
+                "shared_post__original_post__author__profile",
+                "shared_post__original_post__images",
+                "shared_post__original_post__files",
+            )
+            .annotate(
+                reaction_count=Count("reactions", distinct=True),
+                comment_count=Count(
+                    "comments",
+                    filter=Q(comments__is_deleted=False),
+                    distinct=True,
+                ),
+                share_count=Count("shares", distinct=True),
+                neo4j_order=preserved_order,
+            )
+            .order_by("neo4j_order")
         )
-        .order_by("-created_at")
-    )
 
-    # ==========================================
-    # CẮT NHỎ DỮ LIỆU (PAGINATION)
-    # ==========================================
-    paginator = Paginator(posts, 5) # Trả về 5 bài mỗi lần cuộn
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
+        post_list = list(posts)
 
-    post_list = list(page_obj.object_list)
-
-    # ==========================================
-    # XỬ LÝ REACTION CHO NGƯỜI DÙNG HIỆN TẠI
-    # ==========================================
     if post_list:
         my_reactions = (
             PostReaction.objects
@@ -106,33 +127,35 @@ def feed_view(request):
     else:
         my_reaction_map = {}
 
-    # Gán dữ liệu bổ sung
     for post in post_list:
         post.current_user_reaction = my_reaction_map.get(post.id)
         shares = list(post.shared_post.all())
         post.original_post_obj = shares[0].original_post if shares else None
 
-    # ==========================================
-    # TRẢ VỀ DỮ LIỆU (AJAX CHO LAZY LOAD HOẶC LOAD LẦN ĐẦU)
-    # ==========================================
-    if request.GET.get('ajax') == '1':
+    rendered_post_ids = [post.id for post in post_list]
+
+    if rendered_post_ids:
+        mark_feed_posts_seen(request.user.id, rendered_post_ids)
+
+    if request.GET.get("ajax") == "1":
         html = render_to_string(
-            "posts/partials/post_list_chunk.html", 
-            {"posts": post_list, "request": request}
+            "posts/partials/post_list_chunk.html",
+            {"posts": post_list, "request": request},
         )
         return JsonResponse({
             "html": html,
-            "has_next": page_obj.has_next() 
+            "has_next": has_next,
+            "post_ids": rendered_post_ids,
         })
 
     context = {
         "posts": post_list,
-        "has_next": page_obj.has_next(), 
+        "has_next": has_next,
         "profile": getattr(request.user, "profile", None),
+        "post_ids": rendered_post_ids,
     }
 
     return render(request, "posts/feed.html", context)
-
 
 def public_feed_view(request):
     """Bảng tin công khai"""
@@ -659,20 +682,117 @@ def report_view(request):
     custom_reason = request.POST.get("custom_reason", "")
     reporter = request.user
 
-    #in ra log để debug
-    print(f"[DEBUG] Report - Type: {target_type}, ID: {target_id}, Reason: {reason_id}, Custom: {custom_reason}, Reporter: {reporter}")
-
-    report_target(
-        user=reporter,
-        target_type=target_type,
-        target_id=target_id,
-        reason_id=reason_id,
-        custom_reason=custom_reason
-    )
-
+    if reason_id == "custom":
+        reason_id = ""
     
+    if target_type not in [ReportTargetType.POST, ReportTargetType.COMMENT]:
+        return JsonResponse({
+            "success": False,
+            "error": "Invalid target type"}, 
+            status=400)
+    try:
+        target_id_int = int(target_id)
+    except (TypeError, ValueError):
+        return JsonResponse({
+            "success": False,
+            "error": "Invalid target ID"}, 
+            status=400)
+    
+    target_post = None
+    target_comment = None
+    if target_type == ReportTargetType.POST:
+        target_post = Post.objects.filter(
+            id=target_id_int, is_deleted=False
+        ).first()
+        if not target_post:
+            return JsonResponse({
+                "success": False,
+                "error": "Post not found"}, 
+                status=404)
+    else:
+        tarrget_comment = Comment.objects.select_related("post".filter(
+            id=target_id_int, is_deleted=False,
+            post__is_deleted=False,
+        )).first()
+        if not tarrget_comment:
+            return JsonResponse({
+                "success": False,
+                "error": "Comment not found"}, 
+                status=404)
+        target_post = tarrget_comment.post
 
-    return JsonResponse({"success": True})
+    group_post = GroupPost.objects.select_related('group').filter(
+        post=target_post, is_deleted=False, status="approved"
+    ).first()
+
+    #Case 1: Nội dung thuộc group -> đẩy vào GroupReport để admin/owner nhóm xử lý.
+    if group_post:
+        reason_text = custom_reason
+        if reason_id:
+            reason_obj = ReportReason.objects.filter(id=reason_id).first()
+            if not reason_obj:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Report reason not found"}, 
+                    status=404)
+            reason_text = reason_obj.name
+            if custom_reason:
+                reason_text = f"{reason_obj.name}: {custom_reason}"
+        
+        if not reason_text:
+            return JsonResponse({
+                "success": False,
+                "error": "Reason is required"}, 
+                status=400)
+        
+        if target_type == ReportTargetType.POST:
+            success, message = GroupService.report_content(
+                group=group_post.group,
+                reporter=reporter,
+                reason=reason_text,
+                post_id=target_post.id,
+            )
+        else:
+            success, message = GroupService.report_content(
+                group=group_post.group,
+                reporter=reporter,
+                reason=reason_text,
+                comment_id=tarrget_comment.id,
+            )
+        
+        if not success:
+            return JsonResponse({
+                "success": False,
+                "scope": "group",
+                "error": message
+            }, status=400)
+        
+        return JsonResponse({
+            "success": True,
+            "scope": "group",
+            "message": "Content reported to group admins for review."
+        })
+    
+    #Case 2: Nội dung không thuộc group -> đẩy vào hệ thống report chung để đội ngũ moderation xử lý.
+    try:
+        report_target(
+            user=reporter,
+            target_type=target_type,
+            target_id=target_id_int,
+            reason_id=reason_id,
+            custom_reason=custom_reason
+        )
+    except ValidationError as e:
+        return JsonResponse({
+            "success": False,
+            "scope": "platform",
+            "error": str(e)
+        }, status=400)
+    return JsonResponse({
+        "success": True,        
+        "scope": "platform",
+        "message": "Content reported to moderation team for review."
+    })
 
 @require_POST
 def toggle_commenting_view(request, post_id):

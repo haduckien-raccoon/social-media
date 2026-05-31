@@ -1,7 +1,7 @@
 {% for post in posts %}
 {% with group_post=post.group_context.first tagged_list=post.tagged_users.all %}
 {% with tag_count=tagged_list|length %}
-<div class="post-card" id="post-{{ post.id }}">
+<div class="post-card" id="post-{{ post.id }}" data-post-id="{{ post.id }}">
     <div class="post-header">
         <a href="{% url 'accounts:profile-username' post.author.username %}">
             <img src="{{ post.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="p-avatar">

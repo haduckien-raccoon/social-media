@@ -12,6 +12,18 @@ from apps.friends.models import Friend
 from apps.posts.models import *
 from apps.notifications.services import create_notification
 from apps.moderation.services import *
+from apps.posts.neo4j_feed import (
+    sync_user_node,
+    sync_post_node,
+    sync_post_hashtags,
+    sync_tagged_users,
+    sync_post_reaction_edge,
+    delete_post_reaction_edge,
+    sync_comment_edge,
+    refresh_comment_interaction_edge,
+    sync_share_edge,
+    mark_post_deleted_in_neo4j,
+)
 
 # =====================================================
 # 1. WEBSOCKET HELPER - REALTIME BROADCAST
@@ -212,6 +224,11 @@ def create_post(
             link=f"/posts/{post.id}/",
         )
 
+    transaction.on_commit(lambda: sync_user_node(user))
+    transaction.on_commit(lambda: sync_post_node(post))
+    transaction.on_commit(lambda: sync_post_hashtags(post))
+    transaction.on_commit(lambda: sync_tagged_users(post))
+
     return post
 
 @transaction.atomic
@@ -325,6 +342,10 @@ def update_post(
         "content": post.content,
         "privacy": post.privacy
     })
+
+    transaction.on_commit(lambda: sync_post_node(post))
+    transaction.on_commit(lambda: sync_post_hashtags(post))
+    transaction.on_commit(lambda: sync_tagged_users(post))
     
     return post
 
@@ -338,6 +359,8 @@ def delete_post(user, post):
         "event": "post_deleted",
         "post_id": post.id
     })
+
+    transaction.on_commit(lambda: mark_post_deleted_in_neo4j(post.id))
 
 @transaction.atomic
 def share_post(user, post_to_share, caption="", privacy="public"):
@@ -363,7 +386,7 @@ def share_post(user, post_to_share, caption="", privacy="public"):
     )
 
     # 3. Ghi PostShare
-    PostShare.objects.create(
+    share = PostShare.objects.create(
         user=user,
         original_post=original_post,
         new_post=new_post,
@@ -390,6 +413,11 @@ def share_post(user, post_to_share, caption="", privacy="public"):
         "post_id": original_post.id,
         **post_stats,
     })
+
+    transaction.on_commit(lambda: sync_user_node(user))
+    transaction.on_commit(lambda: sync_post_node(new_post))
+    transaction.on_commit(lambda: sync_share_edge(share))
+    transaction.on_commit(lambda: sync_post_node(original_post))
 
     return new_post
 
@@ -488,6 +516,9 @@ def create_comment(user, post, content, parent=None, images=None, files=None):
             link=f"/posts/{post.id}/",
         )
 
+    transaction.on_commit(lambda: sync_comment_edge(comment))
+    transaction.on_commit(lambda: sync_post_node(post))
+
     return comment
 
 def update_comment(user, comment, content):
@@ -551,6 +582,20 @@ def delete_comment(user, comment):
         **post_stats,
     })
 
+    alive_comment_count = Comment.objects.filter(
+        user=user,
+        post_id=post_id,
+        is_deleted=False,
+    ).count()
+
+    transaction.on_commit(lambda: refresh_comment_interaction_edge(
+        user_id=user.id,
+        username=user.username,
+        post_id=post_id,
+        comment_count=alive_comment_count,
+    ))
+    transaction.on_commit(lambda: sync_post_node(comment.post))
+
 # =====================================================
 # 6. REACTION LOGIC (REALTIME)
 # =====================================================
@@ -568,20 +613,24 @@ def toggle_post_reaction(user, post, reaction_type):
         status = "added"
         current_type = reaction_type
 
+        reaction_for_sync = None
+
         if reaction:
             if reaction.reaction_type == reaction_type:
-                # Remove reaction
                 reaction.delete()
                 status = "removed"
                 current_type = None
             else:
-                # Change reaction type
                 reaction.reaction_type = reaction_type
                 reaction.save()
+                reaction_for_sync = reaction
                 status = "changed"
         else:
-            # Add new reaction
-            PostReaction.objects.create(user=user, post=post, reaction_type=reaction_type)
+            reaction_for_sync = PostReaction.objects.create(
+                user=user,
+                post=post,
+                reaction_type=reaction_type,
+            )
 
         # Đếm tổng reactions
         total_count = PostReaction.objects.filter(post=post).count()
@@ -591,6 +640,13 @@ def toggle_post_reaction(user, post, reaction_type):
         reaction_breakdown = {item['reaction_type']: item['count'] for item in reaction_counts}
 
     post_stats = _build_post_stats_payload(post, reaction_count=total_count)
+    
+    if current_type and reaction_for_sync:
+        transaction.on_commit(lambda: sync_post_reaction_edge(reaction_for_sync))
+    else:
+        transaction.on_commit(lambda: delete_post_reaction_edge(user.id, post.id))
+
+    transaction.on_commit(lambda: sync_post_node(post))
 
     # 🚀 REALTIME BROADCAST
     send_ws_message(f"post_{post.id}", "post_event", {
@@ -780,14 +836,39 @@ def un_tag_user(post, user):
     tag = PostTagUser.objects.filter(post=post, user=user)
     tag.delete()
 
+
+MAX_HASHTAGS_PER_POST = 5
+HASHTAG_TRAILING_PUNCT = ".,!?;:()[]{}\"'`"
+
+def normalize_hashtag_value(raw_tag):
+    tag = str(raw_tag or "").strip().lower().lstrip("#")
+    tag = tag.strip(HASHTAG_TRAILING_PUNCT)
+    return tag
+
+
 def add_hashtags(post, hashtags):
-    """Thêm hashtags cho bài viết"""
+    """Thêm hashtags cho bài viết, chống spam hashtag ở tầng MySQL."""
+    seen = set()
+    added_count = 0
+
     for raw_tag in hashtags:
-        tag = raw_tag.strip().lower().lstrip("#")
-        if not tag:
+        tag = normalize_hashtag_value(raw_tag)
+
+        if len(tag) < 2:
             continue
+
+        if tag in seen:
+            continue
+
+        seen.add(tag)
+
+        if added_count >= MAX_HASHTAGS_PER_POST:
+            break
+
         hashtag, _ = Hashtag.objects.get_or_create(tag=tag)
         PostHashtag.objects.get_or_create(post=post, hashtag=hashtag)
+
+        added_count += 1
 
 def remove_hashtags(post, hashtags):
     """Xóa hashtags khỏi bài viết"""
@@ -859,6 +940,3 @@ def get_user_posts(viewer, profile_user, friends_ids):
         else:
             post.image = post.images.first().image if post.images.exists() else None
     return posts
-
-
-

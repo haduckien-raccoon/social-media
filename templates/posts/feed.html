@@ -364,6 +364,74 @@
         }
     }
 
+    function renderRelativeTimeFromIso(isoString) {
+        if (!isoString) return '';
+
+        const createdAt = new Date(isoString);
+        if (Number.isNaN(createdAt.getTime())) {
+            return '';
+        }
+
+        const now = new Date();
+        const diffSeconds = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+
+        if (diffSeconds < 60) {
+            return 'Vừa xong';
+        }
+
+        const diffMinutes = Math.floor(diffSeconds / 60);
+        if (diffMinutes < 60) {
+            return `${diffMinutes} phút trước`;
+        }
+
+        const diffHours = Math.floor(diffMinutes / 60);
+        if (diffHours < 24) {
+            return `${diffHours} giờ trước`;
+        }
+
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays < 7) {
+            return `${diffDays} ngày trước`;
+        }
+
+        const diffWeeks = Math.floor(diffDays / 7);
+        if (diffWeeks < 4) {
+            return `${diffWeeks} tuần trước`;
+        }
+
+        const diffMonths = Math.floor(diffDays / 30);
+        if (diffMonths < 12) {
+            return `${diffMonths} tháng trước`;
+        }
+
+        const diffYears = Math.floor(diffDays / 365);
+        return `${diffYears} năm trước`;
+    }
+
+    function refreshRelativeTimes(root = document) {
+        root.querySelectorAll('.js-relative-time[data-time-iso]').forEach((el) => {
+            const iso = el.dataset.timeIso;
+            const text = renderRelativeTimeFromIso(iso);
+            if (text) {
+                el.innerText = text;
+            }
+        });
+    }
+
+    window.__relativeTimeRefresh = function () {
+        refreshRelativeTimes(document);
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        refreshRelativeTimes(document);
+
+        // Cứ mỗi 60 giây cập nhật lại:
+        // "Vừa xong" -> "1 phút trước" -> "2 phút trước"...
+        setInterval(() => {
+            refreshRelativeTimes(document);
+        }, 60000);
+    });
+
     function updateFeedPostStats(postId, stats = {}) {
         if (!Number.isFinite(postId) || postId <= 0) return;
 
@@ -453,9 +521,29 @@
     let currentPage = 1;
     let isRealtimeRefreshing = false;
     const feedContainer = document.getElementById('feed-post-container');
+
+    function getPostIdFromCard(card) {
+        if (!card) return null;
+
+        const dataPostId = Number(card.dataset.postId);
+        if (Number.isFinite(dataPostId) && dataPostId > 0) {
+            return dataPostId;
+        }
+
+        const fallbackId = Number((card.id || '').replace('post-', ''));
+        return Number.isFinite(fallbackId) && fallbackId > 0 ? fallbackId : null;
+    }
+
+    function getSeenPostIds() {
+        return Array.from(document.querySelectorAll('.post-card'))
+            .map(getPostIdFromCard)
+            .filter((postId) => Number.isFinite(postId) && postId > 0)
+            .join(',');
+    }
+
     const loadedPostIds = new Set(
-        Array.from(document.querySelectorAll('.post-card[id^="post-"]'))
-            .map((node) => Number(node.id.replace('post-', '')))
+        Array.from(document.querySelectorAll('.post-card'))
+            .map(getPostIdFromCard)
             .filter((postId) => Number.isFinite(postId) && postId > 0)
     );
 
@@ -465,10 +553,10 @@
         const fragment = document.createDocumentFragment();
         let addedCount = 0;
 
-        const cards = Array.from(wrapper.querySelectorAll('.post-card[id^="post-"]'));
+        const cards = Array.from(wrapper.querySelectorAll('.post-card'));
         cards.forEach((card) => {
-            const postId = Number(card.id.replace('post-', ''));
-            if (!Number.isFinite(postId) || postId <= 0 || loadedPostIds.has(postId)) return;
+            const postId = getPostIdFromCard(card);
+            if (!postId || loadedPostIds.has(postId)) return;
 
             loadedPostIds.add(postId);
             fragment.appendChild(card);
@@ -506,9 +594,10 @@
         isLoading = true;
         document.getElementById('feed-loading-spinner').style.display = 'block';
         currentPage++;
+
+        const seenPostIds = getSeenPostIds();
         
-        // Gửi yêu cầu AJAX kèm số trang
-        fetch(`?page=${currentPage}&ajax=1`, {
+        fetch(`?page=${currentPage}&ajax=1&seen_post_ids=${encodeURIComponent(seenPostIds)}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(response => response.json())
@@ -537,7 +626,9 @@
         if (isRealtimeRefreshing) return;
         isRealtimeRefreshing = true;
 
-        fetch(`?page=1&ajax=1`, {
+        const seenPostIds = getSeenPostIds();
+
+        fetch(`?page=1&ajax=1&seen_post_ids=${encodeURIComponent(seenPostIds)}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(response => response.json())

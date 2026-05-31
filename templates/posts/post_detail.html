@@ -41,15 +41,20 @@
     }
 
     .detail-container {
-        max-width: 700px;
+        /* Desktop detail view cố định rộng hơn để status ngắn/dài không làm card co lại. */
+        width: 980px;
+        max-width: calc(100vw - var(--sidebar-width) - 48px);
         margin: 24px auto;
         padding-bottom: 80px;
+        flex: 0 1 980px;
     }
 
     /* =========================================
        2. POST CARD & HEADER
        ========================================= */
     .fb-card {
+        width: 100%;
+        min-width: 0;
         background: var(--bg-card);
         border-radius: var(--radius-card);
         box-shadow: var(--shadow-card);
@@ -60,7 +65,7 @@
 
     /* Header */
     .post-header {
-        padding: 16px;
+        padding: 18px 22px 14px;
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
@@ -126,9 +131,12 @@
 
     /* Content */
     .post-content {
-        padding: 4px 16px 16px;
-        font-size: 16px; line-height: 1.5;
+        padding: 6px 22px 18px;
+        font-size: 17px;
+        line-height: 1.58;
         color: var(--text-main);
+        width: 100%;
+        word-break: break-word;
     }
 
     /* =========================================
@@ -174,7 +182,7 @@
        4. STATS & ACTIONS
        ========================================= */
     .post-stats {
-        padding: 10px 16px;
+        padding: 12px 22px;
         display: flex; justify-content: space-between;
         color: var(--text-sub); font-size: 14px;
         border-bottom: 1px solid var(--divider);
@@ -182,7 +190,7 @@
     .reaction-count { display: flex; align-items: center; gap: 4px; }
 
     .post-actions {
-        display: flex; padding: 4px 16px;
+        display: flex; padding: 6px 22px;
         border-bottom: 1px solid var(--divider);
     }
     .action-btn {
@@ -220,7 +228,7 @@
     /* =========================================
        5. COMMENTS SECTION
        ========================================= */
-    .comments-wrapper { padding: 12px 16px; background: #fff; }
+    .comments-wrapper { padding: 16px 22px 18px; background: #fff; }
 
     /* Input Area */
     .comment-input-area { display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-start; }
@@ -292,8 +300,91 @@
         position: absolute; right: -6px; bottom: -8px;
         background: #fff; border-radius: 12px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        padding: 2px 4px; display: flex; align-items: center; gap: 2px;
+        padding: 2px 5px; display: flex; align-items: center; gap: 3px;
         font-size: 11px; z-index: 2;
+        min-height: 20px;
+    }
+
+    .reaction-mini {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 10px;
+        line-height: 1;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.18);
+    }
+
+    .reaction-mini-like { background: #166fe5; }
+    .reaction-mini-love { background: #f33e58; }
+    .reaction-mini-haha,
+    .reaction-mini-wow,
+    .reaction-mini-sad { background: #f7b125; font-size: 12px; }
+    .reaction-mini-angry { background: #e9710f; font-size: 12px; }
+
+    .comment-thread-toggle-wrap {
+        margin: 6px 0 4px 42px;
+    }
+
+    .reply-toggle-btn {
+        border: none;
+        background: transparent;
+        color: var(--text-sub);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 6px;
+        border-radius: 999px;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    .reply-toggle-btn:hover {
+        background: var(--hover-bg);
+        color: var(--text-main);
+        text-decoration: underline;
+    }
+
+    .reply-toggle-icon {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #e4e6eb;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        transition: transform 0.2s ease;
+    }
+
+    .reply-toggle-btn.is-collapsed .reply-toggle-icon {
+        transform: rotate(-90deg);
+    }
+
+    .comment-hidden-by-thread {
+        display: none !important;
+    }
+
+    .comment-img-preview {
+        max-width: 220px;
+        max-height: 160px;
+        display: block;
+        margin-top: 8px;
+        border-radius: 10px;
+        object-fit: cover;
+        cursor: zoom-in;
+        border: 1px solid var(--divider);
+        transition: filter 0.2s, transform 0.2s;
+    }
+
+    .comment-img-preview:hover {
+        filter: brightness(0.95);
+        transform: scale(1.01);
     }
 
     /* =========================================
@@ -503,7 +594,13 @@
        ========================================= */
     @media (max-width: 768px) {
         .main-content { margin-left: 72px !important; padding: 16px 10px; }
-        .detail-container { max-width: 100%; margin: 12px auto; padding: 0 8px 60px; }
+        .detail-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 12px auto;
+            padding: 0 8px 60px;
+            flex: 1 1 auto;
+        }
         .fb-card { border-radius: 10px; }
         .post-header { padding: 12px; gap: 10px; }
         .post-content { padding: 6px 12px 12px; font-size: 15px; }
@@ -537,7 +634,11 @@
 
     @media (max-width: 480px) {
         .main-content { margin-left: 0 !important; padding: 12px 8px; }
-        .detail-container { padding: 0 4px 56px; }
+        .detail-container {
+            width: 100%;
+            max-width: 100%;
+            padding: 0 4px 56px;
+        }
         .post-header { flex-direction: column; align-items: flex-start; }
         .btn-options { align-self: flex-end; }
         .post-stats { gap: 4px; }
@@ -791,11 +892,11 @@
                 <button class="action-btn {% if post.current_user_reaction %}active-{{ post.current_user_reaction }}{% endif %}" 
                     id="main-like-btn" onclick="submitPostReaction()">
                     {% if post.current_user_reaction == 'like' %} <i class="fas fa-thumbs-up" style="background-color: #166fe5; color: #fff; border-radius: 50%; padding: 4px; font-size: 18px;"></i> Thích
-                    {% elif post.current_user_reaction == 'love' %} <i class="fas fa-heart"></i> Yêu thích
-                    {% elif post.current_user_reaction == 'haha' %} <i class="fas fa-laugh-squint"></i> Haha
-                    {% elif post.current_user_reaction == 'sad' %} <i class="fas fa-sad-tear"></i> Buồn
-                    {% elif post.current_user_reaction == 'wow' %} <i class="fas fa-surprise"></i> Wow
-                    {% elif post.current_user_reaction == 'angry' %} <i class="fas fa-angry"></i> Phẫn nộ
+                    {% elif post.current_user_reaction == 'love' %} <i class="fas fa-heart" style="background-color: #f33e58; color: #fff; border-radius: 50%; padding: 4px; font-size: 18px;"></i> Yêu thích
+                    {% elif post.current_user_reaction == 'haha' %} <i class="fas fa-laugh-squint" style="background-color: #f7b125; color: #fff; border-radius: 50%; padding: 4px; font-size: 18px;"></i> Haha
+                    {% elif post.current_user_reaction == 'sad' %} <i class="fas fa-sad-tear" style="background-color: #f7b125; color: #fff; border-radius: 50%; padding: 4px; font-size: 18px;"></i> Buồn
+                    {% elif post.current_user_reaction == 'wow' %} <i class="fas fa-surprise" style="background-color: #f7b125; color: #fff; border-radius: 50%; padding: 4px; font-size: 18px;"></i> Wow
+                    {% elif post.current_user_reaction == 'angry' %} <i class="fas fa-angry" style="background-color: #e9710f; color: #fff; border-radius: 50%; padding: 4px; font-size: 18px;"></i> Phẫn nộ
                     {% else %} <i class="far fa-thumbs-up"></i> Thích
                     {% endif %}
                 </button>
@@ -820,16 +921,17 @@
                             <label for="comment-files" style="margin:0; cursor: pointer; display: flex;"><i class="fas fa-camera"></i></label>
                             <i class="fas fa-paper-plane text-primary" onclick="submitComment({{ post.id }})"></i>
                         </div>
-                        <input type="file" id="comment-files" hidden multiple accept="image/*">
+                        <input type="file" id="comment-files" hidden multiple accept="image/*" onchange="previewCommentFiles(this, 'main-preview')">
                     </div>
-                    <div id="main-preview" style="padding: 8px 0 0 10px;"></div>
+                    <div id="main-preview" class="comment-file-preview"></div>
                 </div>
             </div>
 
             <div id="comments-list">
                 {% for comment in comments %}
-                    <div class="comment-item fade-in" id="comment-{{ comment.id }}" 
-                         data-level="{{ comment.level }}" 
+                    <div class="comment-item fade-in" id="comment-{{ comment.id }}"
+                         data-comment-id="{{ comment.id }}"
+                         data-level="{{ comment.level }}"
                          data-parent-id="{{ comment.parent_id|default:'' }}"
                          style="padding-left: {{ comment.index_px }}px;">
                          
@@ -837,7 +939,7 @@
                             {% if comment.level > 1 %}<div class="thread-line"></div>{% endif %}
                             
                             <a href="{% url 'accounts:profile-username' comment.user.username %}">
-                                <img src="https://ui-avatars.com/api/?name={{ comment.user.username }}&background=random" class="my-avatar" style="width: 32px; height: 32px;">
+                                <img src="{{ comment.user.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="my-avatar" style="width: 32px; height: 32px;">
                             </a>
                             
                             <div style="flex: 1;">
@@ -845,14 +947,32 @@
                                     <a href="{% url 'accounts:profile-username' comment.user.username %}" class="comment-author-name">{{ comment.user.username }}</a>
                                     <div class="comment-text-content">{{ comment.content }}</div>
                                     {% if comment.images.all %}
-                                        {% for img in comment.images.all %}<img src="{{ img.image.url }}" class="comment-img-preview" style="max-height: 120px; display: block; margin-top: 8px; border-radius: 8px;">{% endfor %}
+                                        {% for img in comment.images.all %}
+                                            <img src="{{ img.image.url }}"
+                                                 class="comment-img-preview"
+                                                 onclick="openImageLightboxFromSrc('{{ img.image.url|escapejs }}')"
+                                                 alt="Ảnh bình luận">
+                                        {% endfor %}
                                     {% endif %}
-                                    
-                                    <div class="cmt-reaction-badge" id="comment-badge-{{ comment.id }}" 
+
+                                    {% with badge_reaction=comment.top_reaction|default:comment.current_reaction|default:"like" %}
+                                    <div class="cmt-reaction-badge"
+                                         id="comment-badge-{{ comment.id }}"
+                                         data-reaction-type="{{ badge_reaction }}"
                                          style="display: {% if comment.likes_count > 0 %}flex{% else %}none{% endif %} !important;">
-                                        <i class="fas fa-thumbs-up text-primary" style="font-size: 10px;"></i>
+                                        <span id="comment-badge-icon-{{ comment.id }}"
+                                              class="reaction-mini reaction-mini-{{ badge_reaction }}"
+                                              aria-hidden="true">
+                                            {% if badge_reaction == 'love' %}❤
+                                            {% elif badge_reaction == 'haha' %}😆
+                                            {% elif badge_reaction == 'wow' %}😮
+                                            {% elif badge_reaction == 'sad' %}😢
+                                            {% elif badge_reaction == 'angry' %}😡
+                                            {% else %}<i class="fas fa-thumbs-up" style="font-size: 9px;"></i>{% endif %}
+                                        </span>
                                         <span id="comment-count-{{ comment.id }}" style="font-weight: 600;">{{ comment.likes_count }}</span>
                                     </div>
+                                    {% endwith %}
                                 </div>
                                 
                                 <div class="comment-meta">
@@ -889,14 +1009,37 @@
                                     {% endif %}
                                 </div>
 
+                                <div class="comment-thread-toggle-wrap">
+                                    <button type="button"
+                                            id="reply-toggle-{{ comment.id }}"
+                                            class="reply-toggle-btn d-none"
+                                            data-comment-id="{{ comment.id }}"
+                                            data-expanded="false"
+                                            onclick="toggleReplies({{ comment.id }})">
+                                        <span class="reply-toggle-icon"><i class="fas fa-chevron-down"></i></span>
+                                        <span id="reply-toggle-label-{{ comment.id }}">Xem phản hồi</span>
+                                    </button>
+                                </div>
+
                                 <div id="reply-form-{{ comment.id }}" class="mt-2 d-none fade-in" style="margin-top: 8px;">
-                                    <div class="d-flex align-items-center gap-2">
-                                         <img src="https://ui-avatars.com/api/?name={{ request.user.username }}" class="my-avatar" style="width: 24px; height: 24px;">
-                                         <div class="input-bubble" style="padding: 4px 12px; min-height: 32px;">
-                                            <input type="text" id="reply-input-{{ comment.id }}" placeholder="Viết phản hồi..." 
-                                                   style="font-size: 13px;"
-                                                   onkeydown="if(event.key === 'Enter') submitComment({{ post.id }}, {{ comment.id }})">
-                                         </div>
+                                    <div class="d-flex align-items-start gap-2">
+                                        <img src="{{ request.user.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="my-avatar reply-avatar">
+                                        <div class="reply-input-wrap">
+                                            <div class="input-bubble reply-input-bubble">
+                                                <input type="text" id="reply-input-{{ comment.id }}" placeholder="Viết phản hồi..."
+                                                       style="font-size: 13px;"
+                                                       onkeydown="if(event.key === 'Enter') submitComment({{ post.id }}, {{ comment.id }})">
+                                                <div class="input-actions">
+                                                    <label for="reply-files-{{ comment.id }}" style="margin:0; cursor: pointer; display: flex;">
+                                                        <i class="fas fa-camera"></i>
+                                                    </label>
+                                                    <i class="fas fa-paper-plane text-primary" onclick="submitComment({{ post.id }}, {{ comment.id }})"></i>
+                                                </div>
+                                                <input type="file" id="reply-files-{{ comment.id }}" hidden multiple accept="image/*"
+                                                       onchange="previewCommentFiles(this, 'reply-preview-{{ comment.id }}')">
+                                            </div>
+                                            <div id="reply-preview-{{ comment.id }}" class="comment-file-preview"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -950,6 +1093,9 @@
             <span class="close-btn" onclick="closeReportModal()">&times;</span>
         </div>
         <div class="modal-body">
+            <p id="report-destination-help"
+               class="text-muted small mb-2"
+               style="color:var(--text-sub); margin-bottom:8px;"></p>
             <p class="text-muted small mb-3" style="color:var(--text-sub); margin-bottom:12px;">Vui lòng chọn vấn đề bạn đang gặp phải:</p>
             <form id="reportForm" onsubmit="submitReport(event)">
                 <input type="hidden" id="report_target_type" name="target_type">
@@ -1005,6 +1151,7 @@
     ];
     const POST_ID = "{{ post.id }}";
     const CURRENT_USER_ID = Number("{{ request.user.id|default_if_none:'0' }}") || 0;
+    const REPORT_DESTINATION_TEXT = "{% if group_post %}Báo cáo này sẽ được gửi tới quản trị viên nhóm {{ group_post.group.name|escapejs }}.{% else %}Báo cáo này sẽ được gửi tới quản trị viên hệ thống.{% endif %}";
     
     // CSRF Helper
     const getCookie = (name) => {
@@ -1065,6 +1212,7 @@
     function openReportModal(targetType, targetId) {
         const modal = document.getElementById('reportModal');
         const titleSpan = document.getElementById('report-modal-title');
+        const destinationHelp = document.getElementById('report-destination-help');
         
         document.getElementById('report_target_type').value = targetType;
         document.getElementById('report_target_id').value = targetId;
@@ -1073,6 +1221,8 @@
 
         if (targetType === 'comment') titleSpan.innerText = "Báo cáo bình luận";
         else titleSpan.innerText = "Báo cáo bài viết";
+
+        if (destinationHelp) destinationHelp.innerText = REPORT_DESTINATION_TEXT;
 
         modal.style.display = 'flex';
     }
@@ -1105,15 +1255,24 @@
         if (reasonRadio.value !== 'custom') formData.append('reason', reasonRadio.value);
         formData.append('custom_reason', customReason);
 
-        fetch("{% url 'posts:report_post' %}", { 
+        fetch("{% url 'posts:report_post' %}", {
             method: 'POST', headers: { 'X-CSRFToken': csrftoken }, body: formData
-        }).then(res => res.json()).then(data => {
+        })
+        .then(async (res) => {
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw data;
+            return data;
+        })
+        .then(data => {
             if (data.success) {
                 closeReportModal();
-                showToast("Đã gửi báo cáo thành công.");
+                showToast(data.message || "Đã gửi báo cáo thành công.");
             } else {
                 alert("Lỗi: " + (data.error || "Không thể gửi báo cáo."));
             }
+        })
+        .catch(data => {
+            alert("Lỗi: " + (data.error || "Không thể gửi báo cáo."));
         });
     }
 
@@ -1199,6 +1358,19 @@
         }
     }
 
+    const REACTION_META = {
+        like: { label: 'Thích', badge: '<i class="fas fa-thumbs-up" style="font-size: 9px;"></i>', icon: 'thumbs-up' },
+        love: { label: 'Yêu thích', badge: '❤', icon: 'heart' },
+        haha: { label: 'Haha', badge: '😆', icon: 'laugh-squint' },
+        wow: { label: 'Wow', badge: '😮', icon: 'surprise' },
+        sad: { label: 'Buồn', badge: '😢', icon: 'sad-tear' },
+        angry: { label: 'Phẫn nộ', badge: '😡', icon: 'angry' }
+    };
+
+    function normalizeReactionType(type) {
+        return REACTION_META[type] ? type : 'like';
+    }
+
     function submitCommentReaction(commentId, type) {
         const btn = document.getElementById(`btn-comment-txt-${commentId}`);
         const selectedType = resolveReactionType(btn, 'text-', type);
@@ -1208,55 +1380,89 @@
             headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `reaction=${encodeURIComponent(selectedType)}`
         }).then(res => res.json()).then(data => {
-            updateCommentReactionUI(commentId, data.status === 'removed' ? null : selectedType, data.count);
+            const nextType = data.status === 'removed' ? null : selectedType;
+            updateCommentReactionUI(commentId, nextType, data.count, data.top_reaction || nextType || data.reaction_type);
         });
     }
 
-    function updateCommentReactionCount(commentId, count) {
+    function updateCommentReactionCount(commentId, count, reactionType = null) {
         const badge = document.getElementById(`comment-badge-${commentId}`);
         const cnt = document.getElementById(`comment-count-${commentId}`);
-        if(cnt) cnt.innerText = count;
-        if(badge) badge.style.display = count > 0 ? 'flex' : 'none';
+        const icon = document.getElementById(`comment-badge-icon-${commentId}`);
+        const reactionCount = Number(count) || 0;
+
+        if (cnt) cnt.innerText = reactionCount;
+        if (badge) badge.style.display = reactionCount > 0 ? 'flex' : 'none';
+
+        if (reactionCount <= 0) return;
+
+        const type = normalizeReactionType(reactionType || badge?.dataset.reactionType || 'like');
+
+        if (badge) badge.dataset.reactionType = type;
+        if (icon) {
+            icon.className = `reaction-mini reaction-mini-${type}`;
+            icon.innerHTML = REACTION_META[type].badge;
+            icon.title = REACTION_META[type].label;
+        }
     }
 
-    function updateCommentReactionUI(commentId, type, count) {
+    function updateCommentReactionUI(commentId, type, count, badgeReactionType = null) {
         const btn = document.getElementById(`btn-comment-txt-${commentId}`);
-        if(btn) {
+        if (btn) {
             btn.className = 'meta-action';
-            const map = { 'like':'Thích', 'love':'Yêu thích', 'haha':'Haha', 'wow':'Wow', 'sad':'Buồn', 'angry':'Phẫn nộ' };
-            if(!type) btn.innerText = 'Thích';
-            else { btn.classList.add(`text-${type}`); btn.innerText = map[type]; }
+            if (!type) {
+                btn.innerText = 'Thích';
+            } else {
+                const safeType = normalizeReactionType(type);
+                btn.classList.add(`text-${safeType}`);
+                btn.innerText = REACTION_META[safeType].label;
+            }
         }
-        updateCommentReactionCount(commentId, count);
+
+        updateCommentReactionCount(commentId, count, badgeReactionType || type);
     }
 
     window.submitComment = function(postId, parentId = null) {
         const inputId = parentId ? `reply-input-${parentId}` : 'main-comment-input';
+        const fileInputId = parentId ? `reply-files-${parentId}` : 'comment-files';
+        const previewId = parentId ? `reply-preview-${parentId}` : 'main-preview';
+
         const input = document.getElementById(inputId);
+        const fileInput = document.getElementById(fileInputId);
+        if (!input) return;
+
         const content = input.value.trim();
-        const fileInput = document.getElementById('comment-files');
-        
-        if (!content && (!fileInput || fileInput.files.length === 0)) return;
-        
-        let formData = new FormData();
+        const files = fileInput ? Array.from(fileInput.files || []) : [];
+        if (!content && files.length === 0) return;
+
+        const formData = new FormData();
         formData.append('content', content);
         if (parentId) formData.append('parent_id', parentId);
-        if (!parentId && fileInput && fileInput.files.length > 0) {
-            Array.from(fileInput.files).forEach(f => formData.append('images', f));
-        }
-        
+        files.forEach((file) => formData.append('images', file));
+
         fetch(`/posts/${postId}/comment/`, {
-            method: 'POST', headers: { 'X-CSRFToken': csrftoken }, body: formData
-        }).then(res => res.json()).then(data => {
-            if(data.status === 'ok') {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'ok') {
                 input.value = '';
-                if(parentId) document.getElementById(`reply-form-${parentId}`).classList.add('d-none');
-                else { 
-                    document.getElementById('main-preview').innerHTML = ''; 
-                    fileInput.value = ''; 
+                if (fileInput) fileInput.value = '';
+
+                const preview = document.getElementById(previewId);
+                if (preview) preview.innerHTML = '';
+
+                if (parentId) {
+                    const replyForm = document.getElementById(`reply-form-${parentId}`);
+                    if (replyForm) replyForm.classList.add('d-none');
                 }
+            } else {
+                alert(data.error || 'Có lỗi xảy ra khi gửi bình luận.');
             }
-        });
+        })
+        .catch(() => alert('Có lỗi xảy ra khi gửi bình luận.'));
     };
 
     window.deleteComment = function(id) {
@@ -1266,17 +1472,140 @@
     window.showReplyForm = function(id) {
         document.querySelectorAll('[id^="reply-form-"]').forEach(el => el.classList.add('d-none'));
         const form = document.getElementById(`reply-form-${id}`);
+        if (!form) return;
+
+        const ownerComment = document.getElementById(`comment-${id}`);
+        if (ownerComment?.classList.contains('comment-hidden-by-thread')) {
+            expandAncestors(id);
+        }
+
         form.classList.remove('d-none');
-        setTimeout(() => form.querySelector('input').focus(), 100);
+        setTimeout(() => form.querySelector('input')?.focus(), 100);
     };
-    
-    document.getElementById('comment-files').onchange = (e) => {
-        const box = document.getElementById('main-preview'); box.innerHTML = '';
-        Array.from(e.target.files).forEach(f => {
-            const img = document.createElement('img'); img.src = URL.createObjectURL(f);
-            img.style.height = '60px'; img.style.borderRadius = '8px'; img.style.marginRight = '5px'; box.appendChild(img);
+
+    window.previewCommentFiles = function(fileInput, previewBoxId) {
+        const box = document.getElementById(previewBoxId);
+        if (!box || !fileInput) return;
+        box.innerHTML = '';
+
+        Array.from(fileInput.files || []).forEach((file) => {
+            if (file.type && file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.className = 'comment-preview-img';
+                img.onload = () => URL.revokeObjectURL(img.src);
+                box.appendChild(img);
+                return;
+            }
+
+            const item = document.createElement('div');
+            item.className = 'comment-preview-file';
+            item.innerHTML = `<i class="fas fa-file"></i><span></span>`;
+            item.querySelector('span').textContent = file.name;
+            box.appendChild(item);
+        });
+    };
+
+    function getCommentItem(commentId) {
+        return document.getElementById(`comment-${commentId}`);
+    }
+
+    function getDirectReplyItems(commentId) {
+        return Array.from(document.querySelectorAll('.comment-item'))
+            .filter((item) => String(item.dataset.parentId || '') === String(commentId));
+    }
+
+    function getDescendantReplyItems(commentId) {
+        const descendants = [];
+        const walk = (parentId) => {
+            getDirectReplyItems(parentId).forEach((child) => {
+                descendants.push(child);
+                walk(child.dataset.commentId);
+            });
+        };
+        walk(commentId);
+        return descendants;
+    }
+
+    function countDescendantReplies(commentId) {
+        return getDescendantReplyItems(commentId).length;
+    }
+
+    function setReplyToggleState(commentId, expanded) {
+        const btn = document.getElementById(`reply-toggle-${commentId}`);
+        const label = document.getElementById(`reply-toggle-label-${commentId}`);
+        if (!btn || !label) return;
+
+        const count = countDescendantReplies(commentId);
+        btn.dataset.expanded = expanded ? 'true' : 'false';
+        btn.classList.toggle('is-collapsed', !expanded);
+        label.textContent = expanded ? `Ẩn ${count} phản hồi` : `Xem ${count} phản hồi`;
+    }
+
+    function setRepliesCollapsed(commentId) {
+        getDescendantReplyItems(commentId).forEach((item) => {
+            item.classList.add('comment-hidden-by-thread');
+        });
+        setReplyToggleState(commentId, false);
+    }
+
+    function setRepliesExpanded(commentId) {
+        getDirectReplyItems(commentId).forEach((child) => {
+            child.classList.remove('comment-hidden-by-thread');
+
+            const childId = child.dataset.commentId;
+            const childToggle = document.getElementById(`reply-toggle-${childId}`);
+            const childIsExpanded = childToggle && childToggle.dataset.expanded === 'true';
+
+            if (childIsExpanded) {
+                setRepliesExpanded(childId);
+            } else {
+                getDescendantReplyItems(childId).forEach((descendant) => {
+                    descendant.classList.add('comment-hidden-by-thread');
+                });
+            }
+        });
+
+        setReplyToggleState(commentId, true);
+    }
+
+    window.toggleReplies = function(commentId) {
+        const btn = document.getElementById(`reply-toggle-${commentId}`);
+        if (!btn) return;
+
+        const expanded = btn.dataset.expanded === 'true';
+        if (expanded) {
+            setRepliesCollapsed(commentId);
+        } else {
+            setRepliesExpanded(commentId);
+        }
+    };
+
+    function expandAncestors(commentId) {
+        let current = getCommentItem(commentId);
+
+        while (current && current.dataset.parentId) {
+            const parentId = current.dataset.parentId;
+            setRepliesExpanded(parentId);
+            current = getCommentItem(parentId);
+        }
+    }
+
+    function initCommentThreadToggles() {
+        document.querySelectorAll('.comment-item[data-comment-id]').forEach((item) => {
+            const commentId = item.dataset.commentId;
+            const btn = document.getElementById(`reply-toggle-${commentId}`);
+            const directReplies = getDirectReplyItems(commentId);
+
+            if (!btn || directReplies.length === 0) return;
+
+            btn.classList.remove('d-none');
+            setRepliesCollapsed(commentId);
         });
     }
+
+    document.addEventListener('DOMContentLoaded', initCommentThreadToggles);
+
 
     // Websocket & Lightbox Logic (như cũ)
     const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
@@ -1304,11 +1633,16 @@
                 updateReactionUI(data.status === 'removed' ? null : data.reaction_type, data.total_count);
             }
         } else if (data.event === 'comment_reaction') {
-            updateCommentReactionCount(data.comment_id, data.count);
+            updateCommentReactionCount(data.comment_id, data.count, data.top_reaction || data.reaction_type);
 
             // Chỉ cập nhật text reaction cá nhân khi event thuộc user hiện tại
             if (Number(data.user_id) === CURRENT_USER_ID) {
-                updateCommentReactionUI(data.comment_id, data.status === 'removed' ? null : data.reaction_type, data.count);
+                updateCommentReactionUI(
+                    data.comment_id,
+                    data.status === 'removed' ? null : data.reaction_type,
+                    data.count,
+                    data.top_reaction || data.reaction_type
+                );
             }
         } else if (data.event === 'share_updated') {
             updatePostStatsRealtime({
@@ -1329,48 +1663,76 @@
     ]; {% endcomment %}
 
     let currentImgIndex = 0;
+    let currentLightboxImages = ALL_POST_IMAGES;
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxPrev = document.querySelector('.nav-prev');
+    const lightboxNext = document.querySelector('.nav-next');
 
-    // Mở Lightbox
-    function openLightbox(index) { 
-        if(ALL_POST_IMAGES.length === 0) return; 
-        currentImgIndex = index; 
-        updateLightboxImage(); 
-        
-        lightbox.classList.add('show'); // Dùng class để kích hoạt CSS flex/opacity
-        document.body.style.overflow = 'hidden'; // Chặn cuộn trang web
+    function updateLightboxNavVisibility() {
+        const visible = currentLightboxImages.length > 1 ? 'flex' : 'none';
+        if (lightboxPrev) lightboxPrev.style.display = visible;
+        if (lightboxNext) lightboxNext.style.display = visible;
+    }
+
+    // Mở Lightbox cho ảnh bài viết
+    function openLightbox(index, images = ALL_POST_IMAGES) {
+        currentLightboxImages = Array.isArray(images) && images.length ? images : ALL_POST_IMAGES;
+        if (currentLightboxImages.length === 0) return;
+
+        currentImgIndex = Number(index) || 0;
+        if (currentImgIndex < 0 || currentImgIndex >= currentLightboxImages.length) currentImgIndex = 0;
+
+        updateLightboxImage();
+        updateLightboxNavVisibility();
+
+        lightbox.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Mở Lightbox cho ảnh bình luận
+    function openImageLightboxFromSrc(src) {
+        if (!src) return;
+        currentLightboxImages = [src];
+        currentImgIndex = 0;
+
+        updateLightboxImage();
+        updateLightboxNavVisibility();
+
+        lightbox.classList.add('show');
+        document.body.style.overflow = 'hidden';
     }
 
     // Đóng Lightbox
-    function closeLightbox(e) { 
-        // Nếu event được truyền vào (từ click), đảm bảo không đóng khi click vào ảnh/nút
+    function closeLightbox(e) {
         if (e && e.target !== lightbox && !e.target.classList.contains('lightbox-close')) return;
-        
-        lightbox.classList.remove('show'); 
-        document.body.style.overflow = 'auto'; // Cho phép cuộn lại
+
+        lightbox.classList.remove('show');
+        document.body.style.overflow = 'auto';
     }
 
     // Chuyển ảnh
     function changeImg(step, e) {
-        if(e) e.stopPropagation(); // Ngăn sự kiện click lan ra ngoài làm đóng lightbox
-        
+        if (e) e.stopPropagation();
+        if (!currentLightboxImages.length) return;
+
         currentImgIndex += step;
-        
-        // Logic vòng lặp (Cuối về đầu, Đầu về cuối)
-        if (currentImgIndex >= ALL_POST_IMAGES.length) {
+
+        if (currentImgIndex >= currentLightboxImages.length) {
             currentImgIndex = 0;
         } else if (currentImgIndex < 0) {
-            currentImgIndex = ALL_POST_IMAGES.length - 1;
+            currentImgIndex = currentLightboxImages.length - 1;
         }
-        
+
         updateLightboxImage();
     }
 
     // Cập nhật src cho ảnh
-    function updateLightboxImage() { 
-        lightboxImg.style.opacity = '0.5'; // Hiệu ứng mờ nhẹ khi chuyển
-        lightboxImg.src = ALL_POST_IMAGES[currentImgIndex];
+    function updateLightboxImage() {
+        if (!lightboxImg || !currentLightboxImages.length) return;
+
+        lightboxImg.style.opacity = '0.5';
+        lightboxImg.src = currentLightboxImages[currentImgIndex];
         setTimeout(() => lightboxImg.style.opacity = '1', 150);
     }
 
@@ -1400,4 +1762,3 @@
 </div>
 {% endif %}
 {% endblock %}
-

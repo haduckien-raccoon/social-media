@@ -3554,3 +3554,1791 @@ neo4j.exceptions.CypherSyntaxError: {code: Neo.ClientError.Statement.SyntaxError
 "    # OPTIONAL MATCH (me)-[view:VIEWED_PROFILE]->(candidate)"
      ^}
 [29/05/2026 17:05:24] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.131s | Path: /friends/suggestions/
+[31/05/2026 00:22:55] ERROR | middleware | EXCEPTION at / (IP: 127.0.0.1): {code: Neo.ClientError.Statement.SyntaxError} {message: Unknown function 'duration.inHours' (line 110, column 10 (offset: 4055))
+"         duration.inHours(coalesce(post.created_at, datetime()), datetime()).hours AS age_hours"
+          ^}
+neo4j.exceptions.GqlError: {gql_status: 42N48} {gql_status_description: error: syntax error or access rule violation - no such function. The function duration.inHours() was not found. Verify that the spelling is correct.} {message: 42N48: The function duration.inHours() was not found. Verify that the spelling is correct.} {diagnostic_record: {'_classification': 'CLIENT_ERROR', '_position': {'line': 110, 'offset': 4055, 'column': 10}, 'OPERATION': '', 'OPERATION_CODE': '0', 'CURRENT_SCHEMA': '/'}} {raw_classification: CLIENT_ERROR}
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 152, in feed_view
+    feed_result = get_recommended_feed_post_ids(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 573, in get_recommended_feed_post_ids
+    records = Neo4jFeedClient.execute(query, user_id=user.id, skip=skip, limit=limit)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 37, in execute
+    records, summary, keys = cls.driver().execute_query(
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 978, in execute_query
+    return session._run_transaction(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/session.py", line 588, in _run_transaction
+    result = transaction_function(tx, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 1314, in _work
+    res = tx.run(query, parameters)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/transaction.py", line 206, in run
+    result._tx_ready_run(query, parameters)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 177, in _tx_ready_run
+    self._run(query, parameters, None, None, None, None, None, None)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 236, in _run
+    self._attach()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 430, in _attach
+    self._connection.fetch_message()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 193, in inner
+    func(*args, **kwargs)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt.py", line 863, in fetch_message
+    res = self._process_message(tag, fields)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt5.py", line 1208, in _process_message
+    response.on_failure(summary_metadata or {})
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 263, in on_failure
+    raise self._hydrate_error(metadata)
+neo4j.exceptions.CypherSyntaxError: {code: Neo.ClientError.Statement.SyntaxError} {message: Unknown function 'duration.inHours' (line 110, column 10 (offset: 4055))
+"         duration.inHours(coalesce(post.created_at, datetime()), datetime()).hours AS age_hours"
+          ^}
+[31/05/2026 00:22:55] ERROR | log | Internal Server Error: /
+neo4j.exceptions.GqlError: {gql_status: 42N48} {gql_status_description: error: syntax error or access rule violation - no such function. The function duration.inHours() was not found. Verify that the spelling is correct.} {message: 42N48: The function duration.inHours() was not found. Verify that the spelling is correct.} {diagnostic_record: {'_classification': 'CLIENT_ERROR', '_position': {'line': 110, 'offset': 4055, 'column': 10}, 'OPERATION': '', 'OPERATION_CODE': '0', 'CURRENT_SCHEMA': '/'}} {raw_classification: CLIENT_ERROR}
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 152, in feed_view
+    feed_result = get_recommended_feed_post_ids(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 573, in get_recommended_feed_post_ids
+    records = Neo4jFeedClient.execute(query, user_id=user.id, skip=skip, limit=limit)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 37, in execute
+    records, summary, keys = cls.driver().execute_query(
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 978, in execute_query
+    return session._run_transaction(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/session.py", line 588, in _run_transaction
+    result = transaction_function(tx, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 1314, in _work
+    res = tx.run(query, parameters)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/transaction.py", line 206, in run
+    result._tx_ready_run(query, parameters)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 177, in _tx_ready_run
+    self._run(query, parameters, None, None, None, None, None, None)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 236, in _run
+    self._attach()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 430, in _attach
+    self._connection.fetch_message()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 193, in inner
+    func(*args, **kwargs)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt.py", line 863, in fetch_message
+    res = self._process_message(tag, fields)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt5.py", line 1208, in _process_message
+    response.on_failure(summary_metadata or {})
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 263, in on_failure
+    raise self._hydrate_error(metadata)
+neo4j.exceptions.CypherSyntaxError: {code: Neo.ClientError.Statement.SyntaxError} {message: Unknown function 'duration.inHours' (line 110, column 10 (offset: 4055))
+"         duration.inHours(coalesce(post.created_at, datetime()), datetime()).hours AS age_hours"
+          ^}
+[31/05/2026 00:22:55] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.638s | Path: /
+[31/05/2026 00:26:01] ERROR | middleware | EXCEPTION at / (IP: 127.0.0.1): name 'Case' is not defined
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 164, in feed_view
+    preserved_order = Case(
+                      ^^^^
+NameError: name 'Case' is not defined
+[31/05/2026 00:26:01] ERROR | log | Internal Server Error: /
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 164, in feed_view
+    preserved_order = Case(
+                      ^^^^
+NameError: name 'Case' is not defined
+[31/05/2026 00:26:01] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 1.969s | Path: /
+[31/05/2026 08:57:09] ERROR | middleware | EXCEPTION at / (IP: 127.0.0.1): {code: Neo.ClientError.Statement.SyntaxError} {message: Variable `post_hashtags` not defined (line 184, column 9 (offset: 8068))
+"        post_hashtags, hashtag_count,"
+         ^}
+neo4j.exceptions.GqlError: {gql_status: 42N62} {gql_status_description: error: syntax error or access rule violation - variable not defined. Variable `post_hashtags` not defined.} {message: 42N62: Variable `post_hashtags` not defined.} {diagnostic_record: {'_classification': 'CLIENT_ERROR', '_position': {'line': 184, 'column': 9, 'offset': 8068}, 'OPERATION': '', 'OPERATION_CODE': '0', 'CURRENT_SCHEMA': '/'}} {raw_classification: CLIENT_ERROR}
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 64, in feed_view
+    feed_result = get_recommended_feed_post_ids(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 1078, in get_recommended_feed_post_ids
+    records = Neo4jFeedClient.execute(
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 85, in execute
+    records, summary, keys = cls.driver().execute_query(
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 978, in execute_query
+    return session._run_transaction(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/session.py", line 588, in _run_transaction
+    result = transaction_function(tx, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 1314, in _work
+    res = tx.run(query, parameters)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/transaction.py", line 206, in run
+    result._tx_ready_run(query, parameters)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 177, in _tx_ready_run
+    self._run(query, parameters, None, None, None, None, None, None)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 236, in _run
+    self._attach()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 430, in _attach
+    self._connection.fetch_message()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 193, in inner
+    func(*args, **kwargs)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt.py", line 863, in fetch_message
+    res = self._process_message(tag, fields)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt5.py", line 1208, in _process_message
+    response.on_failure(summary_metadata or {})
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 263, in on_failure
+    raise self._hydrate_error(metadata)
+neo4j.exceptions.CypherSyntaxError: {code: Neo.ClientError.Statement.SyntaxError} {message: Variable `post_hashtags` not defined (line 184, column 9 (offset: 8068))
+"        post_hashtags, hashtag_count,"
+         ^}
+[31/05/2026 08:57:09] ERROR | log | Internal Server Error: /
+neo4j.exceptions.GqlError: {gql_status: 42N62} {gql_status_description: error: syntax error or access rule violation - variable not defined. Variable `post_hashtags` not defined.} {message: 42N62: Variable `post_hashtags` not defined.} {diagnostic_record: {'_classification': 'CLIENT_ERROR', '_position': {'line': 184, 'column': 9, 'offset': 8068}, 'OPERATION': '', 'OPERATION_CODE': '0', 'CURRENT_SCHEMA': '/'}} {raw_classification: CLIENT_ERROR}
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 64, in feed_view
+    feed_result = get_recommended_feed_post_ids(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 1078, in get_recommended_feed_post_ids
+    records = Neo4jFeedClient.execute(
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 85, in execute
+    records, summary, keys = cls.driver().execute_query(
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 978, in execute_query
+    return session._run_transaction(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/session.py", line 588, in _run_transaction
+    result = transaction_function(tx, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/driver.py", line 1314, in _work
+    res = tx.run(query, parameters)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/transaction.py", line 206, in run
+    result._tx_ready_run(query, parameters)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 177, in _tx_ready_run
+    self._run(query, parameters, None, None, None, None, None, None)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 236, in _run
+    self._attach()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/work/result.py", line 430, in _attach
+    self._connection.fetch_message()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 193, in inner
+    func(*args, **kwargs)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt.py", line 863, in fetch_message
+    res = self._process_message(tag, fields)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_bolt5.py", line 1208, in _process_message
+    response.on_failure(summary_metadata or {})
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/neo4j/_sync/io/_common.py", line 263, in on_failure
+    raise self._hydrate_error(metadata)
+neo4j.exceptions.CypherSyntaxError: {code: Neo.ClientError.Statement.SyntaxError} {message: Variable `post_hashtags` not defined (line 184, column 9 (offset: 8068))
+"        post_hashtags, hashtag_count,"
+         ^}
+[31/05/2026 08:57:09] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.578s | Path: /
+[31/05/2026 09:02:24] ERROR | middleware | EXCEPTION at / (IP: 127.0.0.1): name 'MAX_CLIENT_SEEN_IDS' is not defined
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 64, in feed_view
+    feed_result = get_recommended_feed_post_ids(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 712, in get_recommended_feed_post_ids
+    excluded_post_ids = _safe_id_list(seen_post_ids)[-MAX_CLIENT_SEEN_IDS:]
+                                                      ^^^^^^^^^^^^^^^^^^^
+NameError: name 'MAX_CLIENT_SEEN_IDS' is not defined
+[31/05/2026 09:02:24] ERROR | log | Internal Server Error: /
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 64, in feed_view
+    feed_result = get_recommended_feed_post_ids(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 712, in get_recommended_feed_post_ids
+    excluded_post_ids = _safe_id_list(seen_post_ids)[-MAX_CLIENT_SEEN_IDS:]
+                                                      ^^^^^^^^^^^^^^^^^^^
+NameError: name 'MAX_CLIENT_SEEN_IDS' is not defined
+[31/05/2026 09:02:24] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.307s | Path: /
+[31/05/2026 09:03:02] ERROR | middleware | EXCEPTION at / (IP: 127.0.0.1): name 'MAX_CLIENT_SEEN_IDS' is not defined
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 65, in feed_view
+    feed_result = get_recommended_feed_post_ids(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 712, in get_recommended_feed_post_ids
+    excluded_post_ids = _safe_id_list(seen_post_ids)[-MAX_CLIENT_SEEN_IDS:]
+                                                      ^^^^^^^^^^^^^^^^^^^
+NameError: name 'MAX_CLIENT_SEEN_IDS' is not defined
+[31/05/2026 09:03:02] ERROR | log | Internal Server Error: /
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/views.py", line 65, in feed_view
+    feed_result = get_recommended_feed_post_ids(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/posts/neo4j_feed.py", line 712, in get_recommended_feed_post_ids
+    excluded_post_ids = _safe_id_list(seen_post_ids)[-MAX_CLIENT_SEEN_IDS:]
+                                                      ^^^^^^^^^^^^^^^^^^^
+NameError: name 'MAX_CLIENT_SEEN_IDS' is not defined
+[31/05/2026 09:03:02] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: admin           | Method: GET   | Status: 500 | Duration: 0.307s | Path: /
+[31/05/2026 09:10:17] ERROR | middleware | EXCEPTION at /accounts/login/ (IP: 127.0.0.1): (1040, 'Too many connections')
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1040, 'Too many connections')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 50, in login_view
+    user, error = login_user(email, password)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/services.py", line 135, in login_user
+    user = User.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.OperationalError: (1040, 'Too many connections')
+[31/05/2026 09:10:17] ERROR | log | Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1040, 'Too many connections')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 50, in login_view
+    user, error = login_user(email, password)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/services.py", line 135, in login_user
+    user = User.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.OperationalError: (1040, 'Too many connections')
+[31/05/2026 09:10:17] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: Anonymous       | Method: POST  | Status: 500 | Duration: 0.091s | Path: /accounts/login/
+[31/05/2026 09:10:24] ERROR | middleware | EXCEPTION at /accounts/login/ (IP: 127.0.0.1): (1040, 'Too many connections')
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1040, 'Too many connections')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 50, in login_view
+    user, error = login_user(email, password)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/services.py", line 135, in login_user
+    user = User.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.OperationalError: (1040, 'Too many connections')
+[31/05/2026 09:10:24] ERROR | log | Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1040, 'Too many connections')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 50, in login_view
+    user, error = login_user(email, password)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/services.py", line 135, in login_user
+    user = User.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.OperationalError: (1040, 'Too many connections')
+[31/05/2026 09:10:24] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: Anonymous       | Method: POST  | Status: 500 | Duration: 0.054s | Path: /accounts/login/
+[31/05/2026 09:10:55] ERROR | middleware | EXCEPTION at /accounts/login/ (IP: 127.0.0.1): (1040, 'Too many connections')
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1040, 'Too many connections')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 50, in login_view
+    user, error = login_user(email, password)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/services.py", line 135, in login_user
+    user = User.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.OperationalError: (1040, 'Too many connections')
+[31/05/2026 09:10:55] ERROR | log | Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1040, 'Too many connections')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 50, in login_view
+    user, error = login_user(email, password)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/services.py", line 135, in login_user
+    user = User.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.OperationalError: (1040, 'Too many connections')
+[31/05/2026 09:10:55] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: Anonymous       | Method: POST  | Status: 500 | Duration: 0.062s | Path: /accounts/login/
+[31/05/2026 09:11:01] ERROR | middleware | EXCEPTION at /accounts/login/ (IP: 127.0.0.1): (1040, 'Too many connections')
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1040, 'Too many connections')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 50, in login_view
+    user, error = login_user(email, password)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/services.py", line 135, in login_user
+    user = User.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.OperationalError: (1040, 'Too many connections')
+[31/05/2026 09:11:01] ERROR | log | Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1040, 'Too many connections')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 50, in login_view
+    user, error = login_user(email, password)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/services.py", line 135, in login_user
+    user = User.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1621, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 365, in __init__
+    self.connect()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 680, in connect
+    self._get_server_information()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1099, in _get_server_information
+    packet = self._read_packet()
+             ^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.OperationalError: (1040, 'Too many connections')
+[31/05/2026 09:11:01] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: Anonymous       | Method: POST  | Status: 500 | Duration: 0.046s | Path: /accounts/login/
+[31/05/2026 10:02:46] ERROR | middleware | EXCEPTION at /images/ (IP: 127.0.0.1): Directory indexes are not allowed here.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 49, in serve
+    raise Http404(_("Directory indexes are not allowed here."))
+django.http.response.Http404: Directory indexes are not allowed here.
+[31/05/2026 10:02:49] ERROR | middleware | EXCEPTION at /images/ (IP: 127.0.0.1): Directory indexes are not allowed here.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 49, in serve
+    raise Http404(_("Directory indexes are not allowed here."))
+django.http.response.Http404: Directory indexes are not allowed here.
+[31/05/2026 10:02:55] ERROR | middleware | EXCEPTION at /images/ (IP: 127.0.0.1): Directory indexes are not allowed here.
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 49, in serve
+    raise Http404(_("Directory indexes are not allowed here."))
+django.http.response.Http404: Directory indexes are not allowed here.
+[31/05/2026 11:15:45] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[31/05/2026 11:33:30] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[31/05/2026 11:50:05] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[31/05/2026 11:50:10] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[31/05/2026 11:50:33] ERROR | middleware | EXCEPTION at /accounts/login/ (IP: 127.0.0.1): (1062, "Duplicate entry 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwiZW1haWw' for key 'accounts_refreshtoken.token'")
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/cursors.py", line 153, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/cursors.py", line 322, in _query
+    conn.query(q)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 575, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 826, in _read_query_result
+    result.read()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1203, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.IntegrityError: (1062, "Duplicate entry 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwiZW1haWw' for key 'accounts_refreshtoken.token'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 58, in login_view
+    access_token, refresh_token = create_jwt_pair_for_user(user)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/services.py", line 41, in create_jwt_pair_for_user
+    RefreshToken.objects.create(
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/cursors.py", line 153, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/cursors.py", line 322, in _query
+    conn.query(q)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 575, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 826, in _read_query_result
+    result.read()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1203, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.IntegrityError: (1062, "Duplicate entry 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwiZW1haWw' for key 'accounts_refreshtoken.token'")
+[31/05/2026 11:50:33] ERROR | log | Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/cursors.py", line 153, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/cursors.py", line 322, in _query
+    conn.query(q)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 575, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 826, in _read_query_result
+    result.read()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1203, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.IntegrityError: (1062, "Duplicate entry 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwiZW1haWw' for key 'accounts_refreshtoken.token'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/views.py", line 58, in login_view
+    access_token, refresh_token = create_jwt_pair_for_user(user)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/apps/accounts/services.py", line 41, in create_jwt_pair_for_user
+    RefreshToken.objects.create(
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/base.py", line 1008, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/base.py", line 1169, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/base.py", line 1210, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/db/backends/mysql/base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/cursors.py", line 153, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/cursors.py", line 322, in _query
+    conn.query(q)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 575, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 826, in _read_query_result
+    result.read()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 1203, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/connections.py", line 782, in _read_packet
+    packet.raise_for_error()
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/pymysql/err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+django.db.utils.IntegrityError: (1062, "Duplicate entry 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNSwiZW1haWw' for key 'accounts_refreshtoken.token'")
+[31/05/2026 11:50:33] ERROR | middleware | SERVER ERROR 500: IP: 127.0.0.1       | User: Anonymous       | Method: POST  | Status: 500 | Duration: 0.265s | Path: /accounts/login/
+[31/05/2026 12:27:15] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[31/05/2026 12:27:45] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+[31/05/2026 12:28:55] ERROR | middleware | EXCEPTION at /images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png (IP: 127.0.0.1): “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
+Traceback (most recent call last):
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 557, in thread_handler
+    raise exc_info[1]
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 506, in __call__
+    ret = await asyncio.shield(exec_coro)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/asgiref/sync.py", line 561, in thread_handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/media/haduckien/E/Studying/HK6/python_programming/project/venv/lib/python3.12/site-packages/django/views/static.py", line 51, in serve
+    raise Http404(_("“%(path)s” does not exist") % {"path": fullpath})
+django.http.response.Http404: “/media/haduckien/E/Studying/HK6/python_programming/project/images/avatars/Screenshot_from_2025-12-27_23-52-18_7Wtd1QH.png” does not exist
