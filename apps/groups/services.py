@@ -263,34 +263,66 @@ class GroupService:
         
     @staticmethod
     def report_content(group, reporter, reason, post_id=None, comment_id=None):
-        """Hàm tạo báo cáo mới cho Post hoặc Comment"""
-        if not post_id and not comment_id:
-            return False, "Phải báo cáo một bài viết hoặc bình luận cụ thể."
-        
-        """Hàm tạo báo cáo với kiểm tra bảo vệ Owner"""
+        if bool(post_id) == bool(comment_id):
+            return False, "Phải báo cáo đúng một bài viết hoặc một bình luận."
+
+        if not reason or not str(reason).strip():
+            return False, "Vui lòng nhập lý do báo cáo."
+
+        post = None
+        comment = None
         target_user = None
+
         if post_id:
-            from apps.posts.models import Post
-            post = get_object_or_404(Post, id=post_id)
+            group_post = GroupPost.objects.filter(
+                group=group,
+                post_id=post_id,
+                is_deleted=False,
+                post__is_deleted=False,
+            ).select_related("post", "post__author").first()
+
+            if not group_post:
+                return False, "Bài viết không thuộc nhóm này hoặc đã bị xóa."
+
+            post = group_post.post
             target_user = post.author
-        elif comment_id:
-            from apps.posts.models import Comment
-            comment = get_object_or_404(Comment, id=comment_id)
+
+        if comment_id:
+            comment = Comment.objects.filter(
+                id=comment_id,
+                is_deleted=False,
+            ).select_related("post", "user").first()
+
+            if not comment:
+                return False, "Bình luận không tồn tại hoặc đã bị xóa."
+
+            group_post_exists = GroupPost.objects.filter(
+                group=group,
+                post=comment.post,
+                is_deleted=False,
+                post__is_deleted=False,
+            ).exists()
+
+            if not group_post_exists:
+                return False, "Bình luận không thuộc bài viết trong nhóm này."
+
             target_user = comment.user
 
-        # QUY TẮC 1: Không thể báo cáo Owner
         if target_user == group.owner:
             return False, "Bạn không thể báo cáo Chủ sở hữu nhóm."
-        
-        # Đảm bảo tuân thủ CheckConstraint (chỉ post hoặc comment)
-        report = GroupReport.objects.create(
+
+        if reporter == target_user:
+            return False, "Bạn không thể tự báo cáo nội dung của chính mình."
+
+        GroupReport.objects.create(
             group=group,
             reporter=reporter,
-            post_id=post_id,
-            comment_id=comment_id,
-            reason=reason,
-            status='pending'
+            post=post,
+            comment=comment,
+            reason=str(reason).strip(),
+            status="pending",
         )
+
         return True, "Cảm ơn bạn! Báo cáo đã được gửi tới quản trị viên."
     
     @staticmethod

@@ -8,6 +8,9 @@ from apps.groups.services import *
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from apps.accounts.services import create_user_profile
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from apps.posts.models import ReportReason
 
 class GroupForm(forms.ModelForm):
     class Meta:
@@ -173,17 +176,20 @@ def update_post_in_group(request, group_id, post_id):
 def group_detail(request, group_id):
     group = GroupService.get_group_by_id(group_id)
     user_role = GroupService.get_user_role(request.user, group)
-    
-    # Lấy số trang từ URL (mặc định là 1)
+
     page = int(request.GET.get('page', 1))
     posts = []
     has_next = False
     cover_image = group.cover_image.url if group.cover_image else None
-    
-    if not (group.is_private and user_role in ['none', 'pending']):
-        posts, has_next = GroupService.get_group_feed(group, request.user, page=page, page_size=10)
 
-    # Nếu JS gọi Fetch/AJAX (dùng tham số ajax=1) -> Trả về JSON chứa HTML
+    if not (group.is_private and user_role in ['none', 'pending']):
+        posts, has_next = GroupService.get_group_feed(
+            group,
+            request.user,
+            page=page,
+            page_size=10
+        )
+
     if request.GET.get('ajax'):
         html = render_to_string('groups/partials/post_list.html', {
             'posts': posts,
@@ -191,21 +197,23 @@ def group_detail(request, group_id):
             'user_role': user_role,
             'group': group,
         }, request=request)
-        
+
         return JsonResponse({
             'html': html,
             'has_next': has_next
         })
 
+    report_reasons = ReportReason.objects.all().order_by("id")
+
     context = {
         'group': group,
         'user_role': user_role,
         'posts': posts,
-        'has_next': has_next, # Truyền ra ngoài để JS biết còn dữ liệu không
-        'cover_image': cover_image
+        'has_next': has_next,
+        'cover_image': cover_image,
+        'report_reasons': report_reasons,
     }
 
-    print("Group Detail Context:", context)  # Debug: In ra context để kiểm tra dữ liệu truyền ra template
     return render(request, 'groups/group_detail.html', context)
 
 def manage_group(request, group_id):
@@ -333,30 +341,69 @@ def reject_post_in_group(request, group_id, post_id):
     GroupPostService.reject_group_post(post, request.user)
     messages.success(request, "Post rejected successfully!")
     return redirect("groups:manage_group", group_id=group.id)
-
+@login_required
+@require_POST
 def report_item(request, group_id):
-    """View xử lý gửi báo cáo từ thành viên"""
     group = GroupService.get_group_by_id(group_id)
-    if request.method == "POST":
-        reason = request.POST.get("reason")
-        post_id = request.POST.get("post_id")
-        comment_id = request.POST.get("comment_id")
-        
-        success, msg = GroupService.report_content(group, request.user, reason, post_id, comment_id)
-        if success: messages.success(request, msg)
-        else: messages.error(request, msg)
-        
+
+    target_type = request.POST.get("target_type")
+    target_id = request.POST.get("target_id")
+
+    post_id = request.POST.get("post_id")
+    comment_id = request.POST.get("comment_id")
+
+    if target_type == "post":
+        post_id = target_id
+        comment_id = None
+    elif target_type == "comment":
+        comment_id = target_id
+        post_id = None
+
+    reason_id = request.POST.get("reason")
+    custom_reason = request.POST.get("custom_reason", "").strip()
+
+    if reason_id == "custom":
+        reason = custom_reason
+    else:
+        reason_obj = ReportReason.objects.filter(id=reason_id).first()
+        reason = reason_obj.name if reason_obj else ""
+
+    if not reason:
+        messages.error(request, "Vui lòng chọn hoặc nhập lý do báo cáo.")
+        return redirect('groups:group_detail', group_id=group.id)
+
+    success, msg = GroupService.report_content(
+        group=group,
+        reporter=request.user,
+        reason=reason,
+        post_id=post_id,
+        comment_id=comment_id,
+    )
+
+    if success:
+        messages.success(request, msg)
+    else:
+        messages.error(request, msg)
+
     return redirect('groups:group_detail', group_id=group.id)
 
 def handle_report_action(request, group_id):
-    """View xử lý các nút bấm Quyết định của Admin trong trang Manage"""
     group = GroupService.get_group_by_id(group_id)
+
     if request.method == "POST":
         report_id = request.POST.get("report_id")
-        action_type = request.POST.get("action_type") # dismiss, delete_content, delete_and_remove, delete_and_ban
-        
-        success, msg = GroupService.resolve_report(request.user, group, report_id, action_type)
-        if success: messages.success(request, msg)
-        else: messages.error(request, msg)
-        
+        action_type = request.POST.get("action_type")
+
+        success, msg = GroupService.resolve_report(
+            request.user,
+            group,
+            report_id,
+            action_type
+        )
+
+        if success:
+            messages.success(request, msg)
+        else:
+            messages.error(request, msg)
+
     return redirect('groups:manage_group', group_id=group.id)

@@ -243,24 +243,49 @@
     </div>
 </div>
 <div id="reportModal" class="modal" style="display:none; position:fixed; z-index:9999; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-    <div style="background:white; padding:20px; border-radius:8px; width:400px;">
-        <h3>Báo cáo nội dung</h3>
-        <form action="{% url 'groups:report_item' group.id %}" method="POST">
+    <div style="background:white; padding:20px; border-radius:8px; width:420px;">
+        <h3 id="report-modal-title">Báo cáo vi phạm</h3>
+
+        <form id="reportForm" action="{% url 'groups:report_item' group.id %}" method="POST">
             {% csrf_token %}
+
+            <input type="hidden" name="target_type" id="report_target_type">
+            <input type="hidden" name="target_id" id="report_target_id">
+
             <input type="hidden" name="post_id" id="report_post_id">
             <input type="hidden" name="comment_id" id="report_comment_id">
-            
-            <label>Lý do báo cáo:</label>
-            <select name="reason" class="form-control" style="margin:10px 0;" required>
-                <option value="Spam">Spam / Quảng cáo</option>
-                <option value="Hate Speech">Ngôn từ gây thù ghét</option>
-                <option value="Harassment">Quấy rối</option>
-                <option value="False Information">Thông tin sai sự thật</option>
-                <option value="Other">Lý do khác...</option>
-            </select>
-            
+
+            <p style="color:#65676b; font-size:14px; margin-bottom:12px;">
+                Báo cáo này sẽ được gửi tới quản trị viên nhóm {{ group.name }}.
+            </p>
+
+            <label style="font-weight:600; margin-bottom:8px; display:block;">
+                Vui lòng chọn vấn đề bạn đang gặp phải:
+            </label>
+
+            <div class="report-reasons-list" style="display:flex; flex-direction:column; gap:4px;">
+                {% for reason in report_reasons %}
+                <label class="reason-item">
+                    <input type="radio" name="reason" value="{{ reason.id }}" required onchange="toggleCustomReason(false)">
+                    <span>{{ reason.name }}</span>
+                </label>
+                {% endfor %}
+
+                <label class="reason-item">
+                    <input type="radio" name="reason" value="custom" onchange="toggleCustomReason(true)">
+                    <span>Vấn đề khác</span>
+                </label>
+            </div>
+
+            <textarea id="custom_reason_input"
+                      name="custom_reason"
+                      class="custom-reason-area"
+                      placeholder="Mô tả chi tiết vi phạm..."
+                      style="margin-top:15px; display:none; width:100%;"
+                      rows="3"></textarea>
+
             <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:15px;">
-                <button type="button" class="btn-sm btn-reject" onclick="document.getElementById('reportModal').style.display='none'">Hủy</button>
+                <button type="button" class="btn-sm btn-reject" onclick="closeReportModal()">Hủy</button>
                 <button type="submit" class="btn-save">Gửi báo cáo</button>
             </div>
         </form>
@@ -372,10 +397,47 @@
             }
         });
     }
-    function openReportModal(id, type) {
-        document.getElementById('report_post_id').value = type === 'post' ? id : '';
-        document.getElementById('report_comment_id').value = type === 'comment' ? id : '';
-        document.getElementById('reportModal').style.display = 'flex';
+    function openReportModal(targetType, targetId) {
+    const modal = document.getElementById('reportModal');
+    const titleSpan = document.getElementById('report-modal-title');
+
+    document.getElementById('report_target_type').value = targetType;
+    document.getElementById('report_target_id').value = targetId;
+
+    // Tương thích backend cũ nếu groups:report_item vẫn đọc post_id/comment_id
+    document.getElementById('report_post_id').value = targetType === 'post' ? targetId : '';
+    document.getElementById('report_comment_id').value = targetType === 'comment' ? targetId : '';
+
+    document.getElementById('reportForm').reset();
+    document.getElementById('report_target_type').value = targetType;
+    document.getElementById('report_target_id').value = targetId;
+    document.getElementById('report_post_id').value = targetType === 'post' ? targetId : '';
+    document.getElementById('report_comment_id').value = targetType === 'comment' ? targetId : '';
+
+    const customInput = document.getElementById('custom_reason_input');
+    if (customInput) customInput.style.display = 'none';
+
+    if (titleSpan) {
+        titleSpan.innerText = targetType === 'comment'
+            ? 'Báo cáo bình luận'
+            : 'Báo cáo bài viết';
     }
+
+    modal.style.display = 'flex';
+}
+
+function closeReportModal(e) {
+    const modal = document.getElementById('reportModal');
+    if (!e || e.target === modal || e.target.classList.contains('btn-reject')) {
+        modal.style.display = 'none';
+    }
+}
+
+function toggleCustomReason(show) {
+    const input = document.getElementById('custom_reason_input');
+    if (!input) return;
+    input.style.display = show ? 'block' : 'none';
+    if (show) input.focus();
+}
 </script>
 {% endblock %}

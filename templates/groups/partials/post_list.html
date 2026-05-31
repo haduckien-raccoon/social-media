@@ -74,7 +74,7 @@
                     <!-- <button onclick="alert('Đã mở form báo cáo!')" class="dropdown-item">
                         <i class="fa-solid fa-flag"></i> Báo cáo bài viết
                     </button> -->
-                    <button class="dropdown-item" onclick="openReportModal('{{ post.id }}', 'post')">
+                    <button class="dropdown-item" onclick="openReportModal('post', {{ post.id }})">
                         <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo bài viết
                     </button>
                 {% endif %}
