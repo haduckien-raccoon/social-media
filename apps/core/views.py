@@ -1,6 +1,11 @@
 import jwt
+import redis
 from django.conf import settings
+from django.db import connection
+from django.http import JsonResponse
 from django.shortcuts import render
+from neo4j import GraphDatabase
+
 from apps.accounts.models import User
 
 def home(request):
@@ -29,6 +34,55 @@ def home(request):
         "user": user,
         "is_authenticated": is_authenticated
     })
+
+
+def health_check(request):
+    checks = {}
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+        checks["database"] = "ok"
+    except Exception as exc:
+        checks["database"] = f"error: {exc.__class__.__name__}"
+
+    try:
+        redis_client = redis.Redis(
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            db=settings.REDIS_DB,
+            socket_timeout=settings.REDIS_SOCKET_TIMEOUT,
+            socket_connect_timeout=settings.REDIS_SOCKET_CONNECT_TIMEOUT,
+        )
+        redis_client.ping()
+        checks["redis"] = "ok"
+    except Exception as exc:
+        checks["redis"] = f"error: {exc.__class__.__name__}"
+
+    try:
+        driver = GraphDatabase.driver(
+            settings.NEO4J_URI,
+            auth=(settings.NEO4J_USERNAME, settings.NEO4J_PASSWORD),
+            connection_timeout=2,
+        )
+        try:
+            driver.verify_connectivity()
+        finally:
+            driver.close()
+        checks["neo4j"] = "ok"
+    except Exception as exc:
+        checks["neo4j"] = f"error: {exc.__class__.__name__}"
+
+    healthy = all(value == "ok" for value in checks.values())
+
+    return JsonResponse(
+        {
+            "status": "ok" if healthy else "degraded",
+            "checks": checks,
+        },
+        status=200 if healthy else 503,
+    )
 
 def error_404_view(request, exception):
     return render(request, 'errors/error_404.html', status=404)

@@ -43,5 +43,10 @@ if [ "$MODE" = "test" ]; then
     exec python manage.py test -v 2
 fi
 
+if [ "${COLLECT_STATIC:-1}" != "0" ]; then
+    echo "[boot] Collecting static files..."
+    python manage.py collectstatic --noinput --clear
+fi
+
 echo "[boot] Starting ASGI server..."
 exec uvicorn config.asgi:application --host 0.0.0.0 --port 8080 --workers "${UVICORN_WORKERS:-1}" --proxy-headers

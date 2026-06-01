@@ -1,3 +1,5 @@
+name: social-media
+
 services:
   mysql:
     image: mysql:8.0
@@ -13,7 +15,11 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent || mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent || mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent",
+        ]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -32,6 +38,25 @@ services:
       retries: 20
       start_period: 5s
 
+  neo4j:
+    image: neo4j:5.26-community
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: ${NEO4J_AUTH:-neo4j/neo4j_password}
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'cypher-shell -a bolt://127.0.0.1:7687 -u "$${NEO4J_USERNAME:-neo4j}" -p "$${NEO4J_PASSWORD:-neo4j_password}" "RETURN 1" >/dev/null 2>&1',
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 40s
+
   web:
     build:
       context: ..
@@ -41,22 +66,31 @@ services:
     environment:
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
-      MYSQL_USER: root
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-sudo_social}
-      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      NEO4J_URI: neo4j://neo4j:7687
+      DJANGO_SERVE_STATIC: "True"
     command: ["/app/docker/entrypoint.sh", "web"]
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
+      neo4j:
+        condition: service_healthy
     ports:
-      - "8081:8080"
+      - "${WEB_PORT:-8080}:8080"
+    volumes:
+      - static_data:/app/staticfiles
+      - media_data:/app/images
+      - logs_data:/app/logs
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; response=urllib.request.urlopen('http://127.0.0.1:8080/', timeout=5); sys.exit(0 if response.status < 500 else 1)\""]
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "import urllib.request,sys; response=urllib.request.urlopen(''http://127.0.0.1:8080/health/'', timeout=5); sys.exit(0 if response.status == 200 else 1)"',
+        ]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -73,17 +107,21 @@ services:
       MYSQL_PORT: 3306
       MYSQL_USER: root
       MYSQL_DATABASE: ${MYSQL_DATABASE:-sudo_social}
-      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password} 
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      APP_BASE_URL: http://web:8081
+      NEO4J_URI: neo4j://neo4j:7687
+      APP_BASE_URL: http://web:8080
       DJANGO_DEBUG: "False"
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,web
+      DJANGO_SERVE_STATIC: "True"
     command: ["/app/docker/entrypoint.sh", "test"]
     depends_on:
       mysql:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      neo4j:
         condition: service_healthy
     profiles:
       - test
@@ -92,3 +130,8 @@ services:
 volumes:
   mysql_data:
   redis_data:
+  neo4j_data:
+  neo4j_logs:
+  static_data:
+  media_data:
+  logs_data:

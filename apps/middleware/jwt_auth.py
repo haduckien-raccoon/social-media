@@ -14,6 +14,7 @@ from apps.middleware.utils import decode_access_token, generate_access_token
 
 
 PUBLIC_PATHS = [
+    "/health/",
     "/accounts/login/",
     "/accounts/register/",
     "/accounts/verify-email/",

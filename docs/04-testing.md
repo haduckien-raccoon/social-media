@@ -28,7 +28,7 @@ python manage.py test apps.posts.test_posts_services apps.groups.test_groups_pos
 
 ## 3. Chạy test trong Docker
 ```bash
-docker compose -f docker/docker-compose.yml run --rm test
+docker compose --env-file docker/.env.docker -f docker/docker-compose.yml run --rm test
 ```
 
 Kỳ vọng kết quả cuối:
@@ -37,8 +37,8 @@ Kỳ vọng kết quả cuối:
 
 Sau khi test xong, kiểm tra app vẫn chạy:
 ```bash
-docker compose -f docker/docker-compose.yml ps
-docker compose -f docker/docker-compose.yml logs web --tail 80
+docker compose --env-file docker/.env.docker -f docker/docker-compose.yml ps
+docker compose --env-file docker/.env.docker -f docker/docker-compose.yml logs web --tail 80
 ```
 
 ## 4. Checklist regression quan trọng
