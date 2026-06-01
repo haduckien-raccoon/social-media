@@ -39,6 +39,16 @@ from dotenv import load_dotenv
 load_dotenv()
 import datetime
 from django.utils.timezone import make_aware
+from apps.admin.neo4j_sync import (
+    sync_admin_user_to_neo4j_on_commit,
+    sync_admin_post_to_neo4j_on_commit,
+    sync_admin_comment_to_neo4j_on_commit,
+    sync_admin_hashtag_to_neo4j_on_commit,
+    mark_admin_hashtag_deleted_on_commit,
+    sync_moderation_log_to_neo4j_on_commit,
+)
+
+from apps.posts.neo4j_feed import mark_post_deleted_in_neo4j
 
 def is_admin(user):
     return user.is_authenticated and user.is_staff
@@ -259,14 +269,29 @@ def user_management_toggle_ban(request, user_id):
     """ Khóa / mở khóa tài khoản (ban / unban) """
     if request.method == 'POST':
         user = get_object_or_404(User, id=user_id)
+
         if user == request.user:
             messages.error(request, "Không thể khóa tài khoản của chính mình!")
             return redirect('custom_admin:user_detail', user_id=user.id)
-            
+
         user.is_banned = not user.is_banned
-        user.save()
+        user.date_banned = timezone.now() if user.is_banned else None
+        user.save(update_fields=["is_banned", "date_banned"])
+
+        sync_admin_user_to_neo4j_on_commit(user)
+
+        action = "BAN" if user.is_banned else "UNBAN"
+        _log_moderation_action(
+            request.user,
+            ModerationTargetType.USER,
+            user.id,
+            action,
+            "Admin toggled user ban status",
+        )
+
         status_msg = "mở khóa" if not user.is_banned else "khóa"
         messages.success(request, f"Đã {status_msg} tài khoản {user.email}.")
+
     return redirect('custom_admin:user_detail', user_id=user_id)
 
 @user_passes_test(is_admin, login_url='/accounts/login/')
@@ -275,16 +300,28 @@ def user_management_set_role(request, user_id):
     if request.method == 'POST':
         user = get_object_or_404(User, id=user_id)
         role = request.POST.get('role')
-        
+
         if role == 'admin':
             user.is_staff = True
-            user.is_superuser = True # Giữ sync nếu cần Django admin mặc định
-        else: # user basic
+            user.is_superuser = True
+        else:
             user.is_staff = False
             user.is_superuser = False
-            
-        user.save()
+
+        user.save(update_fields=["is_staff", "is_superuser"])
+
+        sync_admin_user_to_neo4j_on_commit(user)
+
+        _log_moderation_action(
+            request.user,
+            ModerationTargetType.USER,
+            user.id,
+            ModerationAction.UPDATE,
+            f"Admin changed user role to {role}",
+        )
+
         messages.success(request, f"Đã cập nhật quyền của {user.email} thành {role}.")
+
     return redirect('custom_admin:user_detail', user_id=user_id)
 
 @user_passes_test(is_admin, login_url='/accounts/login/')
@@ -476,7 +513,7 @@ def user_management_activities(request, user_id):
 
 
 def _log_moderation_action(actor, target_type, target_id, action, reason=""):
-    ContentModerationLog.objects.create(
+    log = ContentModerationLog.objects.create(
         actor=actor,
         target_type=target_type,
         target_id=target_id,
@@ -484,6 +521,8 @@ def _log_moderation_action(actor, target_type, target_id, action, reason=""):
         reason=reason or "",
     )
 
+    sync_moderation_log_to_neo4j_on_commit(log)
+    return log
 
 def _redirect_back(request, fallback_name):
     next_url = request.POST.get("next") or request.GET.get("next") or request.META.get("HTTP_REFERER")
@@ -554,25 +593,39 @@ def content_post_action(request, post_id):
         post.status = ContentStatus.BLOCKED
         post.is_deleted = True
         post.save(update_fields=["status", "is_deleted", "updated_at"])
+
     elif action == ModerationAction.DELETE:
         post.status = ContentStatus.DELETED
         post.is_deleted = True
         post.save(update_fields=["status", "is_deleted", "updated_at"])
+
     elif action == ModerationAction.RESTORE:
         post.status = ContentStatus.NORMAL
         post.is_deleted = False
         post.save(update_fields=["status", "is_deleted", "updated_at"])
+
     elif action == ModerationAction.FLAG:
         post.status = ContentStatus.FLAGGED
         post.save(update_fields=["status", "updated_at"])
+
     elif action == ModerationAction.UNFLAG:
         post.status = ContentStatus.NORMAL
         post.save(update_fields=["status", "updated_at"])
+
     else:
         messages.error(request, "Hành động không hợp lệ.")
         return _redirect_back(request, "custom_admin:content_posts")
 
-    _log_moderation_action(request.user, ModerationTargetType.POST, post.id, action, reason)
+    _log_moderation_action(
+        request.user,
+        ModerationTargetType.POST,
+        post.id,
+        action,
+        reason,
+    )
+
+    sync_admin_post_to_neo4j_on_commit(post)
+
     messages.success(request, "Đã cập nhật trạng thái bài viết.")
     return _redirect_back(request, "custom_admin:content_posts")
 
@@ -658,7 +711,8 @@ def content_comment_action(request, comment_id):
         messages.error(request, "Hành động không hợp lệ.")
         return _redirect_back(request, "custom_admin:content_comments")
 
-    _log_moderation_action(request.user, ModerationTargetType.COMMENT, comment.id, action, reason)
+    log = _log_moderation_action(request.user, ModerationTargetType.COMMENT, comment.id, action, reason)
+    sync_admin_comment_to_neo4j_on_commit(comment)
     messages.success(request, "Đã cập nhật trạng thái bình luận.")
     return _redirect_back(request, "custom_admin:content_comments")
 
@@ -779,6 +833,7 @@ def hashtag_list(request):
                 hashtag, created = Hashtag.objects.get_or_create(tag=tag_value)
                 if created:
                     _log_moderation_action(request.user, ModerationTargetType.HASHTAG, hashtag.id, ModerationAction.UPDATE)
+                    sync_admin_hashtag_to_neo4j_on_commit(hashtag)
                     messages.success(request, "Đã tạo hashtag mới.")
                 else:
                     messages.info(request, "Hashtag đã tồn tại.")
@@ -817,6 +872,7 @@ def hashtag_detail(request, tag_id):
         hashtag.tag = new_tag
         hashtag.save(update_fields=["tag"])
         _log_moderation_action(request.user, ModerationTargetType.HASHTAG, hashtag.id, ModerationAction.UPDATE)
+        sync_admin_hashtag_to_neo4j_on_commit(hashtag)
         messages.success(request, "Đã cập nhật hashtag.")
         return redirect("custom_admin:hashtag_list")
 
@@ -829,8 +885,20 @@ def hashtag_delete(request, tag_id):
         return _redirect_back(request, "custom_admin:hashtag_list")
 
     hashtag = get_object_or_404(Hashtag, id=tag_id)
+    old_tag = hashtag.tag
+    old_id = hashtag.id
+
     hashtag.delete()
-    _log_moderation_action(request.user, ModerationTargetType.HASHTAG, tag_id, ModerationAction.DELETE)
+
+    _log_moderation_action(
+        request.user,
+        ModerationTargetType.HASHTAG,
+        old_id,
+        ModerationAction.DELETE,
+    )
+
+    mark_admin_hashtag_deleted_on_commit(old_tag, old_id)
+
     messages.success(request, "Đã xóa hashtag.")
     return _redirect_back(request, "custom_admin:hashtag_list")
 
@@ -956,13 +1024,15 @@ def report_action(request, report_id):
         return _redirect_back(request, "custom_admin:report_list")
 
     report = get_object_or_404(Report, id=report_id)
-    action = request.POST.get("action", "").strip() 
+    action = request.POST.get("action", "").strip()
     reason = request.POST.get("reason", "").strip()
     confirm_change = request.POST.get("confirm_change") == "yes"
 
-    # KIỂM TRA: Nếu đã xử lý mà chưa bấm nút xác nhận thay đổi quyết định từ giao diện
     if report.status != "pending" and not confirm_change:
-        messages.warning(request, "Báo cáo này đã được xử lý. Vui lòng xác nhận nếu bạn muốn thay đổi quyết định.")
+        messages.warning(
+            request,
+            "Báo cáo này đã được xử lý. Vui lòng xác nhận nếu bạn muốn thay đổi quyết định."
+        )
         return redirect('custom_admin:report_detail', report_id=report.id)
 
     target_user = None
@@ -970,47 +1040,83 @@ def report_action(request, report_id):
 
     if report.target_type == ModerationTargetType.POST:
         target_obj = Post.objects.filter(id=report.target_id).first()
-        if target_obj: target_user = target_obj.author
+        if target_obj:
+            target_user = target_obj.author
+
     elif report.target_type == ModerationTargetType.COMMENT:
-        target_obj = Comment.objects.filter(id=report.target_id).first()
-        if target_obj: target_user = target_obj.user
+        target_obj = Comment.objects.select_related("user", "post").filter(id=report.target_id).first()
+        if target_obj:
+            target_user = target_obj.user
 
     if action == "BAN_USER" and not target_user:
-        messages.error(request, "Không tìm thấy người dùng để khóa (có thể nội dung đã bị xóa hoàn toàn).")
+        messages.error(request, "Không tìm thấy người dùng để khóa.")
         return redirect('custom_admin:report_detail', report_id=report.id)
 
     new_status = "pending"
-    
+
     if action == "IGNORE":
         new_status = "rejected"
-        if target_obj and target_obj.is_deleted:
+
+        if target_obj and getattr(target_obj, "is_deleted", False):
             target_obj.is_deleted = False
             target_obj.status = ContentStatus.NORMAL
-            target_obj.save()
+            target_obj.save(update_fields=["is_deleted", "status", "updated_at"])
+
+            if report.target_type == ModerationTargetType.POST:
+                sync_admin_post_to_neo4j_on_commit(target_obj)
+            elif report.target_type == ModerationTargetType.COMMENT:
+                sync_admin_comment_to_neo4j_on_commit(target_obj)
+
         messages.success(request, "Đã cập nhật: Bỏ qua báo cáo.")
 
     elif action in ["DELETE_CONTENT", "BAN_USER"]:
         if target_obj:
             target_obj.status = ContentStatus.DELETED
             target_obj.is_deleted = True
-            target_obj.save()
-            _log_moderation_action(request.user, report.target_type, target_obj.id, ModerationAction.DELETE, reason)
+            target_obj.save(update_fields=["status", "is_deleted", "updated_at"])
+
+            _log_moderation_action(
+                request.user,
+                report.target_type,
+                target_obj.id,
+                ModerationAction.DELETE,
+                reason,
+            )
+
+            if report.target_type == ModerationTargetType.POST:
+                sync_admin_post_to_neo4j_on_commit(target_obj)
+            elif report.target_type == ModerationTargetType.COMMENT:
+                sync_admin_comment_to_neo4j_on_commit(target_obj)
 
         if action == "BAN_USER" and target_user:
             target_user.is_banned = True
-            target_user.save()
-            _log_moderation_action(request.user, ModerationTargetType.USER, target_user.id, "BAN", reason)
+            target_user.date_banned = timezone.now()
+            target_user.save(update_fields=["is_banned", "date_banned"])
+
+            sync_admin_user_to_neo4j_on_commit(target_user)
+
+            _log_moderation_action(
+                request.user,
+                ModerationTargetType.USER,
+                target_user.id,
+                "BAN",
+                reason,
+            )
+
             messages.warning(request, f"Đã khóa tài khoản {target_user.username}.")
-        
+
         new_status = "approved"
         messages.success(request, "Đã cập nhật: Xử lý vi phạm.")
 
     report.status = new_status
     report.handled_by = request.user
     report.handled_at = timezone.now()
-    report.save()
+    report.save(update_fields=["status", "handled_by", "handled_at"])
 
-    Report.objects.filter(target_type=report.target_type, target_id=report.target_id).update(
+    Report.objects.filter(
+        target_type=report.target_type,
+        target_id=report.target_id
+    ).update(
         status=new_status,
         handled_by=request.user,
         handled_at=timezone.now()

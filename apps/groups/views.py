@@ -8,6 +8,7 @@ from apps.groups.services import *
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from apps.accounts.services import create_user_profile
+from apps.groups.neo4j_sync import mark_group_deleted_in_neo4j_on_commit, sync_group_to_neo4j_on_commit
 
 class GroupForm(forms.ModelForm):
     class Meta:
@@ -50,12 +51,19 @@ def create_group(request):
 
 def delete_group(request, group_id):
     group = get_object_or_404(Group, id=group_id)
+
     if not GroupService.is_owner(request.user, group):
         raise PermissionDenied("You do not have permission to delete this group.")
+
     if request.method == "POST":
+        deleted_group_id = group.id
         group.delete()
+
+        mark_group_deleted_in_neo4j_on_commit(deleted_group_id)
+
         messages.success(request, "Group deleted successfully!")
         return redirect("groups:group_list")
+
     return render(request, "groups/group_confirm_delete.html", {"group": group})
 
 def group_list(request):
@@ -308,6 +316,7 @@ def update_group(request, group_id):
         group.default_sort = request.POST.get("default_sort", "latest_activity")
 
         group.save()
+        sync_group_to_neo4j_on_commit(group)
         messages.success(request, "Cập nhật thông tin nhóm thành công!")
         
     return redirect('groups:manage_group', group_id=group.id)

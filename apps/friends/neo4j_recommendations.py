@@ -8,6 +8,7 @@ from django.conf import settings
 from apps.accounts.models import User
 from apps.friends.models import FriendRequest, Friend, Block
 from apps.friends.neo4j_client import Neo4jClient
+from apps.accounts.neo4j_sync import sync_account_to_neo4j
 
 try:
     from apps.groups.models import GroupMember
@@ -85,37 +86,22 @@ def setup_neo4j_schema():
 
 
 def sync_user_to_neo4j(user: User):
-    profile = getattr(user, "profile", None)
-
-    query = """
-    MERGE (u:User {id: $id})
-    SET u.username = $username,
-        u.email = $email,
-        u.full_name = $full_name,
-        u.avatar = $avatar,
-        u.school = $school,
-        u.province = $province,
-        u.town = $town,
-        u.is_active = $is_active,
-        u.is_banned = $is_banned,
-        u.updated_at = datetime()
     """
+    Backward-compatible wrapper.
 
-    Neo4jClient.execute(
-        query,
-        id=user.id,
-        username=user.username or "",
-        email=user.email or "",
-        full_name=(profile.full_name if profile else None) or "",
-        avatar=_avatar_url(user) or "",
-        school=(profile.school if profile else None) or "",
-        province=(profile.province if profile else None) or "",
-        town=(profile.town if profile else None) or "",
-        is_active=bool(user.is_active),
-        is_banned=bool(user.is_banned),
-    )
+    Friends module vẫn gọi sync_user_to_neo4j như cũ,
+    nhưng logic sync User node chuẩn nằm ở apps.accounts.neo4j_sync.
+    """
+    return sync_account_to_neo4j(user)
 
+def sync_user_to_neo4j(user: User):
+    """
+    Backward-compatible wrapper.
 
+    Friends module vẫn gọi sync_user_to_neo4j như cũ,
+    nhưng logic sync User node chuẩn nằm ở apps.accounts.neo4j_sync.
+    """
+    return sync_account_to_neo4j(user)
 def sync_friend_request_to_neo4j(friend_request: FriendRequest):
     sync_user_to_neo4j(friend_request.from_user)
     sync_user_to_neo4j(friend_request.to_user)

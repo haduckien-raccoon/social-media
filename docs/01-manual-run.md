@@ -37,7 +37,11 @@ CHANNEL_LAYER_BACKEND=redis
 ## 4. Migrate
 ```bash
 python manage.py migrate
-python manage.py sync_feed_neo4j (dong bo graph va mysql)
+python manage.py sync_accounts_neo4j
+python manage.py sync_friends_neo4j --skip-users --chunk-size 200
+python manage.py sync_groups_neo4j --chunk-size 200
+python manage.py sync_feed_neo4j
+python manage.py sync_admin_neo4j
 ```
 
 ## 5. Chạy app

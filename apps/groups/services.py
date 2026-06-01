@@ -9,13 +9,31 @@ from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Case, Case, Count, Q, IntegerField, IntegerField, Max, Value, When, When
 from django.utils import timezone
 from django.db.models import Prefetch
+from django.db import transaction
 
+from apps.groups.neo4j_sync import (
+    sync_group_to_neo4j_on_commit,
+    mark_group_deleted_in_neo4j_on_commit,
+    sync_group_member_to_neo4j_on_commit,
+    delete_group_member_from_neo4j_on_commit,
+    sync_group_post_to_neo4j_on_commit,
+    mark_group_post_deleted_in_neo4j_on_commit,
+)
 
+from apps.posts.neo4j_feed import (
+    sync_post_node,
+    sync_post_hashtags,
+    sync_tagged_users,
+    mark_post_deleted_in_neo4j,
+)
+
+@transaction.atomic
 def approve_group_post(group_post: GroupPost, approver: User):
     group_post.status = 'approved'
     group_post.approved_by = approver
     group_post.approved_at = timezone.now()
     group_post.save()
+    sync_group_post_to_neo4j_on_commit(group_post)
 
 class GroupService:
     @staticmethod
@@ -108,6 +126,7 @@ class GroupService:
         return posts, group_posts_page.has_next()
     
     @staticmethod
+    @transaction.atomic
     def create_group(owner, name, description="",is_private=True):
         group = Group.objects.create(
             owner=owner,
@@ -115,12 +134,15 @@ class GroupService:
             description=description,
             is_private=is_private
         )
-        GroupMember.objects.create(
+        owner_member = GroupMember.objects.create(
             user=owner,
             group=group,
             role=GroupRole.OWNER,
             status="approved"
         )
+
+        sync_group_to_neo4j_on_commit(group)
+        sync_group_member_to_neo4j_on_commit(owner_member)
         return group
     
     @staticmethod
@@ -170,6 +192,8 @@ class GroupService:
             
             membership.role = new_role
             membership.save()
+
+            sync_group_member_to_neo4j_on_commit(membership)
             return True, f"Đã cập nhật vai trò của {membership.user.username} thành {new_role}."
         except GroupMember.DoesNotExist:
             return False, "Không tìm thấy thành viên."
@@ -238,6 +262,7 @@ class GroupService:
 
         return data
     @staticmethod
+    @transaction.atomic
     def handle_join_request(group, user_id, action):
         """
         Xử lý yêu cầu tham gia nhóm (approve/reject).
@@ -252,11 +277,20 @@ class GroupService:
             if action == 'approve':
                 member_request.status = 'approved'
                 member_request.save()
+                create_notification(
+                    actor=None,
+                    recipient=member_request.user,
+                    verb_code="group_request_accept",
+                    target=group,
+                    link=f"/groups/{group.id}/",
+                )
+                sync_group_member_to_neo4j_on_commit(member_request)
             elif action == 'reject':
                 member_request.status = 'rejected'
                 # Hoặc bạn có thể dùng member_request.delete() nếu không muốn lưu lịch sử reject
                 member_request.save()
-                
+                sync_group_member_to_neo4j_on_commit(member_request)
+
             return True, "Xử lý thành công."
         except GroupMember.DoesNotExist:
             return False, "Không tìm thấy yêu cầu này."
@@ -381,6 +415,9 @@ class GroupMemberService:
             role="member",
             status="pending"
         )
+
+        sync_group_member_to_neo4j_on_commit(membership)
+
         create_notification(
             actor=user,
             recipient=group.owner,
@@ -403,7 +440,7 @@ class GroupMemberService:
             raise PermissionDenied("Only group owner or admin can reject members.")
         membership.status = "rejected"
         membership.save()
-
+        sync_group_member_to_neo4j_on_commit(membership)
     @staticmethod
     def approve_member(request_user, membership):
         #Admin and owner can approve members
@@ -417,6 +454,7 @@ class GroupMemberService:
             raise PermissionDenied("Only group owner or admin can approve members.")
         membership.status = "approved"
         membership.save()
+        sync_group_member_to_neo4j_on_commit(membership)
         create_notification(
             actor=request_user,
             recipient=membership.user,
@@ -438,7 +476,7 @@ class GroupMemberService:
             raise PermissionDenied("Only group owner or admin can ban members.")
         membership.status = "banned"
         membership.save()
-    
+        sync_group_member_to_neo4j_on_commit(membership)
     @staticmethod
     def remove_member(request_user, group, target_user_id):
         """Xóa thành viên khỏi nhóm (có thể xin vào lại)"""
@@ -448,7 +486,11 @@ class GroupMemberService:
             membership = GroupMember.objects.get(group=group, user_id=target_user_id)
             if membership.role == GroupRole.OWNER:
                 return False, "Không thể xóa chủ sở hữu."
+            
+            user_id = membership.user_id
+            group_id = membership.group_id
             membership.delete() # Xóa hẳn record để họ có thể join lại
+            delete_group_member_from_neo4j_on_commit(user_id, group_id)
             return True, "Đã xóa thành viên khỏi nhóm."
         except GroupMember.DoesNotExist:
             return False, "Thành viên không tồn tại."
@@ -460,7 +502,10 @@ class GroupMemberService:
             return False, "Bạn không có quyền."
         try:
             membership = GroupMember.objects.get(group=group, user_id=target_user_id, status='banned')
+            user_id = membership.user_id
+            group_id = membership.group_id
             membership.delete() # Xóa record banned để trạng thái trở thành 'none'
+            delete_group_member_from_neo4j_on_commit(user_id, group_id) 
             return True, "Đã gỡ chặn thành viên."
         except GroupMember.DoesNotExist:
             return False, "Thành viên không nằm trong danh sách chặn."
@@ -472,7 +517,11 @@ class GroupMemberService:
             raise PermissionDenied("You are not a member of this group.")
         if membership.role == GroupRole.OWNER:
             raise PermissionDenied("Group owner cannot leave the group. Please transfer ownership or delete the group.")
+        
+        user_id = membership.user_id
+        group_id = membership.group_id
         membership.delete()
+        delete_group_member_from_neo4j_on_commit(user_id, group_id)
 
     @staticmethod
     def get_group_members(group):
@@ -553,13 +602,18 @@ class GroupPostService:
         #check quyền user đăng nếu là admin | owner thì duyệt luôn, còn member thường thì để pending
         status = "approved" if GroupMemberService.is_group_admin_or_owner(user, group) else "pending"
         
-        GroupPost.objects.create(
+        group_post = GroupPost.objects.create(
             group=group,
             post=post,
             status=status,
             is_pinned=False,
             is_deleted=False
         )
+
+        transaction.on_commit(lambda: sync_post_node(post))
+        transaction.on_commit(lambda: sync_post_hashtags(post))
+        transaction.on_commit(lambda: sync_tagged_users(post))
+        sync_group_post_to_neo4j_on_commit(group_post)
 
         create_notification(
             actor=user,
@@ -620,6 +674,13 @@ class GroupPostService:
                 PostFile.objects.create(post=group_post.post, file=file, filename=file.name)
         
         group_post.post.save()
+        group_post.post.save()
+
+        transaction.on_commit(lambda: sync_post_node(group_post.post))
+        transaction.on_commit(lambda: sync_post_hashtags(group_post.post))
+        transaction.on_commit(lambda: sync_tagged_users(group_post.post))
+        sync_group_post_to_neo4j_on_commit(group_post)
+
         return group_post.post
     
     @staticmethod
@@ -636,6 +697,7 @@ class GroupPostService:
             raise PermissionDenied("Only group admins can pin posts.")
         group_post.is_pinned = True
         group_post.save()
+        transaction.on_commit(lambda: sync_group_post_to_neo4j_on_commit(group_post))
     
     @staticmethod
     def unpin_post(group_post, user):
@@ -643,28 +705,47 @@ class GroupPostService:
             raise PermissionDenied("Only group admins can unpin posts.")
         group_post.is_pinned = False
         group_post.save()
-    
+        transaction.on_commit(lambda: sync_group_post_to_neo4j_on_commit(group_post))
+
     @staticmethod
     def delete_post(group_post, user):
         if not GroupMemberService.is_admin(user, group_post.group):
             raise PermissionDenied("Only group admins can delete posts.")
+
         group_post.is_deleted = True
         group_post.status = "deleted"
-        group_post.save()
+        group_post.save(update_fields=["is_deleted", "status", "updated_at"])
+
+        group_post.post.is_deleted = True
+        group_post.post.save(update_fields=["is_deleted", "updated_at"])
+
+        sync_group_post_to_neo4j_on_commit(group_post)
+        transaction.on_commit(lambda: mark_post_deleted_in_neo4j(group_post.post_id))
 
     @staticmethod
     def approve_group_post(group_post, approver):
         if not GroupMemberService.is_admin(approver, group_post.group):
             raise PermissionDenied("Only group admins can approve posts.")
+
         group_post.status = "approved"
-        group_post.save()
+        group_post.approved_by = approver
+        group_post.approved_at = timezone.now()
+        group_post.save(update_fields=["status", "approved_by", "approved_at", "updated_at"])
+
+        transaction.on_commit(lambda: sync_post_node(group_post.post))
+        transaction.on_commit(lambda: sync_post_hashtags(group_post.post))
+        transaction.on_commit(lambda: sync_tagged_users(group_post.post))
+        sync_group_post_to_neo4j_on_commit(group_post)
 
     @staticmethod
     def reject_group_post(group_post, approver):
         if not GroupMemberService.is_admin(approver, group_post.group):
             raise PermissionDenied("Only group admins can reject posts.")
+
         group_post.status = "rejected"
-        group_post.save()
+        group_post.save(update_fields=["status", "updated_at"])
+
+        sync_group_post_to_neo4j_on_commit(group_post)
 
     @staticmethod
     def can_edit_post(user, group_post):

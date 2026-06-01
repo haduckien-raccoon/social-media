@@ -384,7 +384,8 @@ def send_friend_request(from_user, to_user):
         if existing.status == "rejected":
             existing.status = "pending"
             existing.save(update_fields=["status"])
-            sync_friend_request_to_neo4j(existing)
+            # sync_friend_request_to_neo4j(existing)
+            transaction.on_commit(lambda: sync_friend_request_to_neo4j(existing))
             create_notification(
                 actor=from_user,
                 recipient=to_user,
@@ -394,7 +395,8 @@ def send_friend_request(from_user, to_user):
             )
             return existing, "Request sent again."
 
-    sync_friend_request_to_neo4j(existing)
+    # sync_friend_request_to_neo4j(existing)
+    transaction.on_commit(lambda: sync_friend_request_to_neo4j(existing))
 
     create_notification(
         actor=from_user,
@@ -422,8 +424,10 @@ def accept_friend_request(user, request_id):
         Friend.objects.get_or_create(user=req.from_user, friend=req.to_user)
         Friend.objects.get_or_create(user=req.to_user, friend=req.from_user)
 
-        sync_friend_request_to_neo4j(req)
-        sync_friend_to_neo4j(req.from_user_id, req.to_user_id)
+        # sync_friend_request_to_neo4j(req)
+        # sync_friend_to_neo4j(req.from_user_id, req.to_user_id)
+        transaction.on_commit(lambda: sync_friend_request_to_neo4j(req))
+        transaction.on_commit(lambda: sync_friend_to_neo4j(req.from_user_id, req.to_user_id))
 
         create_notification(
             actor=user,
@@ -449,7 +453,8 @@ def reject_friend_request(user, request_id):
         )
         req.status = "rejected"
         req.save(update_fields=["status"])
-        sync_friend_request_to_neo4j(req)
+        # sync_friend_request_to_neo4j(req)
+        transaction.on_commit(lambda: sync_friend_request_to_neo4j(req))
         return True, "Friend request rejected."
     except FriendRequest.DoesNotExist:
         return False, "Request invalid."
@@ -464,9 +469,13 @@ def unfriend_user(user, target_user):
         Q(from_user=user, to_user=target_user) | Q(from_user=target_user, to_user=user)
     ).delete()
 
-    delete_friend_from_neo4j(user.id, target_user.id)
-    delete_friend_request_from_neo4j(user.id, target_user.id)
-    delete_friend_request_from_neo4j(target_user.id, user.id)
+    # delete_friend_from_neo4j(user.id, target_user.id)
+    # delete_friend_request_from_neo4j(user.id, target_user.id)
+    # delete_friend_request_from_neo4j(target_user.id, user.id)
+
+    transaction.on_commit(lambda: delete_friend_from_neo4j(user.id, target_user.id))
+    transaction.on_commit(lambda: delete_friend_request_from_neo4j(user.id, target_user.id))
+    transaction.on_commit(lambda: delete_friend_request_from_neo4j(target_user.id, user.id))
 
     return True, "Unfriended successfully."
 
@@ -480,7 +489,8 @@ def cancel_friend_request(user, request_id):
     from_user_id = req.from_user_id
     to_user_id = req.to_user_id
     req.delete()
-    delete_friend_request_from_neo4j(from_user_id, to_user_id)
+    # delete_friend_request_from_neo4j(from_user_id, to_user_id)
+    transaction.on_commit(lambda: delete_friend_request_from_neo4j(from_user_id, to_user_id))
     return True, "Request cancelled."
 
 
@@ -536,7 +546,8 @@ def block_user(blocker, blocked):
     ).delete()
 
     block, _ = Block.objects.get_or_create(blocker=blocker, blocked=blocked)
-    sync_block_to_neo4j(block)
+    # sync_block_to_neo4j(block)
+    transaction.on_commit(lambda: sync_block_to_neo4j(block))
     return True, "User blocked."
 
 
@@ -546,7 +557,8 @@ def unblock_user(blocker, blocked):
         return False, "User not blocked."
 
     Block.objects.filter(blocker=blocker, blocked=blocked).delete()
-    delete_block_from_neo4j(blocker.id, blocked.id)
+    # delete_block_from_neo4j(blocker.id, blocked.id)
+    transaction.on_commit(lambda: delete_block_from_neo4j(blocker.id, blocked.id))
     return True, "User unblocked."
 
 

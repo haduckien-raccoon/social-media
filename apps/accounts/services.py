@@ -11,6 +11,11 @@ from .models import User, EmailVerificationToken, UserProfile
 from django.conf import settings
 from django.db.models import Q
 from apps.friends.models import *
+from django.db import transaction
+from apps.accounts.neo4j_sync import (
+    sync_account_to_neo4j_on_commit,
+    sync_account_status_to_neo4j_on_commit,
+)
 
 JWT_SECRET = settings.SECRET_KEY
 JWT_ALGORITHM = 'HS256'
@@ -86,11 +91,17 @@ def register_user(username, email, password):
     # Gửi mail
     verify_url = build_absolute_url(f"/accounts/verify-email?token={token.token}")
     send_mail('Verify email', f'Click: {verify_url}', settings.EMAIL_HOST_USER, [user.email])
+    #Sync vào neo4j
+    sync_account_to_neo4j_on_commit(user)
 
     return user, None
 
 def create_user_profile(user):
     profile, created = UserProfile.objects.get_or_create(user=user)
+
+    if created:
+        # print(f"[DEBUG] Created new profile for user: {user.email}")
+        sync_account_to_neo4j_on_commit(user.id)
     return profile, created
 
 def verify_email_token(token_value):
@@ -124,6 +135,7 @@ def verify_email_token(token_value):
         token.user.is_active = True
         token.user.save()
         user = token.user
+        sync_account_to_neo4j_on_commit(token.user)
         # Tạo profile mặc định nếu chưa có
     except Exception as e:
         print(f"[ERROR] Lỗi khi cập nhật token/user: {e}")
@@ -235,6 +247,8 @@ def update_user_profile(user, full_name=None, address=None, town=None, province=
     profile.updated_at = timezone.now()
     profile.save()
 
+    sync_account_to_neo4j_on_commit(user)
+
     return profile
 
 def change_email(user, new_email):
@@ -255,6 +269,9 @@ def change_email(user, new_email):
     send_mail('Verify new email', f'Click: {verify_url}', settings.EMAIL_HOST_USER, [user.email])
     #đăng xuất user tất cả token
     RefreshToken.objects.filter(user=user).delete()
+
+    sync_account_to_neo4j_on_commit(user)
+    
     return True, "Email change initiated. Please verify your new email."
 
 def change_password(user, old_password, new_password):
@@ -271,26 +288,33 @@ def change_username(user, new_username):
 
     user.username = new_username
     user.save()
+
+    sync_account_to_neo4j_on_commit(user)
+    
     return True, "Username changed successfully"
 
 def deactivate_account(user):
     user.is_active = False
     user.save()
+    sync_account_status_to_neo4j_on_commit(user)
     return True, "Account deactivated successfully"
 
 def activate_account(user):
     user.is_active = True
     user.save()
+    sync_account_status_to_neo4j_on_commit(user)
     return True, "Account activated successfully"
 
 def ban_account(user):
     user.is_banned = True
     user.save()
+    sync_account_status_to_neo4j_on_commit(user)
     return True, "Account banned successfully"
 
 def unban_account(user):
     user.is_banned = False
     user.save()
+    sync_account_status_to_neo4j_on_commit(user)
     return True, "Account unbanned successfully"
     
 def get_user_by_email(email):

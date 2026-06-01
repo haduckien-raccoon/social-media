@@ -7,6 +7,8 @@ from apps.accounts.models import User
 # ==========================================
 
 class ModerationTargetType(models.TextChoices):
+	USER = "user", "User"
+	
 	POST = "post", "Post"
 	COMMENT = "comment", "Comment"
 
