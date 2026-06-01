@@ -29,4 +29,3 @@ numpy
 langid 
 requests
 neo4j==6.2.0
-neo4j-driver==5.28.4

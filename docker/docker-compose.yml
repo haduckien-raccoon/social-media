@@ -12,13 +12,18 @@ services:
       - "3306:3306"
     env_file:
       - .env.docker
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password_change_me}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-sudo_social}
+      MYSQL_USER: ${MYSQL_USER:-sudo_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-sudo_password}
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent || mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent",
+          'MYSQL_PWD="$${MYSQL_PASSWORD}" mysql -h 127.0.0.1 -u "$${MYSQL_USER}" "$${MYSQL_DATABASE}" -e "SELECT 1" >/dev/null 2>&1',
         ]
       interval: 10s
       timeout: 5s
@@ -42,7 +47,7 @@ services:
     image: neo4j:5.26-community
     restart: unless-stopped
     environment:
-      NEO4J_AUTH: ${NEO4J_AUTH:-neo4j/neo4j_password}
+      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-neo4j_password}
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
@@ -50,7 +55,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          'cypher-shell -a bolt://127.0.0.1:7687 -u "$${NEO4J_USERNAME:-neo4j}" -p "$${NEO4J_PASSWORD:-neo4j_password}" "RETURN 1" >/dev/null 2>&1',
+          'cypher-shell -a bolt://127.0.0.1:7687 -u "${NEO4J_USERNAME:-neo4j}" -p "${NEO4J_PASSWORD:-neo4j_password}" "RETURN 1" >/dev/null 2>&1',
         ]
       interval: 10s
       timeout: 10s
