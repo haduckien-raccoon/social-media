@@ -67,6 +67,10 @@ def api_search_users(request):
     #Nếu bị chặn thì không hiện ra kết quả
 
     users_qs = filter_blocked_users(users_qs, request.user)
+
+    #Nếu bị xóa, bị ban, bị unactivate, chưa verified thì không hiện ra kết quả
+    #is_deleted, is_banned, is_active, is_verified
+    users_qs = users_qs.filter(is_deleted=False, is_banned=False, is_active=True, is_verified=True)
     
     # Xử lý giới hạn số lượng
     if limit != 'all':

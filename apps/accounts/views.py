@@ -221,6 +221,10 @@ def profile_view(request, id=None, username=None):
             if block_status != "not_blocked":
                 raise Http404("Trang này không khả dụng hoặc người dùng không tồn tại.")
         # =================================================================
+        #Thêm logic check is_deleted, is_banned, is_active, is_verified: Nếu bị xóa, bị ban, bị unactivate, chưa verified thì báo không tìm thấy
+        if user.is_deleted or user.is_banned or not user.is_active or not user.is_verified:
+            raise Http404("Trang này không khả dụng hoặc người dùng không tồn tại.")
+        # =================================================================
 
         # posts + friends
         if user == current_user:
