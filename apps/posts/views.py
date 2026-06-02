@@ -726,72 +726,101 @@ def report_view(request):
     target_type = request.POST.get("target_type")
     target_id = request.POST.get("target_id")
     reason_id = request.POST.get("reason")
-    custom_reason = request.POST.get("custom_reason", "")
+    custom_reason = (request.POST.get("custom_reason", "") or "").strip()
     reporter = request.user
 
+    if not reporter.is_authenticated:
+        return JsonResponse({
+            "success": False,
+            "error": "Bạn cần đăng nhập để báo cáo nội dung."
+        }, status=401)
+
     if reason_id == "custom":
-        reason_id = ""
-    
+        reason_id = None
+
     if target_type not in [ReportTargetType.POST, ReportTargetType.COMMENT]:
         return JsonResponse({
             "success": False,
-            "error": "Invalid target type"}, 
-            status=400)
+            "error": "Invalid target type"
+        }, status=400)
+
     try:
         target_id_int = int(target_id)
     except (TypeError, ValueError):
         return JsonResponse({
             "success": False,
-            "error": "Invalid target ID"}, 
-            status=400)
-    
+            "error": "Invalid target ID"
+        }, status=400)
+
     target_post = None
     target_comment = None
+
     if target_type == ReportTargetType.POST:
         target_post = Post.objects.filter(
-            id=target_id_int, is_deleted=False
+            id=target_id_int,
+            is_deleted=False
         ).first()
+
         if not target_post:
             return JsonResponse({
                 "success": False,
-                "error": "Post not found"}, 
-                status=404)
+                "error": "Post not found"
+            }, status=404)
+
     else:
-        tarrget_comment = Comment.objects.select_related("post".filter(
-            id=target_id_int, is_deleted=False,
-            post__is_deleted=False,
-        )).first()
-        if not tarrget_comment:
+        # FIX QUAN TRỌNG: select_related("post") riêng, filter() riêng
+        target_comment = (
+            Comment.objects
+            .select_related("post")
+            .filter(
+                id=target_id_int,
+                is_deleted=False,
+                post__is_deleted=False,
+            )
+            .first()
+        )
+
+        if not target_comment:
             return JsonResponse({
                 "success": False,
-                "error": "Comment not found"}, 
-                status=404)
-        target_post = tarrget_comment.post
+                "error": "Comment not found"
+            }, status=404)
 
-    group_post = GroupPost.objects.select_related('group').filter(
-        post=target_post, is_deleted=False, status="approved"
-    ).first()
+        target_post = target_comment.post
 
-    #Case 1: Nội dung thuộc group -> đẩy vào GroupReport để admin/owner nhóm xử lý.
+    group_post = (
+        GroupPost.objects
+        .select_related("group")
+        .filter(
+            post=target_post,
+            is_deleted=False,
+            status="approved"
+        )
+        .first()
+    )
+
+    # Case 1: Nội dung thuộc group -> gửi cho admin/owner nhóm xử lý
     if group_post:
         reason_text = custom_reason
+
         if reason_id:
             reason_obj = ReportReason.objects.filter(id=reason_id).first()
             if not reason_obj:
                 return JsonResponse({
                     "success": False,
-                    "error": "Report reason not found"}, 
-                    status=404)
+                    "error": "Report reason not found"
+                }, status=404)
+
             reason_text = reason_obj.name
             if custom_reason:
                 reason_text = f"{reason_obj.name}: {custom_reason}"
-        
+
         if not reason_text:
             return JsonResponse({
                 "success": False,
-                "error": "Reason is required"}, 
-                status=400)
-        
+                "error": "Reason is required"
+            }, status=400)
+
         if target_type == ReportTargetType.POST:
             success, message = GroupService.report_content(
                 group=group_post.group,
@@ -804,30 +833,30 @@ def report_view(request):
                 group=group_post.group,
                 reporter=reporter,
                 reason=reason_text,
-                comment_id=tarrget_comment.id,
+                comment_id=target_comment.id,
             )
-        
+
         if not success:
             return JsonResponse({
                 "success": False,
                 "scope": "group",
                 "error": message
             }, status=400)
-        
+
         return JsonResponse({
             "success": True,
             "scope": "group",
-            "message": "Content reported to group admins for review."
+            "message": "Đã gửi báo cáo tới quản trị viên nhóm."
         })
-    
-    #Case 2: Nội dung không thuộc group -> đẩy vào hệ thống report chung để đội ngũ moderation xử lý.
+
+    # Case 2: Nội dung không thuộc group -> gửi report hệ thống
     try:
         report_target(
             user=reporter,
             target_type=target_type,
             target_id=target_id_int,
             reason_id=reason_id,
-            custom_reason=custom_reason
+            custom_reason=custom_reason,
         )
     except ValidationError as e:
         return JsonResponse({
@@ -835,10 +864,17 @@ def report_view(request):
             "scope": "platform",
             "error": str(e)
         }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "scope": "platform",
+            "error": f"Không thể gửi báo cáo lúc này: {str(e)}"
+        }, status=500)
+
     return JsonResponse({
-        "success": True,        
+        "success": True,
         "scope": "platform",
-        "message": "Content reported to moderation team for review."
+        "message": "Đã gửi báo cáo tới đội ngũ kiểm duyệt."
     })
 
 @require_POST

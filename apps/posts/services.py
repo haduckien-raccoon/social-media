@@ -948,27 +948,46 @@ def toggle_hide_counts(post, user, hide_comment=None, hide_reaction=None):
 
 def report_target(user, target_type, target_id, reason_id=None, custom_reason=""):
     """Báo cáo bài viết hoặc bình luận"""
+    custom_reason = (custom_reason or "").strip()
+
     reason = None
     if reason_id:
         reason = ReportReason.objects.filter(id=reason_id).first()
+        if not reason:
+            raise ValidationError("Report reason not found.")
 
-    #dùng ai service để phân tích nội dung báo cáo
-    #tìm nội dung của bài viết bình luận bị báo cáo
-    #B1 kiểm tra xem bài viết đã có report nào đã gửi rồi AI_score chưa, nếu có rồi thì không cần gọi service nữa
-    existing_report = Report.objects.filter(target_type=target_type, target_id=target_id).order_by('-created_at').first()
+    if not reason and not custom_reason:
+        raise ValidationError("Reason is required.")
+
+    ai_score = 0
+
+    existing_report = (
+        Report.objects
+        .filter(target_type=target_type, target_id=target_id)
+        .order_by("-created_at")
+        .first()
+    )
+
     if existing_report and existing_report.ai_score is not None:
-        ai_result = {"score": existing_report.ai_score}
+        ai_score = existing_report.ai_score
     else:
-        target_content = get_target_content(target_type, target_id)
-        ai_result = ai_help_report(target_content)
+        try:
+            target_content = get_target_content(target_type, target_id)
+            ai_result = ai_help_report(target_content) or {}
+            ai_score = float(ai_result.get("score", 0) or 0)
+        except Exception as e:
+            print(f"[REPORT][AI_ERROR] target_type={target_type}, target_id={target_id}, error={e}")
+            ai_score = 0
+
     report = Report.objects.create(
         reporter=user,
         target_type=target_type,
         target_id=target_id,
         reason=reason,
         custom_reason=custom_reason,
-        ai_score = ai_result.get("score", 0),
+        ai_score=ai_score,
     )
+
     return report
 
 def get_target_content(target_type, target_id):
