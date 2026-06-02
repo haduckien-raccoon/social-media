@@ -3,53 +3,317 @@
 {% block title %}Groups • SUDO{% endblock %}
 
 {% block content %}
-<div style="width: 100%; max-width: 800px;">
-    <h2 style="margin-bottom: 20px;">Groups</h2>
+<style>
+    .groups-page {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+    }
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 20px; flex-wrap: wrap;">
-        
-        <form method="GET" action="" style="display: flex; gap: 8px; flex: 1; max-width: 400px;">
-            <input type="text" name="q" placeholder="Search groups to join..." value="{{ request.GET.q }}" 
-                   style="width: 100%; padding: 10px 16px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; background: var(--bg-body);">
-            <button type="submit" style="padding: 10px 16px; background: var(--btn-blue-bg); color: #fff; border-radius: 8px; font-weight: bold;">
+    .groups-title {
+        margin-bottom: 20px;
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--text-main);
+    }
+
+    .groups-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .groups-search-form {
+        display: flex;
+        gap: 8px;
+        flex: 1;
+        max-width: 460px;
+    }
+
+    .groups-search-input {
+        width: 100%;
+        padding: 10px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        outline: none;
+        background: var(--bg-body);
+        color: var(--text-main);
+    }
+
+    .groups-search-btn,
+    .groups-create-btn {
+        border: 0;
+        text-decoration: none;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .groups-search-btn {
+        background: var(--btn-blue-bg);
+        color: #fff;
+    }
+
+    .groups-create-btn {
+        background: var(--btn-grey-bg);
+        color: var(--text-main);
+    }
+
+    .groups-clear-link {
+        padding: 10px;
+        color: var(--text-grey);
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+    }
+
+    .groups-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .group-card {
+        padding: 16px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-white);
+        border-radius: 12px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .group-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .group-name-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .group-name {
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--text-main);
+        text-decoration: none;
+        overflow-wrap: anywhere;
+    }
+
+    .group-name:hover {
+        text-decoration: underline;
+    }
+
+    .group-meta {
+        margin-top: 6px;
+        color: var(--text-grey);
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .group-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .group-action-link,
+    .group-action-disabled,
+    .group-status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 34px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .group-action-join {
+        background: rgba(24, 119, 242, 0.12);
+        color: var(--btn-blue-bg);
+    }
+
+    .group-action-leave {
+        background: rgba(237, 73, 86, 0.12);
+        color: #ed4956;
+    }
+
+    .group-action-disabled {
+        background: var(--btn-grey-bg);
+        color: var(--text-grey);
+        cursor: default;
+    }
+
+    .group-status-owner {
+        background: rgba(34, 197, 94, 0.14);
+        color: #16a34a;
+    }
+
+    .group-status-member {
+        background: rgba(24, 119, 242, 0.12);
+        color: var(--btn-blue-bg);
+    }
+
+    .group-status-pending {
+        background: rgba(245, 158, 11, 0.14);
+        color: #b45309;
+    }
+
+    .group-status-rejected,
+    .group-status-banned {
+        background: rgba(237, 73, 86, 0.12);
+        color: #ed4956;
+    }
+
+    .group-empty {
+        padding: 20px;
+        text-align: center;
+        color: var(--text-grey);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        background: var(--bg-white);
+    }
+
+    @media (max-width: 576px) {
+        .groups-search-form {
+            max-width: none;
+            width: 100%;
+        }
+
+        .group-card {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .group-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+</style>
+
+<div class="groups-page">
+    <h2 class="groups-title">Groups</h2>
+
+    <div class="groups-toolbar">
+        <form method="GET" action="" class="groups-search-form">
+            <input
+                type="text"
+                name="q"
+                placeholder="Search groups to join..."
+                value="{{ request.GET.q }}"
+                class="groups-search-input"
+            >
+            <button type="submit" class="groups-search-btn" aria-label="Search groups">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </button>
             {% if request.GET.q %}
-                <a href="{% url 'groups:group_list' %}" style="padding: 10px; color: var(--text-grey); display: flex; align-items: center;">
-                    Clear
-                </a>
+                <a href="{% url 'groups:group_list' %}" class="groups-clear-link">Clear</a>
             {% endif %}
         </form>
 
-        <a href="{% url 'groups:create_group' %}" style="padding: 10px 16px; background: var(--btn-grey-bg); color: var(--text-main); border-radius: 8px; font-weight: 600;">
+        <a href="{% url 'groups:create_group' %}" class="groups-create-btn">
             <i class="fa-solid fa-plus"></i> Create Group
         </a>
     </div>
 
-    <ul style="list-style: none; padding: 0;">
+    <ul class="groups-list">
         {% for group in groups %}
-            <li style="padding: 16px; border: 1px solid var(--border-color); background: var(--bg-white); border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-                <a href="{% url 'groups:group_detail' group.pk %}" style="font-weight: 600; font-size: 16px;">
-                    {{ group.name }}
-                </a>
+            <li class="group-card">
+                <div class="group-info">
+                    <div class="group-name-row">
+                        <a href="{% url 'groups:group_detail' group.pk %}" class="group-name">
+                            {{ group.name }}
+                        </a>
 
-                {% comment %} {% if user.is_authenticated %} {% endcomment %}
-                    {# 🚫 Owner không thấy Join/Leave #}
-                    {% if group.owner != user %}
-                        {% if membership %}
-                            {% if membership.status == "approved" %}
-                                <a href="{% url 'groups:leave_group' group.pk %}" style="color: #ed4956; font-weight: 600; font-size: 14px;">Leave</a>
-                            {% elif membership.status == "pending" %}
-                                <span style="color: var(--text-grey); font-weight: 600; font-size: 14px;">Pending</span>
-                            {% endif %}
-                        {% else %}
-                            <a href="{% url 'groups:join_group' group.pk %}" style="color: var(--btn-blue-bg); font-weight: 600; font-size: 14px;">Join</a>
+                        {% if group.viewer_is_owner %}
+                            <span class="group-status-badge group-status-owner">
+                                <i class="fa-solid fa-crown"></i> My group
+                            </span>
+                        {% elif group.viewer_membership_status == "approved" %}
+                            <span class="group-status-badge group-status-member">
+                                <i class="fa-solid fa-circle-check"></i>
+                                {% if group.viewer_membership_role == "admin" %}Admin{% else %}Member{% endif %}
+                            </span>
+                        {% elif group.viewer_membership_status == "pending" %}
+                            <span class="group-status-badge group-status-pending">
+                                <i class="fa-solid fa-clock"></i> Pending
+                            </span>
+                        {% elif group.viewer_membership_status == "rejected" %}
+                            <span class="group-status-badge group-status-rejected">
+                                <i class="fa-solid fa-circle-xmark"></i> Rejected
+                            </span>
+                        {% elif group.viewer_membership_status == "banned" %}
+                            <span class="group-status-badge group-status-banned">
+                                <i class="fa-solid fa-ban"></i> Banned
+                            </span>
                         {% endif %}
-                    {% endif %}
-                {% comment %} {% endif %} {% endcomment %}
+                    </div>
+
+                    <div class="group-meta">
+                        {% if group.is_private %}
+                            <span><i class="fa-solid fa-lock"></i> Private group</span>
+                        {% else %}
+                            <span><i class="fa-solid fa-globe"></i> Public group</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if user.is_authenticated %}
+                    <div class="group-actions">
+                        {% if group.viewer_is_owner %}
+                            <a href="{% url 'groups:group_detail' group.pk %}" class="group-action-link group-action-join">
+                                <i class="fa-solid fa-arrow-right"></i> View group
+                            </a>
+                        {% elif group.viewer_membership_status == "approved" %}
+                            <a href="{% url 'groups:leave_group' group.pk %}" class="group-action-link group-action-leave">
+                                <i class="fa-solid fa-right-from-bracket"></i> Leave
+                            </a>
+                        {% elif group.viewer_membership_status == "pending" %}
+                            <span class="group-action-disabled">
+                                <i class="fa-solid fa-hourglass-half"></i> Waiting approval
+                            </span>
+                        {% elif group.viewer_membership_status == "banned" %}
+                            <span class="group-action-disabled">
+                                <i class="fa-solid fa-ban"></i> Cannot join
+                            </span>
+                        {% elif group.viewer_membership_status == "rejected" %}
+                            <a href="{% url 'groups:join_group' group.pk %}" class="group-action-link group-action-join">
+                                <i class="fa-solid fa-paper-plane"></i> Request again
+                            </a>
+                        {% else %}
+                            <a href="{% url 'groups:join_group' group.pk %}" class="group-action-link group-action-join">
+                                <i class="fa-solid fa-user-plus"></i> Join
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
             </li>
         {% empty %}
-            <li style="padding: 20px; text-align: center; color: var(--text-grey); border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-white);">
+            <li class="group-empty">
                 {% if request.GET.q %}
                     No groups found matching "<strong>{{ request.GET.q }}</strong>".
                 {% else %}
