@@ -143,9 +143,14 @@ def feed_view(request):
         mark_feed_posts_seen(request.user.id, rendered_post_ids)
 
     if request.GET.get("ajax") == "1":
+        # html = render_to_string(
+        #     "posts/partials/post_list_chunk.html",
+        #     {"posts": post_list, "request": request},
+        # )
         html = render_to_string(
             "posts/partials/post_list_chunk.html",
-            {"posts": post_list, "request": request},
+            {"posts": post_list},
+            request=request,
         )
         return JsonResponse({
             "html": html,
@@ -245,9 +250,14 @@ def hashtag_feed_view(request, tag):
         post.can_share = can_share_post(post)
 
     if request.GET.get("ajax") == "1":
+        # html = render_to_string(
+        #     "posts/partials/post_list_chunk.html",
+        #     {"posts": post_list, "request": request}
+        # )
         html = render_to_string(
             "posts/partials/post_list_chunk.html",
-            {"posts": post_list, "request": request}
+            {"posts": post_list},
+            request=request,
         )
         return JsonResponse({
             "html": html,
