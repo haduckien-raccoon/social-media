@@ -81,17 +81,35 @@ INSTALLED_APPS = [
 # ---------------------------
 # MIDDLEWARE
 # ---------------------------
+# MIDDLEWARE = [
+#     "corsheaders.middleware.CorsMiddleware",
+#     "django.middleware.common.CommonMiddleware",
+#     "django.middleware.security.SecurityMiddleware",
+#     "django.contrib.sessions.middleware.SessionMiddleware",
+#     "django.middleware.csrf.CsrfViewMiddleware",
+#     "apps.middleware.jwt_auth.JWTAuthMiddleware",
+#     "django.contrib.auth.middleware.AuthenticationMiddleware",
+#     "django.contrib.messages.middleware.MessageMiddleware",
+#     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+#     'apps.admin.middleware.SystemLoggingMiddleware',
+# ]
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
+
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+
     "django.middleware.csrf.CsrfViewMiddleware",
-    "apps.middleware.jwt_auth.JWTAuthMiddleware",
+
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+
+    "apps.middleware.jwt_auth.JWTAuthMiddleware",  # giữ nhưng để sau auth
+
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'apps.admin.middleware.SystemLoggingMiddleware',
+
+    "apps.admin.middleware.SystemLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
