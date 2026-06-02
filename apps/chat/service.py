@@ -510,6 +510,7 @@ from apps.chat.models import (
 
 
 MAX_ATTACHMENT_SIZE_BYTES = 20 * 1024 * 1024
+CHAT_INACTIVE_MESSAGE = "Tài khoản này không còn hoạt động."
 
 
 def send_ws_message(group_name, message_type, data):
@@ -563,6 +564,8 @@ def _get_full_name(user: User) -> str:
 	return user.username
 
 
+
+
 def get_user_chat_block_statuses(user: User) -> list[str]:
 	"""Return account statuses that make this user unavailable for chat."""
 	statuses: list[str] = []
@@ -582,8 +585,7 @@ def get_user_chat_block_statuses(user: User) -> list[str]:
 def _chat_block_reason(statuses: list[str], *, for_current_user: bool = False) -> str:
 	if not statuses:
 		return ""
-	subject = "Tài khoản của bạn" if for_current_user else "Người dùng hiện tại"
-	return f"{subject} bị: {', '.join(statuses)} nên không thể nhắn tin."
+	return CHAT_INACTIVE_MESSAGE
 
 
 def chat_status_for_user(user: User, *, for_current_user: bool = False) -> dict:
@@ -631,18 +633,9 @@ def get_conversation_chat_block_payload(user: User, conversation: Conversation) 
 	if not blocked_users:
 		return {"blocked": False, "reason": "", "blocked_users": []}
 
-	if len(blocked_users) == 1:
-		reason = blocked_users[0]["reason"]
-	else:
-		details = "; ".join(
-			f"{blocked_user['full_name']} bị: {blocked_user['status_text']}"
-			for blocked_user in blocked_users
-		)
-		reason = f"Không thể nhắn tin vì {details}."
-
 	return {
 		"blocked": True,
-		"reason": reason,
+		"reason": CHAT_INACTIVE_MESSAGE,
 		"blocked_users": blocked_users,
 	}
 
@@ -651,8 +644,6 @@ def ensure_conversation_can_send_message(user: User, conversation: Conversation)
 	block_payload = get_conversation_chat_block_payload(user, conversation)
 	if block_payload["blocked"]:
 		raise PermissionDenied(block_payload["reason"])
-
-
 
 
 def _validate_attachments(attachments: Iterable) -> list:

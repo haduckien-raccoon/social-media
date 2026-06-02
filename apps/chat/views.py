@@ -557,6 +557,8 @@ def _display_name(user: User) -> str:
 	return user.username
 
 
+
+
 def _user_chat_payload(user: User, *, conversation_id: int | None = None) -> dict:
 	chat_status = chat_status_for_user(user)
 	payload = {
@@ -980,7 +982,6 @@ def send_first_message_view(request, friend_id):
 			break
 
 	if conversation_payload is None:
-		chat_block = get_conversation_chat_block_payload(request.user, conversation)
 		conversation_payload = {
 			"id": conversation.id,
 			"participants": [_user_chat_payload(friend_user)],
@@ -988,9 +989,9 @@ def send_first_message_view(request, friend_id):
 			"created_at": conversation.created_at.isoformat(),
 			"unread_count": 0,
 			"last_message": message_payload,
-			"chat_block": chat_block,
-			"can_send_message": not chat_block["blocked"],
-			"blocked_reason": chat_block["reason"],
+			"chat_block": get_conversation_chat_block_payload(request.user, conversation),
+			"can_send_message": True,
+			"blocked_reason": "",
 		}
 
 	return JsonResponse(
