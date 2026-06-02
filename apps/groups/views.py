@@ -151,7 +151,8 @@ def create_post_in_group(request, group_id):
             messages.error(request, "Post must include content, images, or files.")
     
     create_user_profile(request.user)
-    friends = list_people_tag(request.user)
+    # friends = list_people_tag(request.user)
+    friends = people_can_tag_in_group_post(request.user, group)
     for friend in friends:
         create_user_profile(friend)
     return render(request, "groups/create_post.html", {"group": group, "friends": friends})

@@ -581,7 +581,12 @@ def edit_post_view(request, post_id):
         return redirect("posts:post_detail", post_id=post.id)
 
     profile, _ = create_user_profile(request.user)
-    friends = list_people_tag(request.user)
+    #nếu bài cá nhân thì như này
+    if not is_group_post:
+        friends = list_people_tag(request.user)
+    else:
+        #nếu bài thuộc group thì chỉ được tag những người trong group đó
+        friends = people_can_tag_in_group_post(request.user, group_post.group)
 
     for friend in friends:
         create_user_profile(friend)

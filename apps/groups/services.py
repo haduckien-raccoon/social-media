@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 
+from apps.friends.models import Block
 from apps.groups.models import *
 from apps.posts.services import *
 from apps.posts.models import *
@@ -790,3 +791,19 @@ def get_group_list(user, query=None):
         
     # 3. Fallback: Nếu không rơi vào 2 trường hợp trên -> Trả về 20 group đầu tiên
     return Group.objects.all()[:20]
+
+def people_can_tag_in_group_post(user, group):
+    """Kiểm tra xem user có thể tag ai trong bài viết nhóm không (dựa trên thành viên cùng nhóm)"""
+    if not GroupService.is_member(user, group):
+        return User.objects.none()  # Nếu không phải thành viên, không thể tag ai cả
+    # Lấy danh sách thành viên cùng nhóm (trừ bản thân)
+    list_member =  User.objects.filter(
+        groupmember__group=group,
+        groupmember__status="approved"
+    ).exclude(id=user.id).distinct()
+    #Check thêm là không được block lẫn nhau:
+    blocked_by_user = set(Block.objects.filter(blocker=user).values_list('blocked_id', flat=True))
+    blocked_user = set(Block.objects.filter(blocked=user).values_list('blocker_id', flat=True))
+    blocked_ids = blocked_by_user.union(blocked_user)
+    #Trả về 1 cái list tương tự return list(User.objects.filter(id__in=friend_ids))
+    return list_member.exclude(id__in=blocked_ids)
