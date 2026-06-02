@@ -7,7 +7,7 @@
             <img src="{{ post.author.profile.avatar.url|default:'images/avatars/normal.jpg' }}" class="p-avatar">
         </a>
         <div class="p-info">
-            <h5>
+            <h5 class="post-title-text js-expandable-text">
                 <a href="{% url 'accounts:profile-username' post.author.username %}">{{ post.author.username }}</a>
                 {% if group_post %}
                     <span class="text-muted">-></span>
@@ -27,6 +27,7 @@
                     {% endif %}
                 {% endif %}
             </h5>
+            <button type="button" class="see-more-btn" data-more-text="Xem thêm" data-less-text="Ẩn bớt">Xem thêm</button>
             <div class="p-time">
                 <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span> •
                 {% if post.group_post_context %}
@@ -51,7 +52,10 @@
         </div>
     </div>
 
-    <div class="post-content">{{ post.content|linebreaksbr }}</div>
+    {% if post.content %}
+    <div class="post-content js-expandable-text">{{ post.content|linebreaksbr }}</div>
+    <button type="button" class="see-more-btn" data-more-text="Xem thêm" data-less-text="Ẩn bớt">Xem thêm</button>
+    {% endif %}
     {% if post.hashtags.all %}
     <div class="post-hashtags">
         {% for hashtag in post.hashtags.all %}
@@ -71,9 +75,12 @@
                 <div class="small text-muted js-relative-time" data-time-iso="{{ post.original_post_obj.created_at|date:'c' }}">{{ post.original_post_obj.created_at|timesince }} trước</div>
             </div>
         </div>
+        {% if post.original_post_obj.content %}
         <div class="p-3">
-            {{ post.original_post_obj.content|truncatechars:150 }}
+            <div class="js-expandable-text">{{ post.original_post_obj.content|linebreaksbr }}</div>
+            <button type="button" class="see-more-btn" data-more-text="Xem thêm" data-less-text="Ẩn bớt">Xem thêm</button>
         </div>
+        {% endif %}
         {% if post.original_post_obj.images.all %}
             {% with total=post.original_post_obj.images.count %}
             <div class="img-grid grid-{% if total > 4 %}4{% else %}{{ total }}{% endif %}">

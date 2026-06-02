@@ -1,3 +1,33 @@
+<style>
+    /* Thu gọn tiêu đề/nội dung bài viết dài */
+    .js-expandable-text {
+        overflow: hidden;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+    .js-expandable-text.is-collapsed {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+    .js-expandable-text.is-expanded {
+        display: block;
+    }
+    .see-more-btn {
+        display: none;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #65676b;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .see-more-btn:hover {
+        color: #050505;
+        text-decoration: underline;
+    }
+</style>
 
 <div class="card mb-3 border-0 shadow-sm" id="post-{{ post.id }}">
     <!-- Post Header -->
@@ -43,7 +73,8 @@
     <!-- Post Content -->
     <div class="card-body">
         {% if post.content %}
-        <p class="card-text">{{ post.content|linebreaks }}</p>
+        <div class="card-text js-expandable-text">{{ post.content|linebreaks }}</div>
+        <button type="button" class="see-more-btn" data-more-text="Xem thêm" data-less-text="Ẩn bớt">Xem thêm</button>
         {% endif %}
 
         <!-- Post Images -->
@@ -195,6 +226,43 @@ function getCookie(name) {
 
 // Global CSRF token
 const csrftoken = getCookie('csrftoken');
+
+// ========================================
+// 1.1. EXPANDABLE POST CONTENT
+// ========================================
+function initExpandablePostTexts(root = document) {
+    root.querySelectorAll('.js-expandable-text').forEach((textEl) => {
+        if (textEl.dataset.expandReady === '1') return;
+
+        const btn = textEl.nextElementSibling;
+        if (!btn || !btn.classList.contains('see-more-btn')) return;
+
+        textEl.classList.add('is-collapsed');
+        btn.style.display = 'none';
+
+        requestAnimationFrame(() => {
+            const hasOverflow = textEl.scrollHeight > textEl.clientHeight + 2;
+            if (!hasOverflow) return;
+
+            textEl.dataset.expandReady = '1';
+            btn.style.display = 'inline-block';
+            btn.setAttribute('aria-expanded', 'false');
+
+            btn.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const isExpanded = textEl.classList.toggle('is-expanded');
+                textEl.classList.toggle('is-collapsed', !isExpanded);
+
+                btn.innerText = isExpanded
+                    ? (btn.dataset.lessText || 'Ẩn bớt')
+                    : (btn.dataset.moreText || 'Xem thêm');
+                btn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+            });
+        });
+    });
+}
 
 // ========================================
 // 2. REACTION FUNCTIONS
@@ -508,6 +576,8 @@ function escapeHtml(text) {
 // 6. GLOBAL EVENT LISTENERS
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
+    initExpandablePostTexts(document);
+
     // Close reaction pickers when clicking outside
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.reaction-btn') && !e.target.closest('.reaction-picker')) {
