@@ -54,6 +54,14 @@ html, body { height:100%; width:100%; overflow-x:hidden; background:var(--bg-lig
 .setting-button.danger { color: var(--text-dark); }
 .setting-button.danger:hover { border-color: #ff4d4f; box-shadow: var(--shadow); transform: translateY(-2px); }
 .setting-button.danger strong { color: #d9363e; }
+.setting-card.locked { cursor: not-allowed; background: #f8f9fa; opacity: 0.9; }
+.setting-card.locked:hover { border-color: var(--border-color); box-shadow: none; transform: none; }
+.setting-card.locked .setting-icon { color: #1677ff; background: #e6f4ff; }
+.setting-card.locked strong { color: #1677ff; }
+.settings-messages { width: 100%; max-width: 800px; margin: -15px 0 20px; }
+.settings-alert { padding: 12px 14px; border-radius: 10px; font-size: 14px; margin-bottom: 10px; border: 1px solid var(--border-color); background: #f8f9fa; }
+.settings-alert.error { color: #a8071a; background: #fff1f0; border-color: #ffa39e; }
+.settings-alert.success { color: #135200; background: #f6ffed; border-color: #b7eb8f; }
 
 @media (max-width:768px) {
     body { flex-direction:column; }
@@ -93,6 +101,14 @@ html, body { height:100%; width:100%; overflow-x:hidden; background:var(--bg-lig
         <h1 class="page-title">Cài đặt</h1>
     </div>
 
+    {% if messages %}
+    <div class="settings-messages">
+        {% for message in messages %}
+        <div class="settings-alert {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="settings-grid">
         <a href="{% url 'accounts:edit_profile' %}" class="setting-card">
             <div class="setting-icon"><i class="fa-solid fa-user-pen"></i></div>
@@ -110,6 +126,15 @@ html, body { height:100%; width:100%; overflow-x:hidden; background:var(--bg-lig
             </div>
         </a>
 
+        {% if user.is_staff %}
+        <div class="setting-card locked">
+            <div class="setting-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="setting-info">
+                <h3><strong>Tài khoản quản lý</strong></h3>
+                <p>Tài khoản admin không được phép xóa để bảo vệ quyền quản trị hệ thống.</p>
+            </div>
+        </div>
+        {% else %}
         <form
             method="POST"
             action="{% url 'accounts:delete_account' %}"
@@ -125,6 +150,7 @@ html, body { height:100%; width:100%; overflow-x:hidden; background:var(--bg-lig
                 </div>
             </button>
         </form>
+        {% endif %}
     </div>
 </main>
 

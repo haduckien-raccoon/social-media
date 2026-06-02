@@ -381,6 +381,8 @@ def soft_delete_account(user):
     - Neo4j được sync trạng thái inactive/deleted
     """
     now = timezone.now()
+    if getattr(user, "is_staff", False):
+        return False, "Tài khoản quản lý không được phép xóa."
 
     if getattr(user, "is_deleted", False):
         RefreshToken.objects.filter(user=user).delete()

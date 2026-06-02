@@ -586,7 +586,10 @@ def delete_my_account_view(request):
         if getattr(user, "is_deleted", False):
             return redirect("accounts:login")
 
-        soft_delete_account(user)
+        success, message = soft_delete_account(user)
+        if not success:
+            messages.error(request, message)
+            return redirect("accounts:settings")
 
         response = redirect("accounts:login")
         response.delete_cookie("access")
