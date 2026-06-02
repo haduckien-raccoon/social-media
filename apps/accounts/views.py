@@ -18,6 +18,31 @@ from apps.accounts.services import *
 from apps.posts.services import *
 from apps.friends.services import *
 
+
+def _profile_form_value(value):
+    if value is None:
+        return ""
+
+    value = str(value).strip()
+    if value.lower() in {"none", "null"}:
+        return ""
+
+    return value
+
+
+def build_profile_form_data(profile):
+    return {
+        "full_name": _profile_form_value(profile.full_name),
+        "bio": _profile_form_value(profile.bio),
+        "address": _profile_form_value(profile.address),
+        "town": _profile_form_value(profile.town),
+        "province": _profile_form_value(profile.province),
+        "nationality": _profile_form_value(profile.nationality),
+        "school": _profile_form_value(profile.school),
+        "phone_number": _profile_form_value(profile.phone_number),
+    }
+
+
 @csrf_exempt
 def register_view(request):
     if request.method == "GET":
@@ -256,33 +281,29 @@ def edit_profile_view(request):
         user_id = payload.get("user_id")
         user = User.objects.get(id=user_id)
         profile = get_object_or_404(UserProfile, user=user)
-        print(profile.birth_day)
 
         if request.method == "GET":
             return render(request, "accounts/edit_profile.html", {
                 "user": user,
-                "profile": profile
+                "profile": profile,
+                "profile_form": build_profile_form_data(profile),
             })
 
         # POST: cập nhật profile
-        # 1. Cập nhật text fields
-        full_name = request.POST.get("full_name", profile.full_name)
-        bio = request.POST.get("bio", profile.bio)
-        address = request.POST.get("address", profile.address)
-        town = request.POST.get("town", profile.town)
-        province = request.POST.get("province", profile.province)
-        nationality = request.POST.get("nationality", profile.nationality)
-        school = request.POST.get("school", profile.school)
-        phone_number = request.POST.get("phone_number", profile.phone_number)
-        birth_day = request.POST.get("birth_day")
-        if birth_day:
-            profile.birth_day = birth_day  # Django tự parse date string "YYYY-MM-DD"
-        print(profile.birth_day)
-        print(birth_day)
-        # 2. Cập nhật avatar nếu có upload
+        full_name = request.POST.get("full_name", "")
+        bio = request.POST.get("bio", "")
+        address = request.POST.get("address", "")
+        town = request.POST.get("town", "")
+        province = request.POST.get("province", "")
+        nationality = request.POST.get("nationality", "")
+        school = request.POST.get("school", "")
+        phone_number = request.POST.get("phone_number", "")
+
+        # Không nhập ngày sinh thì tự lưu mặc định 01/01/2000.
+        birth_day = request.POST.get("birth_day", "").strip() or "2000-01-01"
+
+        # Cập nhật avatar nếu có upload.
         avatar = request.FILES.get("avatar")
-        if avatar:
-            profile.avatar = avatar
 
         profile = update_user_profile(
             user,

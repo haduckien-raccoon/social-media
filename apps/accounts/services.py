@@ -1,6 +1,6 @@
 from os import error
 import jwt
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from django.conf import settings
 from .models import RefreshToken, PasswordResetToken
 from django.utils import timezone
@@ -101,7 +101,7 @@ def create_user_profile(user):
 
     if created:
         # print(f"[DEBUG] Created new profile for user: {user.email}")
-        sync_account_to_neo4j_on_commit(user.id)
+        sync_account_to_neo4j_on_commit(user)
     return profile, created
 
 def verify_email_token(token_value):
@@ -221,26 +221,70 @@ def get_profile_by_user_id(user_id):
     except UserProfile.DoesNotExist:
         return None
 
+DEFAULT_PROFILE_BIRTH_DAY = date(2000, 1, 1)
+EMPTY_TEXT_VALUES = {"none", "null"}
+
+
+def normalize_profile_text(value):
+    """
+    Chuẩn hóa input text từ form profile.
+
+    - None thật của Python -> ""
+    - Chuỗi "None" / "null" đã lỡ lưu trước đó -> ""
+    - Chuỗi bình thường -> strip hai đầu
+    """
+    if value is None:
+        return ""
+
+    value = str(value).strip()
+    if value.lower() in EMPTY_TEXT_VALUES:
+        return ""
+
+    return value
+
+
+def normalize_profile_birth_day(value):
+    """
+    DateField không nhận chuỗi rỗng.
+    Nếu user không nhập ngày sinh thì tự lưu 01/01/2000.
+    """
+    if isinstance(value, datetime):
+        return value.date()
+
+    if isinstance(value, date):
+        return value
+
+    value = normalize_profile_text(value)
+    if not value:
+        return DEFAULT_PROFILE_BIRTH_DAY
+
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError:
+        return DEFAULT_PROFILE_BIRTH_DAY
+
+
 def update_user_profile(user, full_name=None, address=None, town=None, province=None, nationality=None, school=None, phone_number=None, birth_day=None, bio=None, avatar=None):
     profile, created = UserProfile.objects.get_or_create(user=user)
+
     if full_name is not None:
-        profile.full_name = full_name
+        profile.full_name = normalize_profile_text(full_name)
     if address is not None:
-        profile.address = address
+        profile.address = normalize_profile_text(address)
     if town is not None:
-        profile.town = town
+        profile.town = normalize_profile_text(town)
     if province is not None:
-        profile.province = province
+        profile.province = normalize_profile_text(province)
     if nationality is not None:
-        profile.nationality = nationality
+        profile.nationality = normalize_profile_text(nationality)
     if school is not None:
-        profile.school = school
+        profile.school = normalize_profile_text(school)
     if phone_number is not None:
-        profile.phone_number = phone_number
+        profile.phone_number = normalize_profile_text(phone_number)
     if birth_day is not None:
-        profile.birth_day = birth_day
+        profile.birth_day = normalize_profile_birth_day(birth_day)
     if bio is not None:
-        profile.bio = bio
+        profile.bio = normalize_profile_text(bio)
     if avatar is not None:
         profile.avatar = avatar
 
