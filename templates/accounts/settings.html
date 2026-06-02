@@ -72,7 +72,7 @@ html, body { height:100%; width:100%; overflow-x:hidden; background:var(--bg-lig
 </head>
 <body>
 
-<aside class="icon-sidebar">
+{% comment %} <aside class="icon-sidebar">
     <div class="logo-circle">SD</div>
     <div class="nav-icons">
         <a href="/" class="nav-icon"><i class="fa-solid fa-house"></i></a>
@@ -80,7 +80,7 @@ html, body { height:100%; width:100%; overflow-x:hidden; background:var(--bg-lig
         <i class="fa-regular fa-user nav-icon" onclick="location.href='{% url 'accounts:profile' %}'"></i>
     </div>
     <div class="settings-icon-bottom"><i class="fa-solid fa-gear"></i></div>
-</aside>
+</aside> {% endcomment %}
 
 <aside class="menu-sidebar">
     <a href="{% url 'accounts:profile' %}" class="back-link"><i class="fa-solid fa-chevron-left"></i> My Profile</a>
