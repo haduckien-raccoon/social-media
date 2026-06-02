@@ -275,6 +275,16 @@
     color: var(--danger);
 }
 
+.badge-deleted {
+    background: #111827;
+    color: #ffffff;
+}
+
+.badge-inactive {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
 /* ===================================
    ACTIONS
 =================================== */
@@ -622,13 +632,21 @@
                             </div>
 
                             <div class="info-item">
-                                <div class="info-label">Trạng thái</div>
+                                <div class="info-label">Trạng thái sử dụng</div>
 
                                 <div class="info-value">
 
-                                    {% if target_user.is_banned %}
+                                    {% if target_user.is_deleted %}
+                                        <span class="badge-soft badge-deleted">
+                                            Đã xóa mềm
+                                        </span>
+                                    {% elif target_user.is_banned %}
                                         <span class="badge-soft badge-banned">
                                             Bị khóa
+                                        </span>
+                                    {% elif not target_user.is_active %}
+                                        <span class="badge-soft badge-inactive">
+                                            Tạm vô hiệu hóa
                                         </span>
                                     {% else %}
                                         <span class="badge-soft badge-active">
@@ -636,6 +654,26 @@
                                         </span>
                                     {% endif %}
 
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Xóa mềm</div>
+
+                                <div class="info-value">
+                                    {% if target_user.is_deleted %}
+                                        <span class="badge-soft badge-deleted">is_deleted = True</span>
+                                    {% else %}
+                                        <span class="badge-soft badge-active">is_deleted = False</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-label">Thời điểm xóa mềm</div>
+
+                                <div class="info-value">
+                                    {{ target_user.deleted_at|date:"d/m/Y H:i"|default:"Chưa xóa mềm" }}
                                 </div>
                             </div>
 
@@ -703,6 +741,52 @@
                                             <i class="bi bi-lock-fill"></i>
 
                                             Khóa tài khoản (Ban)
+
+                                        </button>
+
+                                    {% endif %}
+
+                                </form>
+
+                            </div>
+
+                            <!-- SOFT DELETE / RESTORE -->
+                            <div class="action-block">
+
+                                <label>
+                                    Xóa mềm / Khôi phục tài khoản
+                                </label>
+
+                                <form method="POST"
+                                      action="{% url 'custom_admin:user_toggle_deleted' target_user.id %}">
+
+                                    {% csrf_token %}
+
+                                    <input type="hidden"
+                                           name="reason"
+                                           value="Admin cập nhật is_deleted theo yêu cầu sử dụng lại tài khoản">
+
+                                    {% if target_user.is_deleted %}
+
+                                        <button type="submit"
+                                                class="btn btn-custom btn-success-gradient"
+                                                onclick="return confirm('Khôi phục tài khoản này? User sẽ được set is_deleted=False và có thể sử dụng lại.');">
+
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+
+                                            Khôi phục tài khoản
+
+                                        </button>
+
+                                    {% else %}
+
+                                        <button type="submit"
+                                                class="btn btn-custom btn-danger-gradient"
+                                                onclick="return confirm('Bạn có chắc muốn XÓA MỀM tài khoản này? Tài khoản sẽ bị vô hiệu hóa đăng nhập nhưng dữ liệu vẫn được giữ lại.');">
+
+                                            <i class="bi bi-person-x-fill"></i>
+
+                                            Xóa mềm tài khoản
 
                                         </button>
 

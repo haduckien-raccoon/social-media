@@ -228,10 +228,10 @@ def get_system_metrics(request):
 
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def user_management_list(request):
-    """ Xem danh sách user (filter theo email, trạng thái, ngày tạo) """
+    """Xem danh sách user, có filter theo trạng thái khóa/xóa mềm."""
 
-    query = request.GET.get('q', '')
-    status = request.GET.get('status', '')
+    query = request.GET.get('q', '').strip()
+    status = request.GET.get('status', '').strip()
     page = request.GET.get('page')
 
     users = User.objects.all().order_by('-date_joined')
@@ -243,19 +243,25 @@ def user_management_list(request):
         )
 
     if status == 'active':
-        users = users.filter(is_active=True, is_banned=False)
-
+        users = users.filter(
+            is_active=True,
+            is_banned=False,
+            is_deleted=False,
+        )
     elif status == 'banned':
         users = users.filter(is_banned=True)
+    elif status == 'deleted':
+        users = users.filter(is_deleted=True)
+    elif status == 'inactive':
+        users = users.filter(is_active=False, is_deleted=False)
 
-    # PHÂN TRANG
-    paginator = Paginator(users, 10)  # 10 user / page
+    paginator = Paginator(users, 10)
     users_page = paginator.get_page(page)
 
     return render(request, 'admin/users/list.html', {
         'users': users_page,
         'query': query,
-        'status': status
+        'status': status,
     })
 
 @user_passes_test(is_admin, login_url='/accounts/login/')
@@ -266,12 +272,19 @@ def user_management_detail(request, user_id):
 
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def user_management_toggle_ban(request, user_id):
-    """ Khóa / mở khóa tài khoản (ban / unban) """
+    """Khóa / mở khóa tài khoản (ban / unban)."""
     if request.method == 'POST':
         user = get_object_or_404(User, id=user_id)
 
         if user == request.user:
             messages.error(request, "Không thể khóa tài khoản của chính mình!")
+            return redirect('custom_admin:user_detail', user_id=user.id)
+
+        if user.is_deleted:
+            messages.error(
+                request,
+                "Tài khoản đang ở trạng thái đã xóa mềm. Hãy khôi phục tài khoản trước khi ban/unban."
+            )
             return redirect('custom_admin:user_detail', user_id=user.id)
 
         user.is_banned = not user.is_banned
@@ -293,6 +306,58 @@ def user_management_toggle_ban(request, user_id):
         messages.success(request, f"Đã {status_msg} tài khoản {user.email}.")
 
     return redirect('custom_admin:user_detail', user_id=user_id)
+
+
+@user_passes_test(is_admin, login_url='/accounts/login/')
+def user_management_toggle_deleted(request, user_id):
+    """
+    Xóa mềm / khôi phục tài khoản user.
+    - Xóa mềm: giữ dữ liệu để audit, set is_deleted=True, deleted_at=now, is_active=False.
+    - Khôi phục: set is_deleted=False, deleted_at=None, is_active=True để user dùng lại.
+    """
+    if request.method != 'POST':
+        return redirect('custom_admin:user_detail', user_id=user_id)
+
+    user = get_object_or_404(User, id=user_id)
+
+    if user == request.user:
+        messages.error(request, "Không thể xóa mềm tài khoản của chính mình!")
+        return redirect('custom_admin:user_detail', user_id=user.id)
+
+    reason = request.POST.get('reason', '').strip()
+
+    if user.is_deleted:
+        user.is_deleted = False
+        user.deleted_at = None
+        user.is_active = True
+        action = "RESTORE_USER"
+        log_reason = reason or "Admin restored soft-deleted user account"
+        message = f"Đã khôi phục tài khoản {user.email}. User có thể sử dụng lại hệ thống."
+    else:
+        user.is_deleted = True
+        user.deleted_at = timezone.now()
+        user.is_active = False
+        action = "SOFT_DELETE_USER"
+        log_reason = reason or "Admin soft-deleted user account"
+        message = f"Đã xóa mềm tài khoản {user.email}."
+
+    _save_with_existing_update_fields(
+        user,
+        ["is_deleted", "deleted_at", "is_active"],
+    )
+
+    sync_admin_user_to_neo4j_on_commit(user)
+
+    _log_moderation_action(
+        request.user,
+        ModerationTargetType.USER,
+        user.id,
+        action,
+        log_reason,
+    )
+
+    messages.success(request, message)
+    return redirect('custom_admin:user_detail', user_id=user.id)
 
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def user_management_set_role(request, user_id):
@@ -529,6 +594,31 @@ def _redirect_back(request, fallback_name):
     return redirect(next_url or reverse(fallback_name))
 
 
+def _existing_update_fields(obj, fields):
+    """Chỉ save những field thực sự có trong model để tránh lỗi khi deploy lệch migration."""
+    model_field_names = {field.name for field in obj._meta.fields}
+    return [field for field in fields if field in model_field_names]
+
+
+def _apply_soft_delete_tracking(obj, is_deleted):
+    """
+    Set cặp field is_deleted/deleted_at nhất quán cho User/Post/Comment.
+    deleted_at có thể chưa tồn tại ở một số model cũ, nên kiểm tra field trước khi set.
+    """
+    obj.is_deleted = is_deleted
+    update_fields = ["is_deleted"]
+
+    if "deleted_at" in {field.name for field in obj._meta.fields}:
+        obj.deleted_at = timezone.now() if is_deleted else None
+        update_fields.append("deleted_at")
+
+    return update_fields
+
+
+def _save_with_existing_update_fields(obj, fields):
+    obj.save(update_fields=_existing_update_fields(obj, fields))
+
+
 @user_passes_test(is_admin, login_url='/accounts/login/')
 def content_post_list(request):
     query = request.GET.get("q", "").strip()
@@ -591,18 +681,18 @@ def content_post_action(request, post_id):
 
     if action == ModerationAction.HIDE:
         post.status = ContentStatus.BLOCKED
-        post.is_deleted = True
-        post.save(update_fields=["status", "is_deleted", "updated_at"])
+        update_fields = ["status", "updated_at"] + _apply_soft_delete_tracking(post, True)
+        _save_with_existing_update_fields(post, update_fields)
 
     elif action == ModerationAction.DELETE:
         post.status = ContentStatus.DELETED
-        post.is_deleted = True
-        post.save(update_fields=["status", "is_deleted", "updated_at"])
+        update_fields = ["status", "updated_at"] + _apply_soft_delete_tracking(post, True)
+        _save_with_existing_update_fields(post, update_fields)
 
     elif action == ModerationAction.RESTORE:
         post.status = ContentStatus.NORMAL
-        post.is_deleted = False
-        post.save(update_fields=["status", "is_deleted", "updated_at"])
+        update_fields = ["status", "updated_at"] + _apply_soft_delete_tracking(post, False)
+        _save_with_existing_update_fields(post, update_fields)
 
     elif action == ModerationAction.FLAG:
         post.status = ContentStatus.FLAGGED
@@ -691,16 +781,16 @@ def content_comment_action(request, comment_id):
 
     if action == ModerationAction.HIDE:
         comment.status = ContentStatus.BLOCKED
-        comment.is_deleted = True
-        comment.save(update_fields=["status", "is_deleted", "updated_at"])
+        update_fields = ["status", "updated_at"] + _apply_soft_delete_tracking(comment, True)
+        _save_with_existing_update_fields(comment, update_fields)
     elif action == ModerationAction.DELETE:
         comment.status = ContentStatus.DELETED
-        comment.is_deleted = True
-        comment.save(update_fields=["status", "is_deleted", "updated_at"])
+        update_fields = ["status", "updated_at"] + _apply_soft_delete_tracking(comment, True)
+        _save_with_existing_update_fields(comment, update_fields)
     elif action == ModerationAction.RESTORE:
         comment.status = ContentStatus.NORMAL
-        comment.is_deleted = False
-        comment.save(update_fields=["status", "is_deleted", "updated_at"])
+        update_fields = ["status", "updated_at"] + _apply_soft_delete_tracking(comment, False)
+        _save_with_existing_update_fields(comment, update_fields)
     elif action == ModerationAction.FLAG:
         comment.status = ContentStatus.FLAGGED
         comment.save(update_fields=["status", "updated_at"])
@@ -1058,9 +1148,9 @@ def report_action(request, report_id):
         new_status = "rejected"
 
         if target_obj and getattr(target_obj, "is_deleted", False):
-            target_obj.is_deleted = False
             target_obj.status = ContentStatus.NORMAL
-            target_obj.save(update_fields=["is_deleted", "status", "updated_at"])
+            update_fields = ["status", "updated_at"] + _apply_soft_delete_tracking(target_obj, False)
+            _save_with_existing_update_fields(target_obj, update_fields)
 
             if report.target_type == ModerationTargetType.POST:
                 sync_admin_post_to_neo4j_on_commit(target_obj)
@@ -1072,8 +1162,8 @@ def report_action(request, report_id):
     elif action in ["DELETE_CONTENT", "BAN_USER"]:
         if target_obj:
             target_obj.status = ContentStatus.DELETED
-            target_obj.is_deleted = True
-            target_obj.save(update_fields=["status", "is_deleted", "updated_at"])
+            update_fields = ["status", "updated_at"] + _apply_soft_delete_tracking(target_obj, True)
+            _save_with_existing_update_fields(target_obj, update_fields)
 
             _log_moderation_action(
                 request.user,
@@ -1135,9 +1225,9 @@ def mass_notification(request):
 
         # 1. Xác định danh sách User nhận tin
         if target_group == "staff":
-            recipients = User.objects.filter(is_staff=True)
+            recipients = User.objects.filter(is_staff=True, is_deleted=False)
         else:
-            recipients = User.objects.filter(is_active=True)
+            recipients = User.objects.filter(is_active=True, is_deleted=False)
 
         recipient_count = recipients.count()
 

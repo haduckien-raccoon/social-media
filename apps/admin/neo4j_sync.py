@@ -27,18 +27,60 @@ from apps.posts.neo4j_feed import (
 # 1. USER / ACCOUNT ADMIN SYNC
 # =====================================================
 
+def sync_admin_user_soft_delete_state_to_neo4j(user: User) -> None:
+    """
+    Bảo đảm Neo4j luôn có trạng thái xóa mềm của User.
+    Hàm sync_account_to_neo4j ở accounts app có thể chưa set is_deleted/deleted_at,
+    nên admin sync cần ghi đè lại các field nhạy cảm này sau mỗi thay đổi.
+    """
+    query = """
+    MERGE (u:User {id: $user_id})
+    SET u.email = $email,
+        u.username = $username,
+        u.is_active = $is_active,
+        u.is_banned = $is_banned,
+        u.is_staff = $is_staff,
+        u.is_superuser = $is_superuser,
+        u.is_deleted = $is_deleted,
+        u.deleted_at = CASE
+            WHEN $deleted_at IS NULL THEN null
+            ELSE datetime($deleted_at)
+        END,
+        u.admin_synced_at = datetime()
+    """
+
+    Neo4jClient.execute(
+        query,
+        user_id=user.id,
+        email=user.email or "",
+        username=user.username or "",
+        is_active=bool(user.is_active),
+        is_banned=bool(getattr(user, "is_banned", False)),
+        is_staff=bool(user.is_staff),
+        is_superuser=bool(user.is_superuser),
+        is_deleted=bool(getattr(user, "is_deleted", False)),
+        deleted_at=(
+            user.deleted_at.isoformat()
+            if getattr(user, "deleted_at", None)
+            else None
+        ),
+    )
+
+
 def sync_admin_user_to_neo4j(user: User) -> None:
     """
-    Dùng khi admin ban/unban hoặc đổi quyền user.
+    Dùng khi admin ban/unban, đổi quyền, xóa mềm hoặc khôi phục user.
     """
     sync_account_to_neo4j(user)
+    sync_admin_user_soft_delete_state_to_neo4j(user)
 
 
 def sync_admin_user_status_to_neo4j(user: User) -> None:
     """
-    Dùng khi chỉ đổi trạng thái: banned, active, staff, superuser...
+    Dùng khi chỉ đổi trạng thái: banned, active, staff, superuser, deleted...
     """
     sync_account_status_to_neo4j(user)
+    sync_admin_user_soft_delete_state_to_neo4j(user)
 
 
 def sync_admin_user_to_neo4j_on_commit(user: User) -> None:
@@ -61,12 +103,36 @@ def sync_admin_user_to_neo4j_on_commit(user: User) -> None:
 # 2. POST ADMIN SYNC
 # =====================================================
 
+def sync_admin_post_soft_delete_state_to_neo4j(post: Post) -> None:
+    query = """
+    MERGE (p:Post {id: $post_id})
+    SET p.is_deleted = $is_deleted,
+        p.deleted_at = CASE
+            WHEN $deleted_at IS NULL THEN null
+            ELSE datetime($deleted_at)
+        END,
+        p.admin_synced_at = datetime()
+    """
+
+    Neo4jClient.execute(
+        query,
+        post_id=post.id,
+        is_deleted=bool(getattr(post, "is_deleted", False)),
+        deleted_at=(
+            post.deleted_at.isoformat()
+            if getattr(post, "deleted_at", None)
+            else None
+        ),
+    )
+
+
 def sync_admin_post_to_neo4j(post: Post) -> None:
     """
     Đồng bộ trạng thái post do admin thay đổi:
     hide/delete/restore/flag/unflag.
     """
     sync_post_node(post)
+    sync_admin_post_soft_delete_state_to_neo4j(post)
     sync_post_hashtags(post)
     sync_tagged_users(post)
 
@@ -110,6 +176,10 @@ def sync_comment_moderation_node_to_neo4j(comment: Comment) -> None:
         c.content_preview = $content_preview,
         c.status = $status,
         c.is_deleted = $is_deleted,
+        c.deleted_at = CASE
+            WHEN $deleted_at IS NULL THEN null
+            ELSE datetime($deleted_at)
+        END,
         c.created_at = datetime($created_at),
         c.updated_at = datetime($updated_at),
         c.synced_at = datetime()
@@ -133,6 +203,11 @@ def sync_comment_moderation_node_to_neo4j(comment: Comment) -> None:
         content_preview=(comment.content or "")[:200],
         status=getattr(comment, "status", ""),
         is_deleted=bool(comment.is_deleted),
+        deleted_at=(
+            comment.deleted_at.isoformat()
+            if getattr(comment, "deleted_at", None)
+            else None
+        ),
         created_at=comment.created_at.isoformat(),
         updated_at=comment.updated_at.isoformat(),
     )
@@ -329,7 +404,7 @@ def sync_moderation_log_to_neo4j(log: ContentModerationLog) -> None:
             target_id=log.target_id,
         )
 
-    elif log.target_type == "user":
+    elif log.target_type == ModerationTargetType.USER:
         Neo4jClient.execute(
             """
             MATCH (m:ModerationLog {id: $log_id})

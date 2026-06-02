@@ -181,6 +181,8 @@
 .badge-user { background: #f1f5f9; color: var(--text-muted); }
 .badge-active { background: var(--success-soft); color: var(--success); }
 .badge-banned { background: var(--danger-soft); color: var(--danger); }
+.badge-deleted { background: #111827; color: #ffffff; }
+.badge-inactive { background: #fef3c7; color: #d97706; }
 
 /* NEW PAGINATION STYLES */
 .pagination-container {
@@ -308,6 +310,8 @@
                             <option value="">Tất cả trạng thái</option>
                             <option value="active" {% if status == 'active' %}selected{% endif %}>Hoạt động</option>
                             <option value="banned" {% if status == 'banned' %}selected{% endif %}>Đã khóa</option>
+                            <option value="deleted" {% if status == 'deleted' %}selected{% endif %}>Đã xóa mềm</option>
+                            <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Tạm vô hiệu hóa</option>
                         </select>
                     </div>
                     <div class="button-box">
@@ -349,10 +353,17 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if user.is_banned %} 
+                                {% if user.is_deleted %}
+                                    <span class="badge-soft badge-deleted">Deleted</span>
+                                    <div class="small text-muted mt-1">
+                                        {{ user.deleted_at|date:"d/m/Y H:i"|default:"Không rõ thời điểm" }}
+                                    </div>
+                                {% elif user.is_banned %}
                                     <span class="badge-soft badge-banned">Banned</span>
-                                {% else %} 
-                                    <span class="badge-soft badge-active">Active</span> 
+                                {% elif not user.is_active %}
+                                    <span class="badge-soft badge-inactive">Inactive</span>
+                                {% else %}
+                                    <span class="badge-soft badge-active">Active</span>
                                 {% endif %}
                             </td>
                             <td class="text-nowrap">{{ user.date_joined|date:"d/m/Y H:i" }}</td>
