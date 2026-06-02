@@ -1,14 +1,93 @@
+<style>
+    /* UI giống feed: tiêu đề/nội dung dài được thu gọn và có nút Xem thêm */
+    .post-header,
+    .header-left,
+    .p-info {
+        min-width: 0;
+    }
+
+    .header-left {
+        flex: 1;
+    }
+
+    .p-info {
+        flex: 1;
+        max-width: 100%;
+    }
+
+    .post-title,
+    .post-content {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .post-title {
+        margin: 0;
+        max-width: 100%;
+        line-height: 1.35;
+    }
+
+    .js-expandable-title,
+    .js-expandable-content {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+    }
+
+    .js-expandable-title {
+        -webkit-line-clamp: 2;
+    }
+
+    .js-expandable-content {
+        -webkit-line-clamp: 3;
+    }
+
+    .js-expandable-title.is-expanded,
+    .js-expandable-content.is-expanded {
+        display: block;
+        -webkit-line-clamp: unset;
+        overflow: visible;
+    }
+
+    .see-more-btn {
+        border: 0;
+        background: transparent;
+        color: #1877f2;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.3;
+        padding: 0;
+        cursor: pointer;
+    }
+
+    .see-more-btn:hover {
+        text-decoration: underline;
+    }
+
+    .post-title-more {
+        margin-top: 2px;
+    }
+
+    .post-content-more {
+        margin: -10px 16px 12px;
+    }
+
+    .see-more-btn[hidden] {
+        display: none !important;
+    }
+</style>
+
 {% for post in posts %}
 {% with tagged_list=post.tagged_users.all %}
 {% with tag_count=tagged_list|length %}
-<div class="post-card" id="post-{{ post.id }}">
+<div class="post-card" id="post-{{ post.id }}" data-post-id="{{ post.id }}">
     <div class="post-header">
         <div class="header-left">
             <a href="{% url 'accounts:profile-username' post.author.username %}">
                 <img src="{{ post.author.profile.avatar.url|default:'/static/images/avatars/normal.jpg' }}" class="p-avatar">
             </a>
             <div class="p-info">
-                <h5>
+                <h5 class="post-title js-expandable-title">
                     <a href="{% url 'accounts:profile-username' post.author.username %}">{{ post.author.username }}</a>
                     {% if group %}
                         <span class="text-muted">-></span>
@@ -28,6 +107,7 @@
                         {% endif %}
                     {% endif %}
                 </h5>
+                <button type="button" class="see-more-btn post-title-more" data-more-text="Xem thêm" data-less-text="Ẩn bớt" hidden>Xem thêm</button>
                 <div class="p-time">
                     <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span> •
                     {% if post.is_pinned %}<i class="fa-solid fa-thumbtack text-danger"></i> Đã ghim • {% endif %}
@@ -83,7 +163,8 @@
         {% endif %}
     </div>
 
-    <div class="post-content">{{ post.content|linebreaksbr }}</div>
+    <div class="post-content js-expandable-content">{{ post.content|linebreaksbr }}</div>
+    <button type="button" class="see-more-btn post-content-more" data-more-text="Xem thêm" data-less-text="Ẩn bớt" hidden>Xem thêm</button>
     {% if post.hashtags.all %}
     <div class="post-hashtags">
         {% for hashtag in post.hashtags.all %}
@@ -165,3 +246,76 @@
 {% endwith %}
 {% endwith %}
 {% endfor %}
+
+<script>
+(function () {
+    function isOverflowing(el) {
+        if (!el) return false;
+        return el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1;
+    }
+
+    function getToggleButton(el) {
+        const next = el.nextElementSibling;
+        if (next && next.classList.contains('see-more-btn')) {
+            return next;
+        }
+        return null;
+    }
+
+    function setupExpandableText(el) {
+        const btn = getToggleButton(el);
+        if (!btn || el.dataset.expandReady === '1') return;
+
+        el.dataset.expandReady = '1';
+
+        requestAnimationFrame(() => {
+            const shouldShow = isOverflowing(el);
+            btn.hidden = !shouldShow;
+        });
+
+        btn.addEventListener('click', function () {
+            const expanded = el.classList.toggle('is-expanded');
+            btn.textContent = expanded
+                ? (btn.dataset.lessText || 'Ẩn bớt')
+                : (btn.dataset.moreText || 'Xem thêm');
+        });
+    }
+
+    window.initPostListExpandable = function (root) {
+        const scope = root || document;
+        scope.querySelectorAll('.js-expandable-title, .js-expandable-content').forEach(setupExpandableText);
+    };
+
+    if (window.__postListExpandableObserverReady) {
+        window.initPostListExpandable(document);
+        return;
+    }
+
+    window.__postListExpandableObserverReady = true;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        window.initPostListExpandable(document);
+    });
+
+    window.addEventListener('load', function () {
+        window.initPostListExpandable(document);
+    });
+
+    const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
+                if (node.nodeType !== 1) return;
+                if (node.matches && node.matches('.post-card')) {
+                    window.initPostListExpandable(node);
+                } else if (node.querySelectorAll) {
+                    window.initPostListExpandable(node);
+                }
+            });
+        });
+    });
+
+    if (document.body) {
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+})();
+</script>
