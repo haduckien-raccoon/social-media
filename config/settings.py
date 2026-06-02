@@ -121,12 +121,14 @@ if CHANNEL_LAYER_BACKEND == "redis":
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [(REDIS_HOST, REDIS_PORT)],
-                # Di chuyển timeout vào bên trong cấu hình 'redis_data'
-                "redis_data": {
-                    "socket_timeout": 10.0,
-                    "socket_connect_timeout": 10.0,
-                }
+                # Cú pháp ĐÚNG: Đóng gói toàn bộ vào một dictionary trong mảng hosts
+                "hosts": [
+                    {
+                        "address": (REDIS_HOST, REDIS_PORT),
+                        "socket_timeout": 10.0,
+                        "socket_connect_timeout": 10.0,
+                    }
+                ],
             },
         },
     }
