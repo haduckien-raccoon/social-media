@@ -235,6 +235,7 @@ def ai_help_report(text):
 			"error": "Unsupported language"
 		}
 	#Gửi yêu cầu POST đến AI service
+	print(f"Sending text to AI service for analysis: {text}, Language: {lang}")
 	try:
 		response = requests.post(
 			url,

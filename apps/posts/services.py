@@ -975,6 +975,7 @@ def report_target(user, target_type, target_id, reason_id=None, custom_reason=""
             target_content = get_target_content(target_type, target_id)
             ai_result = ai_help_report(target_content) or {}
             ai_score = float(ai_result.get("score", 0) or 0)
+            print(f"[REPORT][AI_RESULT] target_type={target_type}, target_id={target_id}, ai_score={ai_score}")
         except Exception as e:
             print(f"[REPORT][AI_ERROR] target_type={target_type}, target_id={target_id}, error={e}")
             ai_score = 0
