@@ -393,6 +393,9 @@ def post_detail_view(request, post_id):
         "can_share_current_post": can_share_post(post),
     }
 
+    #in ra toàn bộ thông tin context để debug
+    print(f"[DEBUG] Post Detail Context: {context}")
+
     return render(request, "posts/post_detail.html", context)
 
 # =====================================================
