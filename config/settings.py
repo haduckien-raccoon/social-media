@@ -121,7 +121,7 @@ if CHANNEL_LAYER_BACKEND == "redis":
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                # Cú pháp ĐÚNG: Đóng gói toàn bộ vào một dictionary trong mảng hosts
+                # Đưa thẳng cấu hình timeout vào cùng cấp với 'address' bên trong list hosts
                 "hosts": [
                     {
                         "address": (REDIS_HOST, REDIS_PORT),
