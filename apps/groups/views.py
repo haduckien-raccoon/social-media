@@ -213,7 +213,7 @@ def group_detail(request, group_id):
         'cover_image': cover_image
     }
 
-    print("Group Detail Context:", context)  # Debug: In ra context để kiểm tra dữ liệu truyền ra template
+    # print("Group Detail Context:", context)  # Debug: In ra context để kiểm tra dữ liệu truyền ra template
     return render(request, 'groups/group_detail.html', context)
 
 def manage_group(request, group_id):
@@ -288,7 +288,7 @@ def manage_group(request, group_id):
         'admins_ids': group.members.filter(role=GroupRole.ADMIN).values_list('user_id', flat=True)
     }
 
-    print("Dashboard Data:", dashboard_data)  # Debug: In ra dữ liệu dashboard để kiểm tra
+    # print("Dashboard Data:", dashboard_data)  # Debug: In ra dữ liệu dashboard để kiểm tra
     
     return render(request, 'groups/manage_group.html', context)
 
