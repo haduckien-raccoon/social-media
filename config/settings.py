@@ -161,7 +161,7 @@ if MYSQL_DATABASE and MYSQL_USER and MYSQL_PASSWORD:
             "HOST": MYSQL_HOST,
             "PORT": MYSQL_PORT,
             "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'"},
-            "CONN_MAX_AGE": 0,
+            "CONN_MAX_AGE": 60,  # Giữ kết nối mở trong 60 giây để tái sử dụng
             "CONN_HEALTH_CHECKS": True,
         }
     }
