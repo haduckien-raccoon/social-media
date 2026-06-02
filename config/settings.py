@@ -41,8 +41,8 @@ AI_SERVICE_URL = os.getenv("AI_BASE_URL", "http://127.0.0.1:8082").rstrip("/")
 REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = _env_int("REDIS_PORT", 6379)
 REDIS_DB = _env_int("REDIS_DB", 0)
-REDIS_SOCKET_TIMEOUT = _env_float("REDIS_SOCKET_TIMEOUT", 0.2)
-REDIS_SOCKET_CONNECT_TIMEOUT = _env_float("REDIS_SOCKET_CONNECT_TIMEOUT", 0.2)
+REDIS_SOCKET_TIMEOUT = _env_float("REDIS_SOCKET_TIMEOUT", 10)
+REDIS_SOCKET_CONNECT_TIMEOUT = _env_float("REDIS_SOCKET_CONNECT_TIMEOUT", 10)
 NEO4J_URI = os.getenv("NEO4J_URI", "neo4j://localhost:7687")
 NEO4J_USERNAME = os.getenv("NEO4J_USERNAME", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "your_password")
@@ -122,6 +122,9 @@ if CHANNEL_LAYER_BACKEND == "redis":
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
                 "hosts": [(REDIS_HOST, REDIS_PORT)],
+                # Thêm cấu hình timeout trực tiếp vào đây (giá trị tính bằng giây)
+                "socket_timeout": 10,
+                "socket_connect_timeout": 10,
             },
         },
     }
