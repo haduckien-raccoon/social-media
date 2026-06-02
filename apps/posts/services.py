@@ -527,8 +527,7 @@ def share_post(user, post_to_share, caption="", privacy="public"):
 
     normalized_caption = caption.strip() if caption else ""
 
-    # 3. Tạo post mới, đây là bài share nằm trê[DEBUG] Post Detail Context: {'post': <Post: Post 5135 by 102230194@sv1.dut.udn.vn>, 'group_post': None, 'original_post': <Post: Post 5133 by test12@gmail.com>, 'comments': [], 'reaction_breakdown': {}, 'total_reactions': 0, 'total_comments': 0, 'total_shares': 0, 'count_comment': 0, 'report_reasons': <QuerySet [<ReportReason: ReportReason object (1)>, <ReportReason: ReportReason object (2)>, <ReportReason: ReportReason object (3)>, <ReportReason: ReportReason object (4)>, <ReportReason: ReportReason object (5)>, <ReportReason: ReportReason object (6)>, <ReportReason: ReportReason object (7)>, <ReportReason: ReportReason object (8)>, <ReportReason: ReportReason object (9)>, <ReportReason: ReportReason object (10)>, <ReportReason: ReportReason object (11)>]>, 'can_share_current_post': True}
-n trang cá nhân/feed.
+    # 3. Tạo post mới, đây là bài share nằm trê[DEBUG] Post Detail Context: {'post': <Post: Post 5135 by 102230194@sv1.dut.udn.vn>, 'group_post': None, 'original_post': <Post: Post 5133 by test12@gmail.com>, 'comments': [], 'reaction_breakdown': {}, 'total_reactions': 0, 'total_comments': 0, 'total_shares': 0, 'count_comment': 0, 'report_reasons': <QuerySet [<ReportReason: ReportReason object (1)>, <ReportReason: ReportReason object (2)>, <ReportReason: ReportReason object (3)>, <ReportReason: ReportReason object (4)>, <ReportReason: ReportReason object (5)>, <ReportReason: ReportReason object (6)>, <ReportReason: ReportReason object (7)>, <ReportReason: ReportReason object (8)>, <ReportReason: ReportReason object (9)>, <ReportReason: ReportReason object (10)>, <ReportReason: ReportReason object (11)>]>, 'can_share_current_post': True}n trang cá nhân/feed.
     new_post = Post.objects.create(
         author=user,
         content=normalized_caption,
