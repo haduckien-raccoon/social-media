@@ -217,6 +217,7 @@ def ai_help_report(text):
 	#gửi đến cổng 8082 với đường link: http://<ip_server>:8082/predict
 	url = f"{url_server}/predict"
 	#dùng lang để phân tích thuộc tiếng việt, tiếng anh hay tiếng khác
+	print(url)
 	lang, _ = langid.classify(text)
 	#tạo payload để gửi đi
 	if lang == "vi":
