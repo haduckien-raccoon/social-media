@@ -394,7 +394,7 @@ def post_detail_view(request, post_id):
     }
 
     #in ra toàn bộ thông tin context để debug
-    print(f"[DEBUG] Post Detail Context: {context}")
+    # print(f"[DEBUG] Post Detail Context: {context}")
 
     return render(request, "posts/post_detail.html", context)
 
