@@ -780,83 +780,40 @@
 
         {% if post.files.all and not original_post %}
             <div class="post-files">
-
-            {% for file in post.files.all %}
-            <a class="file-item" href="{{ file.file.url }}" download>
-
-                <div class="file-icon">
-
-                    {% with ext=file.file.name|lower %}
-                        {% if ".pdf" in ext %}
-                            <i class="fas fa-file-pdf" style="color:#e53935"></i>
-
-                        {% elif ".doc" in ext or ".docx" in ext %}
-                            <i class="fas fa-file-word" style="color:#1e88e5"></i>
-
-                        {% elif ".xls" in ext or ".xlsx" in ext %}
-                    {% with tagged_list=post.tagged_users.all tag_count=post.tagged_users.count %}
-                    <div class="post-info">
-                        <h4>
-                            <a href="{% url 'accounts:profile-username' post.author.username %}">{{ post.author.username }}</a>
-                            {% if group_post %}
-                                <span class="text-muted">→</span>
-                                <a href="{% url 'groups:group_detail' group_post.group.id %}">{{ group_post.group.name }}</a>
-                            {% endif %}
-                            {% if tag_count %}
-                                <span class="text-muted">cùng với</span>
-                                {% if tag_count <= 4 %}
-                                    {% for tag in tagged_list %}
-                                        <a href="{% url 'accounts:profile-username' tag.user.username %}">{{ tag.user.username }}</a>{% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
+                {% for file in post.files.all %}
+                    <a class="file-item" href="{{ file.file.url }}" download>
+                        <div class="file-icon">
+                            {% with ext=file.file.name|lower %}
+                                {% if ".pdf" in ext %}
+                                    <i class="fas fa-file-pdf" style="color:#e53935"></i>
+                                {% elif ".doc" in ext or ".docx" in ext %}
+                                    <i class="fas fa-file-word" style="color:#1e88e5"></i>
+                                {% elif ".xls" in ext or ".xlsx" in ext %}
+                                    <i class="fas fa-file-excel" style="color:#43a047"></i>
+                                {% elif ".ppt" in ext or ".pptx" in ext %}
+                                    <i class="fas fa-file-powerpoint" style="color:#f4511e"></i>
+                                {% elif ".zip" in ext or ".rar" in ext or ".7z" in ext %}
+                                    <i class="fas fa-file-archive" style="color:#6d4c41"></i>
                                 {% else %}
-                                    {% with first_tag=tagged_list|first %}
-                                        <a href="{% url 'accounts:profile-username' first_tag.user.username %}">{{ first_tag.user.username }}</a>
-                                    {% endwith %}
-                                    <a href="javascript:void(0)" class="tagged-more" onclick="openTaggedModal({{ post.id }})">và {{ tag_count|add:"-1" }} người khác</a>
+                                    <i class="fas fa-file"></i>
                                 {% endif %}
-                            {% endif %}
-                        </h4>
-                        <div class="post-time">
-                            <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span>
-                            •
-                            {% if post.privacy == 'public' %}<i class="fas fa-globe-americas"></i>
-                            {% elif post.privacy == 'friends' %}<i class="fas fa-user-friends"></i>
-                            {% else %}<i class="fas fa-lock"></i>{% endif %}
+                            {% endwith %}
                         </div>
-                    </div>
-                    {% endwith %}
 
-            <div class="post-content">{{ post.content|linebreaksbr }}</div>
-            {% if post.hashtags.all %}
-            <div class="post-hashtags">
-                {% for hashtag in post.hashtags.all %}
-                    <a class="post-hashtag" href="{% url 'posts:hashtag_feed' hashtag.tag %}">#{{ hashtag.tag }}</a>
+                        <div class="file-info">
+                            <div class="file-name">
+                                {{ file.file.name|cut:"posts/files/" }}
+                            </div>
+                            <div class="file-meta">
+                                {{ file.file.size|filesizeformat }}
+                            </div>
+                        </div>
+
+                        <div class="file-download">
+                            <i class="fas fa-download"></i>
+                        </div>
+                    </a>
                 {% endfor %}
-            </div>
-            {% endif %}
-                        {% else %}
-                            <i class="fas fa-file"></i>
-                        {% endif %}
-                    {% endwith %}
-
-                </div>
-
-                <div class="file-info">
-                    <div class="file-name">
-                        {{ file.file.name|cut:"/posts/files/" }}
-                    </div>
-
-                    <div class="file-meta">
-                        {{ file.file.size|filesizeformat }}
-                    </div>
-                </div>
-
-                <div class="file-download">
-                    <i class="fas fa-download"></i>
-                </div>
-            </a>
-            {% endfor %}
-
             </div>
         {% endif %}
 
@@ -868,7 +825,7 @@
             </div>
             <div class="comment-count">
                 <span id="total-comments-label" style="color: var(--text-main); font-weight: 500;">{{ total_comments }}</span> bình luận
-                {% if can_share_post %}
+                {% if can_share_current_post %}
                 <span aria-hidden="true"> · </span>
                 <span id="total-shares-label" style="color: var(--text-main); font-weight: 500;">{{ total_shares }}</span> chia sẻ
                 {% endif %}
@@ -908,7 +865,7 @@
                 <i class="far fa-comment-alt"></i> Bình luận
             </button>
             
-            {% if can_share_post %}
+            {% if can_share_current_post %}
             <button class="action-btn" onclick="openShareModal()">
                 <i class="fas fa-share"></i> Chia sẻ
             </button>
@@ -1061,7 +1018,7 @@
 
 <div id="toast-notification">Thông báo</div>
 
-{% if can_share_post %}
+{% if can_share_current_post %}
 <div id="shareModal" class="modal-overlay" onclick="closeShareModal(event)">
     <div class="modal-box">
         <div class="modal-header">
@@ -1204,11 +1161,14 @@
 
     // Share Modal
     function openShareModal() {
-        document.getElementById('shareModal').style.display = 'flex';
-        document.querySelector('.share-caption').focus();
+        const modal = document.getElementById('shareModal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+        modal.querySelector('.share-caption')?.focus();
     }
     function closeShareModal(e) {
         const modal = document.getElementById('shareModal');
+        if (!modal) return;
         if (!e || e.target === modal || e.target.classList.contains('close-btn') || e.target.classList.contains('btn-cancel')) {
             modal.style.display = 'none';
         }
