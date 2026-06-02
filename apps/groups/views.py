@@ -238,7 +238,12 @@ def manage_group(request, group_id):
             else: messages.error(request, msg)
 
         if action in ['approve', 'reject'] and user_id:
-            success, msg = GroupService.handle_join_request(group, user_id, action)
+            success, msg = GroupService.handle_join_request(
+                group=group,
+                user_id=user_id,
+                action=action,
+                actor=request.user,
+            )
             if success:
                 messages.success(request, msg)
             else:

@@ -263,37 +263,46 @@ class GroupService:
         return data
     @staticmethod
     @transaction.atomic
-    def handle_join_request(group, user_id, action):
+    def handle_join_request(group, user_id, action, actor=None):
         """
-        Xử lý yêu cầu tham gia nhóm (approve/reject).
+        Xử lý yêu cầu tham gia nhóm.
+        actor là admin/owner đang duyệt yêu cầu.
         """
         try:
             member_request = GroupMember.objects.get(
-                group=group, 
-                user_id=user_id, 
-                status='pending'
+                group=group,
+                user_id=user_id,
+                status="pending"
             )
-            
-            if action == 'approve':
-                member_request.status = 'approved'
-                member_request.save()
+
+            if action == "approve":
+                member_request.status = "approved"
+                member_request.save(update_fields=["status", "updated_at"])
+
                 create_notification(
-                    actor=None,
+                    actor=actor,
                     recipient=member_request.user,
                     verb_code="group_request_accept",
                     target=group,
                     link=f"/groups/{group.id}/",
                 )
-                sync_group_member_to_neo4j_on_commit(member_request)
-            elif action == 'reject':
-                member_request.status = 'rejected'
-                # Hoặc bạn có thể dùng member_request.delete() nếu không muốn lưu lịch sử reject
-                member_request.save()
+
                 sync_group_member_to_neo4j_on_commit(member_request)
 
+            elif action == "reject":
+                member_request.status = "rejected"
+                member_request.save(update_fields=["status", "updated_at"])
+
+                sync_group_member_to_neo4j_on_commit(member_request)
+
+            else:
+                return False, "Hành động không hợp lệ."
+
             return True, "Xử lý thành công."
+
         except GroupMember.DoesNotExist:
             return False, "Không tìm thấy yêu cầu này."
+    
         
     @staticmethod
     def report_content(group, reporter, reason, post_id=None, comment_id=None):
