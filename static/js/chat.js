@@ -34,6 +34,31 @@
         return String(tpl || "").replace("/0/", "/" + String(id) + "/");
     }
 
+    function profileUrlById(userId) {
+        return "/accounts/profile/" + encodeURIComponent(userId) + "/";
+    }
+
+    function profileLink(user, fallbackName) {
+        if (!user || !user.id) {
+            return escapeHtml(fallbackName || "Bạn bè");
+        }
+
+        var name = user.full_name || user.username || fallbackName || "Bạn bè";
+
+        return '<a href="' + escapeHtml(profileUrlById(user.id)) + '" class="chat-profile-link">' +
+            escapeHtml(name) +
+        '</a>';
+    }
+
+    function convTitleLink(conv) {
+        var ps = Array.isArray(conv.participants) ? conv.participants : [];
+        if (!ps.length) return escapeHtml("Hội thoại");
+
+        return ps.map(function (p) {
+            return profileLink(p, p.full_name || p.username);
+        }).join(", ");
+    }
+
     function fileSizeLabel(n) {
         if (n < 1024) return n + " B";
         if (n < 1048576) return (n / 1024).toFixed(1) + " KB";
@@ -280,7 +305,7 @@
                     '<button type="button" class="chat-mob-back" aria-label="Quay lại">❮</button>' +
                     '<img class="chat-header-avatar" src="' + escapeHtml(pendingAvatar || ("https://ui-avatars.com/api/?name=" + encodeURIComponent(pendingName || "U"))) + '" alt="">' +
                     '<div class="chat-header-text">' +
-                        '<h3>' + escapeHtml(pendingName) + '</h3>' +
+                        '<h3>' + profileLink(pendingFriend, pendingName) + '</h3>' +
                         '<span class="chat-header-status">Bắt đầu cuộc trò chuyện mới</span>' +
                     '</div>' +
                 '</div>' +
@@ -303,7 +328,7 @@
         var conv = state.conversations.find(function (c) { return c.id === state.activeConvId; });
         if (!conv) return;
         var avatarSrc = convAvatar(conv);
-        var title = convTitle(conv);
+        var titleHtml = convTitleLink(conv);
 
         elHeader.innerHTML =
             '<div class="chat-header-info">' +
@@ -313,7 +338,7 @@
                     '<span class="chat-online-dot"></span>' +
                 '</div>' +
                 '<div class="chat-header-text">' +
-                    '<h3>' + escapeHtml(title) + '</h3>' +
+                    '<h3>' + titleHtml + '</h3>' +
                     '<span class="chat-header-status">' + (state.wsConnected ? '🟢 Đang hoạt động' : '⚪ Đang kết nối...') + '</span>' +
                 '</div>' +
             '</div>' +
