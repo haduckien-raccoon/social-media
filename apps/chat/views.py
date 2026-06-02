@@ -551,7 +551,7 @@ def _avatar_url(user: User) -> str:
 
 def _display_name(user: User) -> str:
 	if hasattr(user, "profile"):
-		full_name = (getattr(user.profile, "full_name", "") or "").strip()
+		full_name = (getattr(user.profile, "user_name", "") or "").strip()
 		if full_name:
 			return full_name
 	return user.username
