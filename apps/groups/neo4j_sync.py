@@ -170,33 +170,148 @@ def mark_group_deleted_in_neo4j(group_id: int) -> None:
 
 def sync_group_member_to_neo4j(member: GroupMember) -> None:
     """
-    Sync mọi trạng thái membership:
-    pending / approved / rejected / banned.
-
-    Feed chỉ dùng approved, nhưng recommendation/debug cần biết trạng thái thật.
+    Quy ước graph:
+    - approved: tạo MEMBER_OF thật, feed được phép dùng.
+    - pending/rejected: không tạo MEMBER_OF, chỉ lưu REQUESTED_JOIN_GROUP để admin/debug.
+    - banned: không tạo MEMBER_OF, chỉ lưu BANNED_FROM_GROUP.
     """
     _sync_user(member.user)
     sync_group_to_neo4j(member.group)
 
+    if getattr(member.user, "is_deleted", False):
+        delete_group_member_from_neo4j(member.user_id, member.group_id)
+        mark_group_join_request_in_neo4j(
+            user_id=member.user_id,
+            group_id=member.group_id,
+            status="deleted_user",
+            role=member.role,
+            joined_at=member.joined_at,
+            updated_at=member.updated_at,
+        )
+        return
+
+    if member.status == "approved":
+        query = """
+        MATCH (u:User {id: $user_id})
+        MATCH (g:Group {id: $group_id})
+
+        OPTIONAL MATCH (u)-[req:REQUESTED_JOIN_GROUP]->(g)
+        DELETE req
+
+        WITH u, g
+        OPTIONAL MATCH (u)-[ban:BANNED_FROM_GROUP]->(g)
+        DELETE ban
+
+        WITH u, g
+        MERGE (u)-[r:MEMBER_OF]->(g)
+        SET r.role = $role,
+            r.status = "approved",
+            r.is_deleted = false,
+            r.joined_at = datetime($joined_at),
+            r.updated_at = datetime($updated_at),
+            r.synced_at = datetime()
+        """
+        Neo4jClient.execute(
+            query,
+            user_id=member.user_id,
+            group_id=member.group_id,
+            role=member.role,
+            joined_at=member.joined_at.isoformat(),
+            updated_at=member.updated_at.isoformat(),
+        )
+        return
+
+    # Không cho pending/rejected/banned tồn tại MEMBER_OF
+    delete_group_member_from_neo4j(member.user_id, member.group_id)
+
+    if member.status in ["pending", "rejected"]:
+        mark_group_join_request_in_neo4j(
+            user_id=member.user_id,
+            group_id=member.group_id,
+            status=member.status,
+            role=member.role,
+            joined_at=member.joined_at,
+            updated_at=member.updated_at,
+        )
+        return
+
+    if member.status == "banned":
+        mark_group_banned_member_in_neo4j(
+            user_id=member.user_id,
+            group_id=member.group_id,
+            role=member.role,
+            joined_at=member.joined_at,
+            updated_at=member.updated_at,
+        )
+        return
+    
+def mark_group_join_request_in_neo4j(
+    user_id: int,
+    group_id: int,
+    status: str,
+    role: str = "member",
+    joined_at=None,
+    updated_at=None,
+) -> None:
     query = """
     MATCH (u:User {id: $user_id})
     MATCH (g:Group {id: $group_id})
-    MERGE (u)-[r:MEMBER_OF]->(g)
-    SET r.role = $role,
-        r.status = $status,
-        r.joined_at = datetime($joined_at),
-        r.updated_at = datetime($updated_at),
+    MERGE (u)-[r:REQUESTED_JOIN_GROUP]->(g)
+    SET r.status = $status,
+        r.role = $role,
+        r.joined_at = CASE
+            WHEN $joined_at IS NULL THEN null
+            ELSE datetime($joined_at)
+        END,
+        r.updated_at = CASE
+            WHEN $updated_at IS NULL THEN datetime()
+            ELSE datetime($updated_at)
+        END,
         r.synced_at = datetime()
     """
 
     Neo4jClient.execute(
         query,
-        user_id=member.user_id,
-        group_id=member.group_id,
-        role=member.role,
-        status=member.status,
-        joined_at=member.joined_at.isoformat(),
-        updated_at=member.updated_at.isoformat(),
+        user_id=int(user_id),
+        group_id=int(group_id),
+        status=status,
+        role=role or "member",
+        joined_at=joined_at.isoformat() if joined_at else None,
+        updated_at=updated_at.isoformat() if updated_at else None,
+    )
+
+
+def mark_group_banned_member_in_neo4j(
+    user_id: int,
+    group_id: int,
+    role: str = "member",
+    joined_at=None,
+    updated_at=None,
+) -> None:
+    query = """
+    MATCH (u:User {id: $user_id})
+    MATCH (g:Group {id: $group_id})
+    MERGE (u)-[r:BANNED_FROM_GROUP]->(g)
+    SET r.role = $role,
+        r.status = "banned",
+        r.joined_at = CASE
+            WHEN $joined_at IS NULL THEN null
+            ELSE datetime($joined_at)
+        END,
+        r.updated_at = CASE
+            WHEN $updated_at IS NULL THEN datetime()
+            ELSE datetime($updated_at)
+        END,
+        r.synced_at = datetime()
+    """
+
+    Neo4jClient.execute(
+        query,
+        user_id=int(user_id),
+        group_id=int(group_id),
+        role=role or "member",
+        joined_at=joined_at.isoformat() if joined_at else None,
+        updated_at=updated_at.isoformat() if updated_at else None,
     )
 
 
