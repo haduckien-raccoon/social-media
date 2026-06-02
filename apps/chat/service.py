@@ -624,12 +624,14 @@ def _get_avatar_url(user: User) -> str:
 	return f"https://ui-avatars.com/api/?name={user.username}"
 
 
+# def _get_full_name(user: User) -> str:
+# 	if hasattr(user, "profile"):
+# 		full_name = (getattr(user.profile, "full_name", "") or "").strip()
+# 		if full_name:
+# 			return full_name
+# 	return user.username
 def _get_full_name(user: User) -> str:
-	if hasattr(user, "profile"):
-		full_name = (getattr(user.profile, "full_name", "") or "").strip()
-		if full_name:
-			return full_name
-	return user.username
+    return user.username
 
 
 def _validate_attachments(attachments: Iterable) -> list:
