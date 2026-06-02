@@ -181,6 +181,13 @@ CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
 SECURE_SSL_REDIRECT = False
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://sudo-social.japaneast.cloudapp.azure.com",
+    "http://sudo-social.japaneast.cloudapp.azure.com",
+    "https://20.222.176.227",
+    "http://20.222.176.227",
+]
+
 # Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")

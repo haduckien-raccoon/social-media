@@ -75,6 +75,7 @@ services:
       REDIS_PORT: 6379
       NEO4J_URI: neo4j://neo4j:7687
       DJANGO_SERVE_STATIC: "True"
+      UVICORN_WORKERS: 2
     command: ["/app/docker/entrypoint.sh", "web"]
     depends_on:
       mysql:
