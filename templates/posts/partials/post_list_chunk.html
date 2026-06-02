@@ -29,9 +29,24 @@
             </h5>
             <div class="p-time">
                 <span class="js-relative-time" data-time-iso="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} trước</span> •
-                {% if post.privacy == 'public' %}<i class="fas fa-globe-americas"></i>
-                {% elif post.privacy == 'friends' %}<i class="fas fa-user-friends"></i>
-                {% else %}<i class="fas fa-lock"></i>{% endif %}
+                {% if post.group_post_context %}
+                    {% if post.group_post_context.group.is_private %}
+                        <i class="fas fa-lock" title="Bài viết trong nhóm riêng tư"></i>
+                        <span>Nhóm riêng tư</span>
+                    {% else %}
+                        <i class="fas fa-users" title="Bài viết trong nhóm"></i>
+                        <span>Trong nhóm</span>
+                    {% endif %}
+                {% elif post.privacy == 'public' %}
+                    <i class="fas fa-globe-americas" title="Công khai"></i>
+                    <span>Công khai</span>
+                {% elif post.privacy == 'friends' %}
+                    <i class="fas fa-user-friends" title="Bạn bè"></i>
+                    <span>Bạn bè</span>
+                {% else %}
+                    <i class="fas fa-lock" title="Chỉ mình tôi"></i>
+                    <span>Chỉ mình tôi</span>
+                {% endif %}
             </div>
         </div>
     </div>

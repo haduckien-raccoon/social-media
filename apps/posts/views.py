@@ -143,14 +143,29 @@ def feed_view(request):
     else:
         my_reaction_map = {}
 
+    # for post in post_list:
+    #     post.current_user_reaction = my_reaction_map.get(post.id)
+    #     shares = list(post.shared_post.all())
+    #     post.original_post_obj = shares[0].original_post if shares else None
+
+    #     # FIX SHARE PRIVACY:
+    #     # Gắn cờ cho template feed biết có được hiện nút share không.
+    #     # Backend vẫn chặn thật ở share_post(), đây chỉ phục vụ UI.
+    #     post.can_share = can_share_post(post)
     for post in post_list:
         post.current_user_reaction = my_reaction_map.get(post.id)
         shares = list(post.shared_post.all())
         post.original_post_obj = shares[0].original_post if shares else None
 
-        # FIX SHARE PRIVACY:
-        # Gắn cờ cho template feed biết có được hiện nút share không.
-        # Backend vẫn chặn thật ở share_post(), đây chỉ phục vụ UI.
+        group_contexts = list(post.group_context.all())
+        post.group_post_context = next(
+            (
+                gp for gp in group_contexts
+                if not gp.is_deleted and gp.status != "deleted"
+            ),
+            None,
+        )
+
         post.can_share = can_share_post(post)
 
     rendered_post_ids = [post.id for post in post_list]
