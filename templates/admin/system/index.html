@@ -4,390 +4,1000 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-    :root { 
-        --bg-main: #f1f5f9; 
-        --card-bg: #ffffff; 
-        --border: #e2e8f0; 
-        --primary: #4f46e5; /* Đổi sang màu Indigo hiện đại */
-        --primary-glow: rgba(79, 70, 229, 0.15);
-        --success: #10b981; /* Emerald green */
-        --success-glow: rgba(16, 185, 129, 0.15);
-        --warning: #f59e0b; /* Vivid amber */
-        --warning-glow: rgba(245, 158, 11, 0.15);
-        --danger: #f43f5e; /* Rose red */
-        --danger-glow: rgba(244, 63, 94, 0.15);
-    }
-    
-    body { background-color: var(--bg-main); color: #0f172a; font-family: system-ui, -apple-system, sans-serif; }
-    
-    .system-wrapper { min-height: 100vh; }
-    
-    /* Box tổng nâng cấp hiệu ứng nổi khối */
-    .custom-card { 
-        background: var(--card-bg); 
-        border: 1px solid var(--border); 
-        border-radius: 20px; 
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
-    }
-    
-    /* Navigation Tabs High-tech */
-    .nav-tabs .nav-link { 
-        color: #64748b; 
-        font-weight: 700; 
-        padding: 18px 28px; 
-        border: none; 
-        border-bottom: 3px solid transparent; 
-        transition: all 0.3s ease; 
-    }
-    .nav-tabs .nav-link:hover { color: var(--primary); background: rgba(79, 70, 229, 0.04); }
-    .nav-tabs .nav-link.active { 
-        color: var(--primary); 
-        background: transparent; 
-        border-color: transparent transparent var(--primary) transparent; 
-    }
-    
-    /* Linux Monitor Box - Nâng cấp Glow Effect & Border tương tác */
-    .monitor-box {
-        background: #ffffff;
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 24px;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    /* Hiệu ứng di chuột phát quang theo từng khối màu đặc sắc */
-    .monitor-cpu:hover { transform: translateY(-5px); box-shadow: 0 20px 30px var(--primary-glow); border-color: var(--primary); }
-    .monitor-ram:hover { transform: translateY(-5px); box-shadow: 0 20px 30px var(--success-glow); border-color: var(--success); }
-    .monitor-disk:hover { transform: translateY(-5px); box-shadow: 0 20px 30px var(--warning-glow); border-color: var(--warning); }
-    .monitor-info:hover { transform: translateY(-5px); box-shadow: 0 20px 30px rgba(100, 116, 139, 0.15); border-color: #94a3b8; }
-    
-    /* Hộp bao bọc Icon tinh tế hơn */
-    .icon-badge {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-    }
-    .ib-primary { background: rgba(79, 70, 229, 0.1); color: var(--primary); }
-    .ib-success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-    .ib-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
-    .ib-info { background: rgba(148, 163, 184, 0.15); color: #475569; }
+:root {
+    --sys-bg: #f8fafc;
+    --sys-card: rgba(255, 255, 255, 0.92);
+    --sys-card-solid: #ffffff;
+    --sys-border: rgba(226, 232, 240, 0.86);
+    --sys-text: #0f172a;
+    --sys-soft: #475569;
+    --sys-muted: #64748b;
 
-    /* Font gõ chữ số dạng Gradient chuyển màu cực đỉnh */
-    .tech-font {
-        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-        font-weight: 800;
-        letter-spacing: -1px;
-    }
-    #cpu-val { background: linear-gradient(135deg, #4f46e5, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    #ram-val { background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    #disk-val { background: linear-gradient(135deg, #f59e0b, #d97706); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    #swap-val { background: linear-gradient(135deg, #f43f5e, #be123c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    --sys-primary: #4f46e5;
+    --sys-primary-soft: #eef2ff;
+    --sys-primary-glow: rgba(79, 70, 229, 0.22);
 
-    .metric-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.2px; color: #64748b; font-weight: 700; }
-    
-    /* Khu vực vẽ biểu đồ mềm mại */
-    .chart-container-live { position: relative; height: 280px; width: 100%; margin-top: 10px; }
-    
-    /* Thiết kế lại thanh tiến trình mượt mà, bo tròn hoàn toàn */
-    .progress { height: 8px !important; background-color: #f1f5f9; border-radius: 10px; overflow: hidden; }
-    .progress-bar { border-radius: 10px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    --sys-success: #16a34a;
+    --sys-success-soft: #f0fdf4;
+    --sys-success-glow: rgba(22, 163, 74, 0.18);
 
-    /* Terminal Logs chất nghệ thuật hơn */
-    .terminal-box { 
-        background: #090d16; 
-        color: #38bdf8; 
-        font-family: 'Fira Code', 'Courier New', monospace; 
-        font-size: 0.88rem; 
-        padding: 24px; 
-        border-radius: 16px; 
-        height: 600px; 
-        overflow-y: auto; 
-        white-space: pre-wrap; 
-        box-shadow: inset 0 4px 20px rgba(0,0,0,0.5);
-        border: 1px solid #1e293b;
+    --sys-warning: #d97706;
+    --sys-warning-soft: #fff7ed;
+    --sys-warning-glow: rgba(217, 119, 6, 0.18);
+
+    --sys-danger: #dc2626;
+    --sys-danger-soft: #fef2f2;
+    --sys-danger-glow: rgba(220, 38, 38, 0.18);
+
+    --sys-info: #0284c7;
+    --sys-info-soft: #f0f9ff;
+
+    --sys-shadow-sm: 0 8px 18px rgba(15, 23, 42, 0.05);
+    --sys-shadow-md: 0 18px 45px rgba(15, 23, 42, 0.08);
+    --sys-shadow-lg: 0 28px 70px rgba(15, 23, 42, 0.12);
+}
+
+.main-content {
+    min-height: auto;
+}
+
+.system-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 8% 0%, rgba(79, 70, 229, 0.10), transparent 34%),
+        radial-gradient(circle at 92% 8%, rgba(14, 165, 233, 0.09), transparent 32%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    padding: 28px 0 56px;
+    color: var(--sys-text);
+}
+
+.system-container {
+    width: 100%;
+    max-width: 1780px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.system-hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    border-radius: 32px;
+    padding: 28px;
+    background:
+        linear-gradient(135deg, rgba(79, 70, 229, 0.94), rgba(37, 99, 235, 0.92)),
+        #4f46e5;
+    box-shadow: var(--sys-shadow-lg);
+    color: white;
+    margin-bottom: 24px;
+}
+
+.system-hero::before {
+    content: "";
+    position: absolute;
+    inset: -120px -80px auto auto;
+    width: 360px;
+    height: 360px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.system-hero::after {
+    content: "";
+    position: absolute;
+    left: -70px;
+    bottom: -120px;
+    width: 300px;
+    height: 300px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.system-hero-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+}
+
+.hero-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: #22c55e;
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.22);
+}
+
+.system-hero h2 {
+    margin: 0;
+    font-size: clamp(1.8rem, 3vw, 3.1rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+.system-hero p {
+    margin: 12px 0 0;
+    max-width: 780px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.hero-status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+    gap: 12px;
+    min-width: min(100%, 360px);
+}
+
+.hero-status-card {
+    padding: 16px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.hero-status-label {
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.66);
+    margin-bottom: 8px;
+}
+
+.hero-status-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 900;
+    color: white;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.status-online {
+    background: rgba(34, 197, 94, 0.15);
+    color: #dcfce7;
+    border: 1px solid rgba(187, 247, 208, 0.35);
+}
+
+.status-offline {
+    background: rgba(248, 113, 113, 0.18);
+    color: #fee2e2;
+    border: 1px solid rgba(254, 202, 202, 0.35);
+}
+
+.system-nav-wrap {
+    margin-bottom: 22px;
+}
+
+.system-shell {
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid var(--sys-border);
+    border-radius: 30px;
+    box-shadow: var(--sys-shadow-md);
+    overflow: hidden;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.system-tabs {
+    display: flex;
+    gap: 10px;
+    padding: 16px;
+    border-bottom: 1px solid var(--sys-border);
+    background: rgba(248, 250, 252, 0.78);
+    overflow-x: auto;
+}
+
+.system-tabs .nav-link {
+    border: 0;
+    min-height: 48px;
+    padding: 0 18px;
+    border-radius: 16px;
+    color: var(--sys-muted);
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    white-space: nowrap;
+    transition: 0.25s ease;
+}
+
+.system-tabs .nav-link:hover {
+    color: var(--sys-primary);
+    background: var(--sys-primary-soft);
+}
+
+.system-tabs .nav-link.active {
+    color: white;
+    background: linear-gradient(135deg, #4f46e5, #2563eb);
+    box-shadow: 0 12px 24px rgba(79, 70, 229, 0.24);
+}
+
+.system-body {
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.metric-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 210px;
+    padding: 22px;
+    border-radius: 26px;
+    border: 1px solid var(--sys-border);
+    background: var(--sys-card-solid);
+    box-shadow: var(--sys-shadow-sm);
+    transition: 0.28s ease;
+}
+
+.metric-card::after {
+    content: "";
+    position: absolute;
+    right: -46px;
+    top: -46px;
+    width: 138px;
+    height: 138px;
+    border-radius: 999px;
+    opacity: 0.65;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--sys-shadow-md);
+}
+
+.metric-cpu:hover { border-color: rgba(79, 70, 229, 0.42); }
+.metric-ram:hover { border-color: rgba(22, 163, 74, 0.42); }
+.metric-disk:hover { border-color: rgba(217, 119, 6, 0.42); }
+.metric-swap:hover { border-color: rgba(220, 38, 38, 0.42); }
+
+.metric-cpu::after { background: var(--sys-primary-soft); }
+.metric-ram::after { background: var(--sys-success-soft); }
+.metric-disk::after { background: var(--sys-warning-soft); }
+.metric-swap::after { background: var(--sys-danger-soft); }
+
+.metric-top {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.metric-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.metric-cpu .metric-icon { background: var(--sys-primary-soft); color: var(--sys-primary); }
+.metric-ram .metric-icon { background: var(--sys-success-soft); color: var(--sys-success); }
+.metric-disk .metric-icon { background: var(--sys-warning-soft); color: var(--sys-warning); }
+.metric-swap .metric-icon { background: var(--sys-danger-soft); color: var(--sys-danger); }
+
+.metric-meta {
+    text-align: right;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--sys-muted);
+    background: #f8fafc;
+    border: 1px solid var(--sys-border);
+    border-radius: 999px;
+    padding: 7px 10px;
+}
+
+.metric-label {
+    position: relative;
+    z-index: 1;
+    margin-top: 18px;
+    color: var(--sys-muted);
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.metric-value {
+    position: relative;
+    z-index: 1;
+    margin-top: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.08em;
+}
+
+.metric-cpu .metric-value { color: var(--sys-primary); }
+.metric-ram .metric-value { color: var(--sys-success); }
+.metric-disk .metric-value { color: var(--sys-warning); }
+.metric-swap .metric-value { color: var(--sys-danger); }
+
+.metric-progress {
+    position: relative;
+    z-index: 1;
+    height: 10px;
+    margin-top: 22px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    overflow: hidden;
+}
+
+.metric-progress span {
+    display: block;
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    transition: width 0.45s ease;
+}
+
+.metric-cpu .metric-progress span { background: linear-gradient(90deg, #4f46e5, #2563eb); }
+.metric-ram .metric-progress span { background: linear-gradient(90deg, #16a34a, #10b981); }
+.metric-disk .metric-progress span { background: linear-gradient(90deg, #d97706, #f59e0b); }
+.metric-swap .metric-progress span { background: linear-gradient(90deg, #dc2626, #f43f5e); }
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.info-card {
+    border: 1px solid var(--sys-border);
+    border-radius: 22px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: var(--sys-shadow-sm);
+    min-width: 0;
+}
+
+.info-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--sys-muted);
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+}
+
+.info-value {
+    color: var(--sys-text);
+    font-weight: 850;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.health-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+    background: #94a3b8;
+}
+
+.health-ok { background: #22c55e; box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12); }
+.health-bad { background: #ef4444; box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.12); }
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.chart-card,
+.log-card {
+    border: 1px solid var(--sys-border);
+    border-radius: 26px;
+    background: white;
+    box-shadow: var(--sys-shadow-sm);
+    overflow: hidden;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 20px 22px;
+    border-bottom: 1px solid var(--sys-border);
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.panel-title {
+    margin: 0;
+    color: var(--sys-text);
+    font-size: 1rem;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.panel-subtitle {
+    margin: 6px 0 0;
+    color: var(--sys-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--sys-border);
+    background: #f8fafc;
+    color: var(--sys-soft);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    font-weight: 850;
+}
+
+.chart-wrap {
+    height: 310px;
+    padding: 18px;
+}
+
+.log-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.log-switcher {
+    display: inline-flex;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 16px;
+    border: 1px solid var(--sys-border);
+    background: white;
+    box-shadow: var(--sys-shadow-sm);
+}
+
+.log-switcher a {
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--sys-muted);
+    text-decoration: none;
+    font-weight: 850;
+    font-size: 0.88rem;
+    transition: 0.22s ease;
+}
+
+.log-switcher a:hover {
+    background: #f8fafc;
+    color: var(--sys-primary);
+}
+
+.log-switcher a.active-access {
+    background: linear-gradient(135deg, #4f46e5, #2563eb);
+    color: white;
+}
+
+.log-switcher a.active-error {
+    background: linear-gradient(135deg, #dc2626, #f43f5e);
+    color: white;
+}
+
+.terminal-box {
+    min-height: 620px;
+    max-height: 68vh;
+    overflow: auto;
+    padding: 24px;
+    border-radius: 24px;
+    background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 0.98)),
+        #020617;
+    border: 1px solid #1e293b;
+    color: #7dd3fc;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.88rem;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), var(--sys-shadow-md);
+}
+
+.terminal-box::-webkit-scrollbar { width: 10px; height: 10px; }
+.terminal-box::-webkit-scrollbar-track { background: #020617; }
+.terminal-box::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; border: 2px solid #020617; }
+.terminal-box::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+.empty-log {
+    color: #94a3b8;
+}
+
+@media (max-width: 1400px) {
+    .metric-grid,
+    .info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    .terminal-box::-webkit-scrollbar { width: 8px; }
-    .terminal-box::-webkit-scrollbar-track { background: #090d16; }
-    .terminal-box::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-    .terminal-box::-webkit-scrollbar-thumb:hover { background: #334155; }
+}
+
+@media (max-width: 992px) {
+    .chart-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-status-grid {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .system-container {
+        padding: 0 14px;
+    }
+
+    .system-hero {
+        padding: 22px;
+        border-radius: 24px;
+    }
+
+    .system-body {
+        padding: 16px;
+    }
+
+    .metric-grid,
+    .info-grid,
+    .hero-status-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-card {
+        min-height: 185px;
+    }
+
+    .chart-wrap {
+        height: 260px;
+        padding: 14px;
+    }
+
+    .terminal-box {
+        min-height: 460px;
+        font-size: 0.8rem;
+    }
+}
 </style>
 
-<div class="system-wrapper py-5 pb-5">
-    <div class="container-fluid px-md-4">
-        <div class="mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
-            <div>
-                <h3 class="fw-extrabold text-dark mb-1 d-flex align-items-center"><i class="bi bi-cpu text-primary me-2 fs-2"></i>System Monitor</h3>
-                <p class="text-muted m-0">Giám sát tài nguyên máy chủ theo thời gian thực (Real-time OS Monitoring)</p>
-            </div>
-            <div>
-                <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-4 py-2 rounded-pill shadow-sm d-inline-flex align-items-center fw-bold" style="font-size: 0.9rem;">
-                    <span class="spinner-grow spinner-grow-sm me-2" role="status" style="width: 0.6rem; height: 0.6rem;"></span> Live System Monitoring
-                </span>
-            </div>
+<div class="system-page">
+    <div class="system-container">
+
+        <div class="system-nav-wrap">
+            {% include 'admin/partials/nav.html' %}
         </div>
+
+        <section class="system-hero">
+            <div class="system-hero-inner">
+                <div>
+                    <div class="hero-kicker">
+                        <span class="hero-dot"></span>
+                        Live server monitoring
+                    </div>
+                    <h2>System Monitor</h2>
+                    <p>
+                        Theo dõi CPU, RAM, Disk, Swap và nhật ký hệ thống theo thời gian thực.
+                        Màn hình này chỉ dùng để giám sát, không còn cho phép chỉnh sửa cấu hình hệ thống.
+                    </p>
+                </div>
+
+                <div class="hero-status-grid">
+                    <div class="hero-status-card">
+                        <div class="hero-status-label">Database</div>
+                        <div class="hero-status-value">
+                            {% if server_status.db_status == 'Online' %}
+                                <span class="status-pill status-online"><i class="bi bi-check-circle-fill"></i> Online</span>
+                            {% else %}
+                                <span class="status-pill status-offline"><i class="bi bi-x-circle-fill"></i> Offline</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="hero-status-card">
+                        <div class="hero-status-label">Cache</div>
+                        <div class="hero-status-value">
+                            {% if server_status.cache_status == 'Online' %}
+                                <span class="status-pill status-online"><i class="bi bi-check-circle-fill"></i> Online</span>
+                            {% else %}
+                                <span class="status-pill status-offline"><i class="bi bi-x-circle-fill"></i> {{ server_status.cache_status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 shadow-sm border-0 px-4 py-3">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 shadow-sm border-0 px-4 py-3 mb-4">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             {% endfor %}
         {% endif %}
 
-        <div class="custom-card overflow-hidden border-0">
-            <ul class="nav nav-tabs bg-light border-bottom px-3" id="sysTabs" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#monitor"><i class="bi bi-activity me-2"></i>Performance Monitor</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#logs"><i class="bi bi-terminal me-2"></i>Access & Error Logs</button></li>
+        <section class="system-shell">
+            <ul class="nav system-tabs" id="sysTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active"
+                            id="monitor-tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#monitor"
+                            type="button"
+                            role="tab"
+                            aria-controls="monitor"
+                            aria-selected="true">
+                        <i class="bi bi-speedometer2"></i>
+                        Performance Monitor
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link"
+                            id="logs-tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#logs"
+                            type="button"
+                            role="tab"
+                            aria-controls="logs"
+                            aria-selected="false">
+                        <i class="bi bi-terminal"></i>
+                        Access & Error Logs
+                    </button>
+                </li>
             </ul>
 
-            <div class="tab-content p-4 bg-white">
-                
-                <div class="tab-pane fade show active" id="monitor">
-                    
-                    <div class="row g-4 mb-4">
-                        <div class="col-xl-3 col-md-6">
-                            <div class="monitor-box monitor-cpu h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="icon-badge ib-primary"><i class="bi bi-cpu-fill"></i></div>
-                                        <div class="metric-title">CPU Usage</div>
-                                    </div>
-                                    <span class="badge bg-slate-100 text-muted border px-2 py-1" id="cpu-cores">-- Cores</span>
-                                </div>
-                                <div class="d-flex align-items-end gap-2 mt-4">
-                                    <div class="tech-font" style="font-size: 2.8rem; line-height: 1;" id="cpu-val">0.0%</div>
-                                </div>
-                                <div class="progress mt-4">
-                                    <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" id="cpu-bar" style="width: 0%;"></div>
-                                </div>
+            <div class="tab-content system-body">
+                <div class="tab-pane fade show active" id="monitor" role="tabpanel" aria-labelledby="monitor-tab">
+                    <div class="metric-grid">
+                        <article class="metric-card metric-cpu">
+                            <div class="metric-top">
+                                <div class="metric-icon"><i class="bi bi-cpu-fill"></i></div>
+                                <div class="metric-meta" id="cpu-cores">-- cores</div>
                             </div>
-                        </div>
+                            <div class="metric-label">CPU Usage</div>
+                            <div class="metric-value" id="cpu-val">0.0%</div>
+                            <div class="metric-progress"><span id="cpu-bar"></span></div>
+                        </article>
 
-                        <div class="col-xl-3 col-md-6">
-                            <div class="monitor-box monitor-ram h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="icon-badge ib-success"><i class="bi bi-memory"></i></div>
-                                        <div class="metric-title">Memory (RAM)</div>
-                                    </div>
-                                    <span class="badge bg-slate-100 text-muted border px-2 py-1" id="ram-text">-- GB / -- GB</span>
-                                </div>
-                                <div class="d-flex align-items-end gap-2 mt-4">
-                                    <div class="tech-font" style="font-size: 2.8rem; line-height: 1;" id="ram-val">0.0%</div>
-                                </div>
-                                <div class="progress mt-4">
-                                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" id="ram-bar" style="width: 0%;"></div>
-                                </div>
+                        <article class="metric-card metric-ram">
+                            <div class="metric-top">
+                                <div class="metric-icon"><i class="bi bi-memory"></i></div>
+                                <div class="metric-meta" id="ram-text">-- / -- GB</div>
                             </div>
-                        </div>
+                            <div class="metric-label">Memory Usage</div>
+                            <div class="metric-value" id="ram-val">0.0%</div>
+                            <div class="metric-progress"><span id="ram-bar"></span></div>
+                        </article>
 
-                        <div class="col-xl-3 col-md-6">
-                            <div class="monitor-box monitor-disk h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="icon-badge ib-warning"><i class="bi bi-device-hdd-fill"></i></div>
-                                        <div class="metric-title">Storage (/)</div>
-                                    </div>
-                                    <span class="badge bg-slate-100 text-muted border px-2 py-1" id="disk-text">-- GB / -- GB</span>
-                                </div>
-                                <div class="d-flex align-items-end gap-2 mt-4">
-                                    <div class="tech-font" style="font-size: 2.8rem; line-height: 1;" id="disk-val">0.0%</div>
-                                </div>
-                                <div class="progress mt-4">
-                                    <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" id="disk-bar" style="width: 0%;"></div>
-                                </div>
+                        <article class="metric-card metric-disk">
+                            <div class="metric-top">
+                                <div class="metric-icon"><i class="bi bi-device-hdd-fill"></i></div>
+                                <div class="metric-meta" id="disk-text">-- / -- GB</div>
                             </div>
-                        </div>
+                            <div class="metric-label">Storage /</div>
+                            <div class="metric-value" id="disk-val">0.0%</div>
+                            <div class="metric-progress"><span id="disk-bar"></span></div>
+                        </article>
 
-                        <div class="col-xl-3 col-md-6">
-                            <div class="monitor-box monitor-info h-100 bg-light bg-opacity-50 border-dashed">
-                                <div class="d-flex align-items-center gap-2 mb-3">
-                                    <div class="icon-badge ib-info"><i class="bi bi-info-square-fill"></i></div>
-                                    <div class="metric-title">Server Info</div>
-                                </div>
-                                <div class="d-flex flex-column gap-2 mt-2">
-                                    <div class="d-flex justify-content-between border-bottom border-light pb-2">
-                                        <span class="text-muted small">OS</span>
-                                        <span class="fw-bold text-dark small text-end">{{ server_status.os }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between border-bottom border-light pb-2">
-                                        <span class="text-muted small">Python</span>
-                                        <span class="fw-bold text-dark small">{{ server_status.python }}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between pt-1">
-                                        <span class="text-muted small">Swap Usage</span>
-                                        <span class="fw-bold tech-font small" id="swap-val" style="font-size: 1rem;">0.0%</span>
-                                    </div>
-                                </div>
+                        <article class="metric-card metric-swap">
+                            <div class="metric-top">
+                                <div class="metric-icon"><i class="bi bi-hdd-stack-fill"></i></div>
+                                <div class="metric-meta">Swap</div>
                             </div>
-                        </div>
+                            <div class="metric-label">Swap Usage</div>
+                            <div class="metric-value" id="swap-val">0.0%</div>
+                            <div class="metric-progress"><span id="swap-bar"></span></div>
+                        </article>
                     </div>
 
-                    <div class="row g-4">
-                        <div class="col-lg-6">
-                            <div class="monitor-box p-4">
-                                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
-                                    <h6 class="fw-bold m-0 text-dark"><i class="bi bi-cpu text-primary me-2"></i>CPU History</h6>
-                                    <span class="badge bg-light text-secondary rounded-pill px-3 py-1 small">Cập nhật mỗi 2s</span>
-                                </div>
-                                <div class="chart-container-live"><canvas id="cpuChart"></canvas></div>
+                    <div class="info-grid">
+                        <article class="info-card">
+                            <div class="info-label"><i class="bi bi-pc-display"></i> Operating System</div>
+                            <div class="info-value">{{ server_status.os }}</div>
+                        </article>
+
+                        <article class="info-card">
+                            <div class="info-label"><i class="bi bi-code-square"></i> Python Runtime</div>
+                            <div class="info-value">{{ server_status.python }}</div>
+                        </article>
+
+                        <article class="info-card">
+                            <div class="info-label"><i class="bi bi-database-check"></i> Database</div>
+                            <div class="info-value">
+                                {% if server_status.db_status == 'Online' %}
+                                    <span class="health-dot health-ok"></span>
+                                {% else %}
+                                    <span class="health-dot health-bad"></span>
+                                {% endif %}
+                                <span class="ms-2">{{ server_status.db_status }}</span>
                             </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="monitor-box p-4">
-                                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
-                                    <h6 class="fw-bold m-0 text-dark"><i class="bi bi-memory text-success me-2"></i>Memory History</h6>
-                                    <span class="badge bg-light text-secondary rounded-pill px-3 py-1 small">Cập nhật mỗi 2s</span>
-                                </div>
-                                <div class="chart-container-live"><canvas id="ramChart"></canvas></div>
+                        </article>
+
+                        <article class="info-card">
+                            <div class="info-label"><i class="bi bi-lightning-charge-fill"></i> Cache</div>
+                            <div class="info-value">
+                                {% if server_status.cache_status == 'Online' %}
+                                    <span class="health-dot health-ok"></span>
+                                {% else %}
+                                    <span class="health-dot health-bad"></span>
+                                {% endif %}
+                                <span class="ms-2">{{ server_status.cache_status }}</span>
                             </div>
-                        </div>
+                        </article>
+                    </div>
+
+                    <div class="chart-grid">
+                        <article class="chart-card">
+                            <div class="panel-header">
+                                <div>
+                                    <h6 class="panel-title"><i class="bi bi-cpu text-primary"></i> CPU History</h6>
+                                    <p class="panel-subtitle">Biểu đồ tải CPU trong các lần cập nhật gần nhất.</p>
+                                </div>
+                                <span class="live-badge"><i class="bi bi-broadcast-pin"></i> 2s refresh</span>
+                            </div>
+                            <div class="chart-wrap"><canvas id="cpuChart"></canvas></div>
+                        </article>
+
+                        <article class="chart-card">
+                            <div class="panel-header">
+                                <div>
+                                    <h6 class="panel-title"><i class="bi bi-memory text-success"></i> Memory History</h6>
+                                    <p class="panel-subtitle">Theo dõi RAM để phát hiện spike bất thường.</p>
+                                </div>
+                                <span class="live-badge"><i class="bi bi-broadcast-pin"></i> 2s refresh</span>
+                            </div>
+                            <div class="chart-wrap"><canvas id="ramChart"></canvas></div>
+                        </article>
                     </div>
                 </div>
 
-                <div class="tab-pane fade" id="config">
-                    <div class="alert alert-light border shadow-sm d-flex align-items-center gap-3 mb-4 rounded-4">
-                        <i class="bi bi-info-circle-fill fs-4 text-primary"></i>
-                        <div>Các thông số dưới đây được lưu trực tiếp vào Database, không cần khởi động lại máy chủ khi thay đổi.</div>
-                    </div>
-                    <form method="POST">
-                        {% csrf_token %}
-                        <div class="row g-4">
-                            {% for config in configs %}
-                            <div class="col-md-6">
-                                <div class="p-4 border rounded-4 bg-light h-100">
-                                    <label class="fw-bold text-dark mb-1 d-block font-monospace">{{ config.key }}</label>
-                                    <small class="text-muted d-block mb-3">{{ config.description }}</small>
-                                    {% if config.data_type == 'bool' %}
-                                        <div class="form-check form-switch fs-5">
-                                            <input class="form-check-input" type="checkbox" name="config_{{ config.key }}" value="on" {% if config.value == 'True' or config.value == 'true' or config.value == '1' %}checked{% endif %}>
-                                        </div>
-                                    {% else %}
-                                        <input type="{% if config.data_type == 'int' %}number{% else %}text{% endif %}" class="form-control rounded-3" name="config_{{ config.key }}" value="{{ config.value }}">
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endfor %}
+                <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab">
+                    <div class="log-toolbar">
+                        <div>
+                            <h6 class="panel-title"><i class="bi bi-card-list text-secondary"></i> 200 dòng nhật ký gần nhất</h6>
+                            <p class="panel-subtitle">Chỉ xem log. Không có thao tác chỉnh sửa cấu hình trong màn hình này.</p>
                         </div>
-                        <div class="mt-4 text-end"><button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-bold"><i class="bi bi-save me-2"></i>Lưu cấu hình</button></div>
-                    </form>
-                </div>
-
-                <div class="tab-pane fade" id="logs">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold m-0"><i class="bi bi-card-list text-muted me-2"></i>200 Dòng nhật ký gần nhất</h6>
-                        <div class="btn-group shadow-sm">
-                            <a href="?log=access#logs" class="btn btn-sm {% if log_type == 'access' %}btn-primary{% else %}btn-light border{% endif %} fw-medium px-3">Access Log</a>
-                            <a href="?log=error#logs" class="btn btn-sm {% if log_type == 'error' %}btn-danger{% else %}btn-light border{% endif %} fw-medium px-3">Error Log</a>
+                        <div class="log-switcher">
+                            <a href="?log=access#logs" class="{% if log_type == 'access' %}active-access{% endif %}">
+                                <i class="bi bi-list-check"></i>
+                                Access Log
+                            </a>
+                            <a href="?log=error#logs" class="{% if log_type == 'error' %}active-error{% endif %}">
+                                <i class="bi bi-bug-fill"></i>
+                                Error Log
+                            </a>
                         </div>
                     </div>
-                    <div class="terminal-box" id="termBox">{{ log_content }}</div>
-                </div>
 
+                    <div class="terminal-box" id="termBox">{% if log_content %}{{ log_content }}{% else %}<span class="empty-log">Chưa có log để hiển thị.</span>{% endif %}</div>
+                </div>
             </div>
-        </div>
+        </section>
     </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // 1. Xử lý giữ Tab khi reload trang
-    if(window.location.hash) {
-        let triggerEl = document.querySelector(`button[data-bs-target="${window.location.hash}"]`);
-        if(triggerEl) new bootstrap.Tab(triggerEl).show();
-    }
-    const term = document.getElementById('termBox'); if(term) term.scrollTop = term.scrollHeight;
+document.addEventListener("DOMContentLoaded", function () {
+    const term = document.getElementById("termBox");
+    if (term) term.scrollTop = term.scrollHeight;
 
-    // 2. Cấu hình Chart.js (Style mượt mà, tắt điểm neo)
-    const commonChartOpts = {
-        responsive: true, 
-        maintainAspectRatio: false, 
-        animation: { duration: 0 }, // Tắt animation để vẽ Live mượt
-        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-        scales: { 
-            y: { min: 0, max: 100, grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', font: {family: 'monospace'} } }, 
-            x: { display: false } 
-        },
-        elements: { point: { radius: 0 }, line: { borderWidth: 2.5 } } // Ẩn dấu chấm, làm nét đường dày hơn chút
-    };
-    
-    const maxPoints = 40; // Hiển thị 40 mốc thời gian trên màn hình
-    const emptyLabels = Array(maxPoints).fill('');
+    if (window.location.hash) {
+        const triggerEl = document.querySelector(`button[data-bs-target="${window.location.hash}"]`);
+        if (triggerEl && window.bootstrap) {
+            new bootstrap.Tab(triggerEl).show();
+        }
+    }
+
+    const maxPoints = 40;
+    const labels = Array(maxPoints).fill("");
     const cpuData = Array(maxPoints).fill(0);
     const ramData = Array(maxPoints).fill(0);
 
-    // Khởi tạo Canvas CPU
-    const cpuCtx = document.getElementById('cpuChart').getContext('2d');
-    let cpuGradient = cpuCtx.createLinearGradient(0, 0, 0, 300);
-    cpuGradient.addColorStop(0, 'rgba(79, 70, 229, 0.3)');
-    cpuGradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
-    
-    const cpuChart = new Chart(cpuCtx, {
-        type: 'line', 
-        data: { labels: emptyLabels, datasets: [{ data: cpuData, borderColor: '#4f46e5', backgroundColor: cpuGradient, fill: true, tension: 0.4 }] }, 
-        options: commonChartOpts
-    });
-
-    // Khởi tạo Canvas RAM
-    const ramCtx = document.getElementById('ramChart').getContext('2d');
-    let ramGradient = ramCtx.createLinearGradient(0, 0, 0, 300);
-    ramGradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
-    ramGradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-
-    const ramChart = new Chart(ramCtx, {
-        type: 'line', 
-        data: { labels: emptyLabels, datasets: [{ data: ramData, borderColor: '#10b981', backgroundColor: ramGradient, fill: true, tension: 0.4 }] }, 
-        options: commonChartOpts
-    });
-
-    // 3. Hàm gọi API và Cập nhật Giao diện
-    let pollTimer;
-    function fetchLiveMetrics() {
-        fetch("{% url 'custom_admin:system_metrics_api' %}")
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === 'ok') {
-                    // Update Text & Bars
-                    document.getElementById('cpu-val').innerText = data.cpu + '%';
-                    document.getElementById('cpu-bar').style.width = data.cpu + '%';
-                    document.getElementById('cpu-cores').innerText = data.cpu_cores + ' Cores';
-
-                    document.getElementById('ram-val').innerText = data.ram + '%';
-                    document.getElementById('ram-bar').style.width = data.ram + '%';
-                    document.getElementById('ram-text').innerText = data.ram_used + ' GB / ' + data.ram_total + ' GB';
-
-                    document.getElementById('disk-val').innerText = data.disk + '%';
-                    document.getElementById('disk-bar').style.width = data.disk + '%';
-                    document.getElementById('disk-text').innerText = data.disk_used + ' GB / ' + data.disk_total + ' GB';
-
-                    document.getElementById('swap-val').innerText = data.swap + '%';
-                    
-                    // Update Charts (Dịch mảng dữ liệu)
-                    cpuData.shift(); cpuData.push(data.cpu); cpuChart.update();
-                    ramData.shift(); ramData.push(data.ram); ramChart.update();
+    const baseOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        interaction: { intersect: false, mode: "index" },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: "rgba(15, 23, 42, 0.92)",
+                padding: 12,
+                cornerRadius: 12,
+                displayColors: false,
+                callbacks: {
+                    label: function (context) {
+                        return context.raw + "%";
+                    }
                 }
-            }).catch(err => console.error("Monitor API Error:", err));
-    }
-
-    // 4. Tiết kiệm tài nguyên: Chỉ gọi API (Polling) khi đang ở Tab Monitor
-    const monitorTab = document.querySelector('button[data-bs-target="#monitor"]');
-    if(monitorTab.classList.contains('active')) {
-        fetchLiveMetrics(); 
-        pollTimer = setInterval(fetchLiveMetrics, 2000); // 2 giây cập nhật 1 lần
-    }
-
-    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
-        tab.addEventListener('shown.bs.tab', e => {
-            if(e.target.getAttribute('data-bs-target') === '#monitor') {
-                fetchLiveMetrics(); 
-                pollTimer = setInterval(fetchLiveMetrics, 2000);
-            } else { 
-                clearInterval(pollTimer); // Ngừng gọi API khi chuyển sang tab Config/Log
             }
+        },
+        scales: {
+            y: {
+                min: 0,
+                max: 100,
+                grid: { color: "rgba(226, 232, 240, 0.75)" },
+                ticks: { color: "#94a3b8", font: { family: "monospace", weight: "700" } }
+            },
+            x: { display: false }
+        },
+        elements: {
+            point: { radius: 0, hitRadius: 12 },
+            line: { borderWidth: 3, tension: 0.42 }
+        }
+    };
+
+    const cpuCtx = document.getElementById("cpuChart");
+    const ramCtx = document.getElementById("ramChart");
+
+    let cpuChart = null;
+    let ramChart = null;
+
+    if (cpuCtx && window.Chart) {
+        const ctx = cpuCtx.getContext("2d");
+        const gradient = ctx.createLinearGradient(0, 0, 0, 310);
+        gradient.addColorStop(0, "rgba(79, 70, 229, 0.26)");
+        gradient.addColorStop(1, "rgba(79, 70, 229, 0)");
+        cpuChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: [...labels],
+                datasets: [{ data: cpuData, borderColor: "#4f46e5", backgroundColor: gradient, fill: true }]
+            },
+            options: baseOptions
+        });
+    }
+
+    if (ramCtx && window.Chart) {
+        const ctx = ramCtx.getContext("2d");
+        const gradient = ctx.createLinearGradient(0, 0, 0, 310);
+        gradient.addColorStop(0, "rgba(22, 163, 74, 0.24)");
+        gradient.addColorStop(1, "rgba(22, 163, 74, 0)");
+        ramChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: [...labels],
+                datasets: [{ data: ramData, borderColor: "#16a34a", backgroundColor: gradient, fill: true }]
+            },
+            options: baseOptions
+        });
+    }
+
+    function clampPercent(value) {
+        const number = Number(value || 0);
+        return Math.max(0, Math.min(100, number));
+    }
+
+    function setText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = value;
+    }
+
+    function setBar(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.style.width = clampPercent(value) + "%";
+    }
+
+    function updateCharts(cpu, ram) {
+        cpuData.shift();
+        cpuData.push(clampPercent(cpu));
+        ramData.shift();
+        ramData.push(clampPercent(ram));
+
+        if (cpuChart) cpuChart.update("none");
+        if (ramChart) ramChart.update("none");
+    }
+
+    let pollTimer = null;
+
+    function fetchLiveMetrics() {
+        fetch("{% url 'custom_admin:system_metrics_api' %}", {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.status !== "ok") return;
+
+                setText("cpu-val", data.cpu + "%");
+                setText("cpu-cores", data.cpu_cores + " cores");
+                setBar("cpu-bar", data.cpu);
+
+                setText("ram-val", data.ram + "%");
+                setText("ram-text", data.ram_used + " / " + data.ram_total + " GB");
+                setBar("ram-bar", data.ram);
+
+                setText("disk-val", data.disk + "%");
+                setText("disk-text", data.disk_used + " / " + data.disk_total + " GB");
+                setBar("disk-bar", data.disk);
+
+                setText("swap-val", data.swap + "%");
+                setBar("swap-bar", data.swap);
+
+                updateCharts(data.cpu, data.ram);
+            })
+            .catch((err) => console.error("Monitor API Error:", err));
+    }
+
+    function startPolling() {
+        if (pollTimer) return;
+        fetchLiveMetrics();
+        pollTimer = setInterval(fetchLiveMetrics, 2000);
+    }
+
+    function stopPolling() {
+        if (!pollTimer) return;
+        clearInterval(pollTimer);
+        pollTimer = null;
+    }
+
+    const monitorTab = document.querySelector('button[data-bs-target="#monitor"]');
+    if (!monitorTab || monitorTab.classList.contains("active")) {
+        startPolling();
+    }
+
+    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach((tab) => {
+        tab.addEventListener("shown.bs.tab", (event) => {
+            const target = event.target.getAttribute("data-bs-target");
+            if (target === "#monitor") startPolling();
+            else stopPolling();
         });
     });
 });
