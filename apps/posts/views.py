@@ -30,6 +30,22 @@ from apps.posts.neo4j_feed import (
 from apps.groups.services import *
 MAX_CLIENT_SEEN_IDS = 200
 
+def get_active_group_post_context(post):
+    """
+    Bài thuộc group thì quyền hiển thị do group quyết định,
+    không cho sửa privacy cá nhân của Post.
+    """
+    return (
+        GroupPost.objects
+        .select_related("group")
+        .filter(
+            post=post,
+            is_deleted=False,
+        )
+        .exclude(status="deleted")
+        .first()
+    )
+
 def _parse_seen_post_ids(raw_value):
     if not raw_value:
         return []
@@ -475,33 +491,46 @@ def create_post_view(request):
 
 def edit_post_view(request, post_id):
     """Chỉnh sửa bài viết"""
-    post = get_object_or_404(Post, id=post_id, is_deleted=False)
+    post = get_object_or_404(
+        Post.objects.select_related("author").prefetch_related(
+            "images",
+            "files",
+            "tagged_users__user",
+            "hashtags",
+            "group_context__group",
+        ),
+        id=post_id,
+        is_deleted=False,
+    )
 
     if post.author != request.user:
         return HttpResponseForbidden()
 
+    group_post = get_active_group_post_context(post)
+    is_group_post = group_post is not None
+
     if request.method == "POST":
         content = request.POST.get("content")
-        privacy = request.POST.get("privacy")
+
+        # FIX: bài thuộc group thì tuyệt đối không nhận privacy từ form/devtools.
+        # Nếu truyền None vào update_post(), service sẽ giữ nguyên privacy cũ.
+        if is_group_post:
+            privacy = None
+        else:
+            privacy = request.POST.get("privacy")
+
         tag_users = request.POST.getlist("tagged_users")
-        print(f"[DEBUG] Tagged Users: {tag_users}")
         location = request.POST.get("location", "")
-        
-        # 1. Lấy file MỚI upload lên
+
         images = request.FILES.getlist("images")
         files = request.FILES.getlist("files")
-        
-        # 2. Lấy danh sách ID CŨ cần xóa (quan trọng)
+
         delete_image_ids = request.POST.getlist("delete_image_ids")
         delete_file_ids = request.POST.getlist("delete_file_ids")
-
-        print(f"[DEBUG] New Images: {images}")
-        print(f"[DEBUG] Delete Img IDs: {delete_image_ids}")
 
         result = moderate_text(content)
 
         if result["blocked"]:
-
             request.user.violation_score += 1
             request.user.save()
 
@@ -510,16 +539,13 @@ def edit_post_view(request, post_id):
                 target_type=ModerationTargetType.POST,
                 target_id=post.id,
                 result=result,
-                reason="Toxic post edit detected"
+                reason="Toxic post edit detected",
             )
 
             return JsonResponse({
                 "success": False,
-                "error": (
-                    "Nội dung chỉnh sửa chứa "
-                    "từ vi phạm."
-                ),
-                "violations": result["violations"]
+                "error": "Nội dung chỉnh sửa chứa từ vi phạm.",
+                "violations": result["violations"],
             }, status=400)
 
         try:
@@ -531,23 +557,33 @@ def edit_post_view(request, post_id):
                 images=images,
                 files=files,
                 location_name=location,
-                delete_image_ids=delete_image_ids, # Truyền vào service
-                delete_file_ids=delete_file_ids    # Truyền vào service
+                delete_image_ids=delete_image_ids,
+                delete_file_ids=delete_file_ids,
             )
         except ValidationError as e:
             return JsonResponse({"error": str(e)}, status=400)
+
         return redirect("posts:post_detail", post_id=post.id)
-    
+
     profile, _ = create_user_profile(request.user)
     friends = list_people_tag(request.user)
+
     for friend in friends:
         create_user_profile(friend)
-    #tạo 1 dictionary {id: user} để dễ lookup trong template
+
     tagged_user_map = {
         tag.user.id: tag.user
         for tag in post.tagged_users.all()
     }
-    return render(request, "posts/edit_post.html", {"post": post, "friends": friends, "profile": profile, "tagged_user_map": tagged_user_map})
+
+    return render(request, "posts/edit_post.html", {
+        "post": post,
+        "friends": friends,
+        "profile": profile,
+        "tagged_user_map": tagged_user_map,
+        "group_post": group_post,
+        "is_group_post": is_group_post,
+    })
 
 @require_POST
 def delete_post_view(request, post_id):
