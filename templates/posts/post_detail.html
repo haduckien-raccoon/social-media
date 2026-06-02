@@ -868,8 +868,10 @@
             </div>
             <div class="comment-count">
                 <span id="total-comments-label" style="color: var(--text-main); font-weight: 500;">{{ total_comments }}</span> bình luận
+                {% if can_share_post %}
                 <span aria-hidden="true"> · </span>
                 <span id="total-shares-label" style="color: var(--text-main); font-weight: 500;">{{ total_shares }}</span> chia sẻ
+                {% endif %}
             </div>
         </div>
 
@@ -906,9 +908,11 @@
                 <i class="far fa-comment-alt"></i> Bình luận
             </button>
             
+            {% if can_share_post %}
             <button class="action-btn" onclick="openShareModal()">
                 <i class="fas fa-share"></i> Chia sẻ
             </button>
+            {% endif %}
         </div>
 
         <div class="comments-wrapper">
@@ -1057,6 +1061,7 @@
 
 <div id="toast-notification">Thông báo</div>
 
+{% if can_share_post %}
 <div id="shareModal" class="modal-overlay" onclick="closeShareModal(event)">
     <div class="modal-box">
         <div class="modal-header">
@@ -1085,6 +1090,7 @@
         </form>
     </div>
 </div>
+{% endif %}
 
 <div id="reportModal" class="modal-overlay" onclick="closeReportModal(event)">
     <div class="modal-box">

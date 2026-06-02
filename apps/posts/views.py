@@ -132,6 +132,11 @@ def feed_view(request):
         shares = list(post.shared_post.all())
         post.original_post_obj = shares[0].original_post if shares else None
 
+        # FIX SHARE PRIVACY:
+        # Gắn cờ cho template feed biết có được hiện nút share không.
+        # Backend vẫn chặn thật ở share_post(), đây chỉ phục vụ UI.
+        post.can_share = can_share_post(post)
+
     rendered_post_ids = [post.id for post in post_list]
 
     if rendered_post_ids:
@@ -234,6 +239,10 @@ def hashtag_feed_view(request, tag):
         post.current_user_reaction = my_reaction_map.get(post.id)
         shares = list(post.shared_post.all())
         post.original_post_obj = shares[0].original_post if shares else None
+
+        # FIX SHARE PRIVACY:
+        # Bài group/friends trong hashtag feed cũng không được hiện share.
+        post.can_share = can_share_post(post)
 
     if request.GET.get("ajax") == "1":
         html = render_to_string(
@@ -368,15 +377,20 @@ def post_detail_view(request, post_id):
 
     context = {
         "post": post,
-        "group_post": group_post, # Truyền ra context để HTML biết bài này ở group nào (nếu cần hiển thị tên nhóm)
+        "group_post": group_post,
         "original_post": original_post,
-        "comments": sorted_comments, 
+        "comments": sorted_comments,
         "reaction_breakdown": reaction_breakdown,
         "total_reactions": PostReaction.objects.filter(post=post).count(),
         "total_comments": len(sorted_comments),
         "total_shares": PostShare.objects.filter(original_post=post).count(),
         "count_comment": count_comment,
         "report_reasons": report_reaseons,
+
+        # FIX SHARE PRIVACY:
+        # Cho template post_detail biết có được hiện nút/modal share hay không.
+        # Backend vẫn chặn cứng trong share_post().
+        "can_share_current_post": can_share_post(post),
     }
 
     return render(request, "posts/post_detail.html", context)
@@ -665,12 +679,42 @@ def toggle_comment_reaction_view(request, comment_id):
 # =====================================================
 @require_POST
 def share_post_view(request, post_id):
-    """Chia sẻ bài viết"""
-    original_post = get_object_or_404(Post, id=post_id)
+    """
+    Chia sẻ bài viết.
+
+    FIX SHARE PRIVACY:
+    - Không cho share bài thuộc group.
+    - Không cho share bài friends.
+    - Không cho share bài only_me.
+    - Nếu user cố POST thủ công bằng devtools/Postman vẫn bị chặn.
+    """
+    post_to_share = get_object_or_404(Post, id=post_id, is_deleted=False)
     caption = request.POST.get("caption", "")
     privacy = request.POST.get("privacy", "public")
 
-    new_post = share_post(request.user, original_post, caption, privacy)
+    try:
+        new_post = share_post(
+            request.user,
+            post_to_share,
+            caption=caption,
+            privacy=privacy,
+        )
+    except ValidationError as e:
+        if hasattr(e, "messages") and e.messages:
+            error_message = e.messages[0]
+        else:
+            error_message = str(e)
+
+        # Nếu sau này share bằng fetch/ajax thì trả JSON.
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({
+                "success": False,
+                "error": error_message,
+            }, status=403)
+
+        # Nếu là form POST thường thì trả 403.
+        return HttpResponseForbidden(error_message)
+
     return redirect("posts:post_detail", post_id=new_post.id)
 
 @require_POST

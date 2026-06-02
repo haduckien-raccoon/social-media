@@ -155,6 +155,7 @@
                 </a>
             </div>
 
+            {% if post.can_share %}
             <!-- Share Button -->
             <div class="col-4">
                 <button class="btn w-100 text-muted" onclick="sharePost({{ post.id }})">
@@ -162,6 +163,7 @@
                     Chia sẻ
                 </button>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

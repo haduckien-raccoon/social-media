@@ -362,58 +362,213 @@ def delete_post(user, post):
 
     transaction.on_commit(lambda: mark_post_deleted_in_neo4j(post.id))
 
+# =====================================================
+# 3.1. SHARE PERMISSION HELPERS
+# =====================================================
+
+def get_original_post_for_share(post):
+    """
+    FIX SHARE PRIVACY:
+    Chuẩn hóa bài gốc khi share.
+
+    Case:
+    - Nếu user share bài gốc       -> original_post = chính bài đó
+    - Nếu user share lại bài share -> original_post = bài gốc ban đầu
+
+    Lý do cần tách helper:
+    - Dùng chung cho can_share_post()
+    - Dùng chung cho share_post()
+    - Tránh lặp logic post.shared_post.first().original_post nhiều nơi
+    """
+    if not post:
+        return None
+
+    if hasattr(post, "shared_post") and post.shared_post.exists():
+        share_info = (
+            post.shared_post
+            .select_related("original_post")
+            .first()
+        )
+        if share_info and share_info.original_post:
+            return share_info.original_post
+
+    return post
+
+
+def is_group_post(post):
+    """
+    FIX SHARE PRIVACY:
+    Check bài viết có thuộc group hay không.
+
+    Vì group mặc định là private nên chỉ cần bài có GroupPost context
+    còn hiệu lực thì không cho share.
+
+    Dùng local import để tránh nguy cơ circular import giữa apps.posts và apps.groups.
+    """
+    if not post or not getattr(post, "id", None):
+        return False
+
+    from apps.groups.models import GroupPost
+
+    return GroupPost.objects.filter(
+        post_id=post.id,
+        is_deleted=False,
+    ).exclude(
+        status="deleted"
+    ).exists()
+
+
+def get_post_share_block_reason(post):
+    """
+    FIX SHARE PRIVACY:
+    Trả về lý do không được share.
+    Nếu trả về None nghĩa là được share.
+
+    Luật:
+    - Bài thuộc group: không share
+    - Bài friends: không share
+    - Bài only_me: không share
+    - Bài đã xóa: không share
+    - Nếu là bài share lại, phải check cả bài đang share và bài gốc
+    """
+    if not post:
+        return "Bài viết không tồn tại."
+
+    if post.is_deleted:
+        return "Không thể chia sẻ bài viết đã bị xóa."
+
+    # FIX 1: Bài đang được bấm share thuộc group -> cấm share.
+    if is_group_post(post):
+        return "Không thể chia sẻ bài viết thuộc nhóm."
+
+    # FIX 2: Bài đang được bấm share là friends hoặc only_me -> cấm share.
+    if post.privacy == PostPrivacy.FRIENDS:
+        return "Không thể chia sẻ bài viết chỉ dành cho bạn bè."
+
+    if post.privacy == PostPrivacy.ONLY_ME:
+        return "Không thể chia sẻ bài viết riêng tư."
+
+    if post.privacy != PostPrivacy.PUBLIC:
+        return "Bài viết này không được phép chia sẻ."
+
+    original_post = get_original_post_for_share(post)
+
+    if original_post and original_post.id != post.id:
+        if original_post.is_deleted:
+            return "Không thể chia sẻ vì bài viết gốc đã bị xóa."
+
+        # FIX 3: Bài share lại nhưng bài gốc thuộc group -> vẫn cấm.
+        if is_group_post(original_post):
+            return "Không thể chia sẻ bài viết gốc thuộc nhóm."
+
+        # FIX 4: Bài share lại nhưng bài gốc friends/only_me -> vẫn cấm.
+        if original_post.privacy == PostPrivacy.FRIENDS:
+            return "Không thể chia sẻ bài viết gốc chỉ dành cho bạn bè."
+
+        if original_post.privacy == PostPrivacy.ONLY_ME:
+            return "Không thể chia sẻ bài viết gốc riêng tư."
+
+        if original_post.privacy != PostPrivacy.PUBLIC:
+            return "Bài viết gốc này không được phép chia sẻ."
+
+    return None
+
+
+def can_share_post(post):
+    """
+    FIX SHARE PRIVACY:
+    Helper cho backend và template/view context.
+    True  -> hiện nút share / cho phép POST share
+    False -> ẩn nút share / chặn POST share
+    """
+    return get_post_share_block_reason(post) is None
+
+
+def ensure_post_shareable(post):
+    """
+    FIX SHARE PRIVACY:
+    Chốt chặn backend thật sự.
+
+    Không tin UI, vì user vẫn có thể tự POST bằng devtools/Postman.
+    """
+    reason = get_post_share_block_reason(post)
+    if reason:
+        raise ValidationError(reason)
+
 @transaction.atomic
 def share_post(user, post_to_share, caption="", privacy="public"):
     """
-    Share bài viết
-    - Share bài gốc → original_post = bài đó
-    - Share bài share → original_post = bài gốc
+    Share bài viết.
+
+    FIX SHARE PRIVACY:
+    - Không cho share bài thuộc group.
+    - Không cho share bài privacy=friends.
+    - Không cho share bài only_me.
+    - Nếu share lại một bài share, vẫn kiểm tra bài gốc.
     """
 
-    # 1. Chuẩn hoá bài gốc (ROOT POST)
-    if hasattr(post_to_share, "shared_post") and post_to_share.shared_post.exists():
-        # post_to_share là bài share → lấy bài gốc
-        original_post = post_to_share.shared_post.first().original_post
-    else:
-        # post_to_share là bài gốc
-        original_post = post_to_share
+    # =====================================================
+    # FIX SHARE PRIVACY - CHỐT CHẶN BACKEND
+    # Đặt trước khi tạo new_post/PostShare để tránh lưu rác vào DB.
+    # =====================================================
+    ensure_post_shareable(post_to_share)
 
-    # 2. Tạo post mới (post share)
+    # 1. Chuẩn hoá bài gốc ROOT POST.
+    original_post = get_original_post_for_share(post_to_share)
+
+    if not original_post:
+        raise ValidationError("Bài viết gốc không tồn tại.")
+
+    # 2. Validate privacy của bài share mới.
+    # Đây là quyền của bài share mới do user tạo.
+    valid_privacies = {choice[0] for choice in PostPrivacy.choices}
+    if privacy not in valid_privacies:
+        raise ValidationError("Invalid privacy value.")
+
+    normalized_caption = caption.strip() if caption else ""
+
+    # 3. Tạo post mới, đây là bài share nằm trên trang cá nhân/feed.
     new_post = Post.objects.create(
         author=user,
-        content=caption,
+        content=normalized_caption,
         privacy=privacy,
     )
 
-    # 3. Ghi PostShare
+    # 4. Ghi quan hệ share.
     share = PostShare.objects.create(
         user=user,
         original_post=original_post,
         new_post=new_post,
-        caption=caption,
+        caption=normalized_caption,
         privacy=privacy,
     )
 
-    create_notification(
-        actor=user,
-        recipient=original_post.author,
-        verb_code="share_post",
-        target=original_post,
-        link=f"/posts/{original_post.id}/",
-    )
+    # 5. Notification.
+    if original_post.author_id != user.id:
+        create_notification(
+            actor=user,
+            recipient=original_post.author,
+            verb_code="share_post",
+            target=original_post,
+            link=f"/posts/{original_post.id}/",
+        )
 
+    # 6. Realtime stats.
     post_stats = _build_post_stats_payload(original_post)
+
     send_ws_message(f"post_{original_post.id}", "post_event", {
         "event": "share_updated",
         "post_id": original_post.id,
         **post_stats,
     })
+
     send_ws_message("feed_global", "feed_update", {
         "action": "post_stats",
         "post_id": original_post.id,
         **post_stats,
     })
 
+    # 7. Sync Neo4j sau commit.
     transaction.on_commit(lambda: sync_user_node(user))
     transaction.on_commit(lambda: sync_post_node(new_post))
     transaction.on_commit(lambda: sync_share_edge(share))

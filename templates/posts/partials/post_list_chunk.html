@@ -124,8 +124,10 @@
         </div>
         <div>
             <span id="comment-count-{{ post.id }}">{{ post.comment_count }}</span> bình luận
+            {% if post.can_share %}
             <span aria-hidden="true"> · </span>
             <span id="share-count-{{ post.id }}">{{ post.share_count|default:0 }}</span> chia sẻ
+            {% endif %}
         </div>
     </div>
 
@@ -158,12 +160,15 @@
         <div class="action-btn" onclick="window.location.href='{% url 'posts:post_detail' post.id %}'">
             <i class="far fa-comment-alt me-2"></i> Bình luận
         </div>
+        {% if post.can_share %}
         <div class="action-btn" onclick="openShareModal({{ post.id }})">
             <i class="fas fa-share me-2"></i> Chia sẻ
         </div>
+        {% endif %}
     </div>
 </div>
 
+{% if post.can_share %}
 <div id="shareModal-{{ post.id }}" class="share-modal" onclick="closeShareModal(event, {{ post.id }})">
     <div class="share-box">
         <div class="share-header">
@@ -202,6 +207,7 @@
         </form>
     </div>
 </div>
+{% endif %}
 {% if tag_count > 4 %}
 <div id="tagged-modal-{{ post.id }}" class="tagged-modal" onclick="handleTaggedBackdrop(event, {{ post.id }})">
     <div class="tagged-box">
