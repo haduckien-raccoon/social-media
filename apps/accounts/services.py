@@ -27,6 +27,9 @@ def build_absolute_url(path):
     return f"{base_url}{normalized_path}"
 
 def create_jwt_pair_for_user(user):
+    if getattr(user, "is_deleted", False):
+        raise ValueError("Cannot create JWT for deleted account")
+
     access_payload = {
         'user_id': user.id,
         'email': user.email,
@@ -123,6 +126,10 @@ def verify_email_token(token_value):
     # Kiểm tra hết hạn
     if token.expires_at < timezone.now():
         return False, "Token đã hết hạn."
+
+    if getattr(token.user, "is_deleted", False):
+        return False, "Tài khoản đã bị xóa."
+
     #tạo profile nếu chưa có
     create_user_profile(token.user)
     token.user.is_verified = True
@@ -148,6 +155,10 @@ def login_user(email, password):
         error = None
     except User.DoesNotExist:
         return None, "Invalid email or password"
+
+    if getattr(user, "is_deleted", False):
+        return None, "Account has been deleted"
+
     if not user.check_password(password):
         # Backward compatibility for legacy users created with plain-text password.
         if user.password == password:
@@ -189,6 +200,11 @@ def refresh_jwt_token(refresh_token_value):
         return None, "Refresh token expired"
 
     user = token_record.user
+
+    if getattr(user, "is_deleted", False) or not user.is_active or user.is_banned:
+        token_record.delete()
+        return None, "Account is not available"
+
     new_access_token, new_refresh_token = create_jwt_pair_for_user(user)
 
     # Xoá token cũ
@@ -206,6 +222,9 @@ def reset_user_password(token_value, new_password):
         return False, "Token expired"
 
     user = token.user
+    if getattr(user, "is_deleted", False):
+        return False, "Account has been deleted"
+
     user.set_password(new_password)
     user.save()
 
@@ -265,6 +284,9 @@ def normalize_profile_birth_day(value):
 
 
 def update_user_profile(user, full_name=None, address=None, town=None, province=None, nationality=None, school=None, phone_number=None, birth_day=None, bio=None, avatar=None):
+    if getattr(user, "is_deleted", False):
+        return None
+
     profile, created = UserProfile.objects.get_or_create(user=user)
 
     if full_name is not None:
@@ -296,6 +318,9 @@ def update_user_profile(user, full_name=None, address=None, town=None, province=
     return profile
 
 def change_email(user, new_email):
+    if getattr(user, "is_deleted", False):
+        return False, "Account has been deleted"
+
     if User.objects.filter(email=new_email).exclude(id=user.id).exists():
         return False, "Email already in use"
 
@@ -319,6 +344,9 @@ def change_email(user, new_email):
     return True, "Email change initiated. Please verify your new email."
 
 def change_password(user, old_password, new_password):
+    if getattr(user, "is_deleted", False):
+        return False, "Account has been deleted"
+
     if not user.check_password(old_password):
         return False, "Old password is incorrect"
 
@@ -327,6 +355,9 @@ def change_password(user, old_password, new_password):
     return True, "Password changed successfully"
 
 def change_username(user, new_username):
+    if getattr(user, "is_deleted", False):
+        return False, "Account has been deleted"
+
     if User.objects.filter(username=new_username).exclude(id=user.id).exists():
         return False, "Username already in use"
 
@@ -337,6 +368,40 @@ def change_username(user, new_username):
     
     return True, "Username changed successfully"
 
+def soft_delete_account(user):
+    """
+    Xóa mềm tài khoản cá nhân.
+
+    Không xóa record khỏi database để giữ lịch sử bài viết, bình luận, report, graph.
+    Sau khi gọi hàm này:
+    - is_deleted = True
+    - is_active = False để chặn đăng nhập
+    - deleted_at/date_unactivate lưu thời điểm xóa
+    - refresh token bị xóa để không refresh phiên cũ được nữa
+    - Neo4j được sync trạng thái inactive/deleted
+    """
+    now = timezone.now()
+
+    if getattr(user, "is_deleted", False):
+        RefreshToken.objects.filter(user=user).delete()
+        return True, "Account has already been deleted"
+
+    user.is_deleted = True
+    user.deleted_at = now
+    user.is_active = False
+    user.date_unactivate = now
+    user.save(update_fields=[
+        "is_deleted",
+        "deleted_at",
+        "is_active",
+        "date_unactivate",
+    ])
+
+    RefreshToken.objects.filter(user=user).delete()
+    sync_account_status_to_neo4j_on_commit(user)
+
+    return True, "Account deleted successfully"
+
 def deactivate_account(user):
     user.is_active = False
     user.save()
@@ -344,8 +409,12 @@ def deactivate_account(user):
     return True, "Account deactivated successfully"
 
 def activate_account(user):
+    if getattr(user, "is_deleted", False):
+        return False, "Deleted account cannot be activated"
+
     user.is_active = True
-    user.save()
+    user.date_unactivate = None
+    user.save(update_fields=["is_active", "date_unactivate"])
     sync_account_status_to_neo4j_on_commit(user)
     return True, "Account activated successfully"
 

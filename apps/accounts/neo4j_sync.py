@@ -77,6 +77,7 @@ def _build_user_payload(user: User) -> Dict[str, Any]:
 
         # account status
         "is_active": bool(user.is_active),
+        "is_deleted": bool(getattr(user, "is_deleted", False)),
         "is_banned": bool(user.is_banned),
         "is_verified": bool(user.is_verified),
         "is_staff": bool(user.is_staff),
@@ -98,6 +99,7 @@ def _build_user_payload(user: User) -> Dict[str, Any]:
         "date_joined": _iso_datetime(user.date_joined),
         "date_banned": _iso_datetime(user.date_banned),
         "date_unactivate": _iso_datetime(user.date_unactivate),
+        "deleted_at": _iso_datetime(getattr(user, "deleted_at", None)),
         "profile_created_at": _iso_datetime(profile.created_at if profile else None),
         "profile_updated_at": _iso_datetime(profile.updated_at if profile else None),
     }
@@ -154,6 +156,11 @@ def setup_account_graph_schema() -> None:
         FOR (u:User)
         ON (u.violation_score)
         """,
+        """
+        CREATE INDEX user_deleted_index IF NOT EXISTS
+        FOR (u:User)
+        ON (u.is_deleted)
+        """,
     ]
 
     for query in queries:
@@ -187,6 +194,7 @@ def sync_account_to_neo4j(user: User) -> None:
         u.username = $username,
 
         u.is_active = $is_active,
+        u.is_deleted = $is_deleted,
         u.is_banned = $is_banned,
         u.is_verified = $is_verified,
         u.is_staff = $is_staff,
@@ -215,6 +223,10 @@ def sync_account_to_neo4j(user: User) -> None:
         u.date_unactivate = CASE
             WHEN $date_unactivate IS NULL THEN null
             ELSE datetime($date_unactivate)
+        END,
+        u.deleted_at = CASE
+            WHEN $deleted_at IS NULL THEN null
+            ELSE datetime($deleted_at)
         END,
         u.profile_created_at = CASE
             WHEN $profile_created_at IS NULL THEN null
@@ -247,6 +259,7 @@ def sync_account_status_to_neo4j(user: User) -> None:
         u.email = $email,
         u.username = $username,
         u.is_active = $is_active,
+        u.is_deleted = $is_deleted,
         u.is_banned = $is_banned,
         u.is_verified = $is_verified,
         u.is_staff = $is_staff,
@@ -261,6 +274,10 @@ def sync_account_status_to_neo4j(user: User) -> None:
             WHEN $date_unactivate IS NULL THEN null
             ELSE datetime($date_unactivate)
         END,
+        u.deleted_at = CASE
+            WHEN $deleted_at IS NULL THEN null
+            ELSE datetime($deleted_at)
+        END,
         u.updated_at = datetime()
     """
 
@@ -270,6 +287,7 @@ def sync_account_status_to_neo4j(user: User) -> None:
         email=user.email or "",
         username=user.username or "",
         is_active=bool(user.is_active),
+        is_deleted=bool(getattr(user, "is_deleted", False)),
         is_banned=bool(user.is_banned),
         is_verified=bool(user.is_verified),
         is_staff=bool(user.is_staff),
@@ -278,6 +296,7 @@ def sync_account_status_to_neo4j(user: User) -> None:
         violation_score=int(user.violation_score or 0),
         date_banned=_iso_datetime(user.date_banned),
         date_unactivate=_iso_datetime(user.date_unactivate),
+        deleted_at=_iso_datetime(getattr(user, "deleted_at", None)),
     )
 
 
@@ -298,6 +317,8 @@ def mark_account_inactive_in_neo4j(user_id: int) -> None:
     MATCH (u:User {id: $user_id})
     SET u.is_active = false,
         u.is_deleted = true,
+        u.deleted_at = datetime(),
+        u.date_unactivate = datetime(),
         u.updated_at = datetime()
     """
     Neo4jClient.execute(query, user_id=int(user_id))
@@ -345,6 +366,7 @@ def _bulk_upsert_user_nodes(payloads: List[Dict[str, Any]]) -> int:
         u.username = row.username,
 
         u.is_active = row.is_active,
+        u.is_deleted = row.is_deleted,
         u.is_banned = row.is_banned,
         u.is_verified = row.is_verified,
         u.is_staff = row.is_staff,
@@ -372,6 +394,10 @@ def _bulk_upsert_user_nodes(payloads: List[Dict[str, Any]]) -> int:
         u.date_unactivate = CASE
             WHEN row.date_unactivate IS NULL THEN null
             ELSE datetime(row.date_unactivate)
+        END,
+        u.deleted_at = CASE
+            WHEN row.deleted_at IS NULL THEN null
+            ELSE datetime(row.deleted_at)
         END,
         u.profile_created_at = CASE
             WHEN row.profile_created_at IS NULL THEN null

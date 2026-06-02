@@ -49,6 +49,11 @@ html, body { height:100%; width:100%; overflow-x:hidden; background:var(--bg-lig
 .setting-info p { font-size: 14px; color: var(--text-grey); }
 .setting-card.danger:hover { border-color: #ff4d4f; }
 .setting-card.danger .setting-icon { color: #ff4d4f; background: #fff1f0; }
+.setting-form { width: 100%; margin: 0; }
+.setting-button { width: 100%; border: 1px solid var(--border-color); text-align: left; cursor: pointer; font: inherit; }
+.setting-button.danger { color: var(--text-dark); }
+.setting-button.danger:hover { border-color: #ff4d4f; box-shadow: var(--shadow); transform: translateY(-2px); }
+.setting-button.danger strong { color: #d9363e; }
 
 @media (max-width:768px) {
     body { flex-direction:column; }
@@ -104,6 +109,22 @@ html, body { height:100%; width:100%; overflow-x:hidden; background:var(--bg-lig
                 <p>Quản lý danh sách và bỏ chặn người dùng</p>
             </div>
         </a>
+
+        <form
+            method="POST"
+            action="{% url 'accounts:delete_account' %}"
+            class="setting-form"
+            onsubmit="return confirm('Bạn chắc chắn muốn xóa tài khoản? Tài khoản sẽ bị vô hiệu hóa và không thể đăng nhập lại.');"
+        >
+            {% csrf_token %}
+            <button type="submit" class="setting-card setting-button danger">
+                <div class="setting-icon"><i class="fa-solid fa-user-slash"></i></div>
+                <div class="setting-info">
+                    <h3><strong>Xóa tài khoản cá nhân</strong></h3>
+                    <p>Xóa mềm tài khoản, đăng xuất ngay và chặn đăng nhập lại</p>
+                </div>
+            </button>
+        </form>
     </div>
 </main>
 

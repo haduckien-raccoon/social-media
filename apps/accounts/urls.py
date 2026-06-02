@@ -20,6 +20,7 @@ urlpatterns = [
     path("update_password/", update_password_view, name="update_password"),
     path("settings/", settings_page_view, name="settings"),
     path("settings/blocked/", blocked_users_view, name="blocked_users"),
+    path("delete-account/", delete_my_account_view, name="delete_account"),
     path("block/<int:user_id>/", block_user_view, name="block_user"),
     path("unblock/<int:user_id>/", unblock_user_view, name="unblock_user"),
 ]

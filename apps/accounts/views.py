@@ -196,6 +196,8 @@ def profile_view(request, id=None, username=None):
 
         current_user_id = payload.get("user_id")
         current_user = User.objects.get(id=current_user_id)
+        if getattr(current_user, "is_deleted", False):
+            return redirect("accounts:login")
 
         if id is not None:
             id = int(id)
@@ -280,6 +282,8 @@ def edit_profile_view(request):
         )
         user_id = payload.get("user_id")
         user = User.objects.get(id=user_id)
+        if getattr(user, "is_deleted", False):
+            return redirect("accounts:login")
         profile = get_object_or_404(UserProfile, user=user)
 
         if request.method == "GET":
@@ -338,6 +342,8 @@ def update_email_view(request):
         )
         user_id = payload.get("user_id")
         user = User.objects.get(id=user_id)
+        if getattr(user, "is_deleted", False):
+            return redirect("accounts:login")
         profile = get_object_or_404(UserProfile, user=user)
 
         if request.method == "GET":
@@ -384,6 +390,8 @@ def update_username_view(request):
         )
         user_id = payload.get("user_id")
         user = User.objects.get(id=user_id)
+        if getattr(user, "is_deleted", False):
+            return redirect("accounts:login")
         profile = get_object_or_404(UserProfile, user=user)
 
         if request.method == "GET":
@@ -430,6 +438,8 @@ def update_password_view(request):
         )
         user_id = payload.get("user_id")
         user = User.objects.get(id=user_id)
+        if getattr(user, "is_deleted", False):
+            return redirect("accounts:login")
         profile = get_object_or_404(UserProfile, user=user)
 
         if request.method == "GET":
@@ -479,6 +489,8 @@ def blocked_users_view(request):
         )
         current_user_id = payload.get("user_id")
         current_user = User.objects.get(id=current_user_id)
+        if getattr(current_user, "is_deleted", False):
+            return redirect("accounts:login")
         blocked_users = get_list_blocked_users(current_user)
 
         return render(request, "accounts/blocked_users.html", {
@@ -503,6 +515,8 @@ def block_user_view(request, user_id):
         )
         current_user_id = payload.get("user_id")
         current_user = User.objects.get(id=current_user_id)
+        if getattr(current_user, "is_deleted", False):
+            return redirect("accounts:login")
         target_user = get_object_or_404(User, id=user_id)
 
         if request.method == "POST":
@@ -532,6 +546,8 @@ def unblock_user_view(request, user_id):
         )
         current_user_id = payload.get("user_id")
         current_user = User.objects.get(id=current_user_id)
+        if getattr(current_user, "is_deleted", False):
+            return redirect("accounts:login")
         target_user = get_object_or_404(User, id=user_id)
 
         if request.method == "POST":
@@ -547,6 +563,40 @@ def unblock_user_view(request, user_id):
         return JsonResponse({"status": "error", "message": "Unauthorized"}, status=401)
     
 @csrf_exempt
+def delete_my_account_view(request):
+    access_token = request.COOKIES.get("access")
+    if not access_token:
+        return redirect("accounts:login")
+
+    if request.method != "POST":
+        return redirect("accounts:settings")
+
+    try:
+        payload = jwt.decode(
+            access_token,
+            settings.SECRET_KEY,
+            algorithms=["HS256"]
+        )
+        user_id = payload.get("user_id")
+        user = User.objects.get(id=user_id)
+        if getattr(user, "is_deleted", False):
+            return redirect("accounts:login")
+
+        soft_delete_account(user)
+
+        response = redirect("accounts:login")
+        response.delete_cookie("access")
+        response.delete_cookie("refresh")
+        return response
+
+    except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
+        response = redirect("accounts:login")
+        response.delete_cookie("access")
+        response.delete_cookie("refresh")
+        return response
+    
+
+@csrf_exempt
 def settings_page_view(request):
     access_token = request.COOKIES.get("access")
     if not access_token:
@@ -560,6 +610,8 @@ def settings_page_view(request):
         )
         user_id = payload.get("user_id")
         user = User.objects.get(id=user_id)
+        if getattr(user, "is_deleted", False):
+            return redirect("accounts:login")
         profile = get_object_or_404(UserProfile, user=user)
 
         return render(request, "accounts/settings.html", {

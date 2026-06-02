@@ -32,6 +32,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=False)
     date_unactivate = models.DateTimeField(blank=True, null=True)
     is_staff = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(blank=True, null=True)
     is_banned = models.BooleanField(default=False)
     date_banned = models.DateTimeField(blank=True, null=True)
     is_verified = models.BooleanField(default=False)
