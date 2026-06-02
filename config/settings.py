@@ -121,10 +121,10 @@ if CHANNEL_LAYER_BACKEND == "redis":
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                # Đưa thẳng cấu hình timeout vào cùng cấp với 'address' bên trong list hosts
                 "hosts": [
                     {
-                        "address": (REDIS_HOST, REDIS_PORT),
+                        # Sửa tuple thành chuỗi URL chuẩn của Redis
+                        "address": f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
                         "socket_timeout": 10.0,
                         "socket_connect_timeout": 10.0,
                     }
