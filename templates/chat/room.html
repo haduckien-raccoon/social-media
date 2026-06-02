@@ -5,6 +5,18 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/chat.css' %}">
+<style>
+    .chat-disabled-notice {
+        margin: 12px 16px 16px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: #f3f4f6;
+        color: #6b7280;
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #e5e7eb;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -52,6 +64,8 @@
             <header id="chat-active-header" class="chat-active-header"></header>
 
             <div id="chat-message-list" class="chat-message-list"></div>
+
+            <div id="chat-disabled-notice" class="chat-disabled-notice" hidden>đoạn chat tạm thời không hoạt động</div>
 
             <form id="chat-compose-form" class="chat-compose-form">
                 {% csrf_token %}
@@ -109,4 +123,194 @@
 
 {% block extra_js %}
 <script src="{% static 'js/chat.js' %}"></script>
+
+<script>
+(function () {
+    const DISABLED_MESSAGE = "đoạn chat tạm thời không hoạt động";
+    const configEl = document.getElementById("chat-config");
+    const form = document.getElementById("chat-compose-form");
+    const notice = document.getElementById("chat-disabled-notice");
+    const input = document.getElementById("chat-message-input");
+    const attachmentsInput = document.getElementById("chat-attachments-input");
+    const sendButton = document.getElementById("chat-send-button");
+    const attachmentsPreview = document.getElementById("chat-attachments-preview");
+    const conversationList = document.getElementById("conversation-list");
+
+    if (!configEl || !form || !notice) {
+        return;
+    }
+
+    const conversationStates = new Map();
+    const friendStates = new Map();
+    let activeConversationId = String(configEl.dataset.activeConversationId || "");
+    let activeFriendId = String(configEl.dataset.initialFriendId || "");
+    let directFriendState = null;
+
+    function readJsonScript(id, fallback) {
+        const el = document.getElementById(id);
+        if (!el) return fallback;
+        try {
+            return JSON.parse(el.textContent || "null") || fallback;
+        } catch (error) {
+            return fallback;
+        }
+    }
+
+    function normalizeState(state) {
+        if (state && state.can_send === false) {
+            return {
+                can_send: false,
+                message: state.message || DISABLED_MESSAGE,
+                reason: state.reason || "temporary_unavailable",
+            };
+        }
+        return { can_send: true, message: "", reason: "" };
+    }
+
+    function rememberConversation(conversation) {
+        if (!conversation || conversation.id == null) return;
+        conversationStates.set(String(conversation.id), normalizeState(conversation.chat_state));
+    }
+
+    function rememberFriend(friend) {
+        if (!friend || friend.id == null) return;
+        friendStates.set(String(friend.id), normalizeState(friend.chat_state));
+    }
+
+    function setComposeEnabled(enabled, message) {
+        if (enabled) {
+            notice.hidden = true;
+            form.hidden = false;
+            form.style.display = "";
+        } else {
+            notice.textContent = message || DISABLED_MESSAGE;
+            notice.hidden = false;
+            form.hidden = true;
+            form.style.display = "none";
+            if (input) input.value = "";
+            if (attachmentsInput) attachmentsInput.value = "";
+            if (attachmentsPreview) attachmentsPreview.innerHTML = "";
+        }
+
+        [input, attachmentsInput, sendButton].forEach(function (el) {
+            if (el) el.disabled = !enabled;
+        });
+    }
+
+    function applyConversationState(conversationId) {
+        activeConversationId = String(conversationId || activeConversationId || "");
+        activeFriendId = "";
+        directFriendState = null;
+        const state = normalizeState(conversationStates.get(activeConversationId));
+        setComposeEnabled(state.can_send !== false, state.message);
+    }
+
+    function applyFriendState(friendId, state) {
+        activeFriendId = String(friendId || activeFriendId || "");
+        activeConversationId = "";
+        directFriendState = normalizeState(state || friendStates.get(activeFriendId));
+        setComposeEnabled(directFriendState.can_send !== false, directFriendState.message);
+    }
+
+    readJsonScript("chat-initial-conversations", []).forEach(rememberConversation);
+    readJsonScript("chat-initial-friends", []).forEach(rememberFriend);
+
+    if (activeConversationId) {
+        applyConversationState(activeConversationId);
+    } else if (activeFriendId) {
+        applyFriendState(activeFriendId);
+    } else {
+        setComposeEnabled(true, "");
+    }
+
+    window.ChatComposeGuard = {
+        rememberConversation,
+        rememberFriend,
+        applyConversationState,
+        applyFriendState,
+        setComposeEnabled,
+    };
+
+    form.addEventListener("submit", function (event) {
+        const state = activeConversationId
+            ? normalizeState(conversationStates.get(activeConversationId))
+            : normalizeState(directFriendState || friendStates.get(activeFriendId));
+
+        if (state.can_send === false) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            setComposeEnabled(false, state.message);
+        }
+    }, true);
+
+    if (conversationList) {
+        conversationList.addEventListener("click", function (event) {
+            const item = event.target.closest("[data-conversation-id], [data-id]");
+            if (!item) return;
+            const id = item.dataset.conversationId || item.dataset.id;
+            if (!id || !conversationStates.has(String(id))) return;
+            setTimeout(function () {
+                applyConversationState(id);
+            }, 0);
+        }, true);
+    }
+
+    const originalFetch = window.fetch;
+    window.fetch = function () {
+        const args = arguments;
+        const request = args[0];
+        const url = typeof request === "string" ? request : (request && request.url) || "";
+
+        return originalFetch.apply(this, args).then(function (response) {
+            const contentType = response.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) {
+                return response;
+            }
+
+            response.clone().json().then(function (data) {
+                if (!data || typeof data !== "object") return;
+
+                if (Array.isArray(data.results)) {
+                    if (url.includes("/conversations/")) {
+                        data.results.forEach(rememberConversation);
+                    }
+                    if (url.includes("/friends/search/")) {
+                        data.results.forEach(rememberFriend);
+                    }
+                }
+
+                if (data.conversation) {
+                    rememberConversation(data.conversation);
+                    if (data.conversation.id != null) {
+                        applyConversationState(data.conversation.id);
+                    }
+                }
+
+                const messageMatch = url.match(/\/conversations\/(\d+)\/messages\//);
+                if (messageMatch && data.chat_state) {
+                    const conversationId = messageMatch[1];
+                    conversationStates.set(String(conversationId), normalizeState(data.chat_state));
+                    applyConversationState(conversationId);
+                }
+
+                const startFriendMatch = url.match(/\/friends\/(\d+)\/start\//);
+                if (startFriendMatch) {
+                    const friendId = startFriendMatch[1];
+                    friendStates.set(String(friendId), normalizeState(data.chat_state));
+                    applyFriendState(friendId, data.chat_state);
+                }
+
+                const firstMessageMatch = url.match(/\/friends\/(\d+)\/send-first-message\//);
+                if (firstMessageMatch && data.chat_state && data.chat_state.can_send === false) {
+                    const friendId = firstMessageMatch[1];
+                    friendStates.set(String(friendId), normalizeState(data.chat_state));
+                    applyFriendState(friendId, data.chat_state);
+                }
+            }).catch(function () {});
+
+            return response;
+        });
+    };
+})();
+</script>
 {% endblock %}
