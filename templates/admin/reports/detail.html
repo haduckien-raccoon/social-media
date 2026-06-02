@@ -3,572 +3,1405 @@
 {% block content %}
 
 <style>
-/* 
-========================================
-BỘ BIẾN THẨM MỸ BẢO MẬT & RESET
-========================================
-*/
-.admin-rev-scope {
-    --ar-primary: #3b82f6;        /* Blue 500 */
-    --ar-primary-hover: #2563eb;  /* Blue 600 */
-    --ar-bg-main: #f8fafc;        /* Slate 50 */
-    --ar-card-bg: #ffffff;
-    --ar-text-dark: #1e293b;      /* Slate 800 */
-    --ar-text-base: #475569;      /* Slate 600 */
-    --ar-text-muted: #94a3b8;     /* Slate 400 */
-    --ar-border: #e2e8f0;         /* Slate 200 */
-    --ar-divider: #f1f5f9;        /* Slate 100 */
-    
-    --ar-shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
-    --ar-shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
-    
-    background-color: var(--ar-bg-main);
-    color: var(--ar-text-dark);
-    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+/* =========================================================
+   ADMIN REPORT DETAIL - CLEAN MODERN UI
+   Scoped CSS, không ảnh hưởng các trang khác
+========================================================= */
+.report-detail-page {
+    --rd-bg: #f4f7fb;
+    --rd-surface: rgba(255, 255, 255, 0.94);
+    --rd-surface-solid: #ffffff;
+    --rd-text: #0f172a;
+    --rd-text-soft: #334155;
+    --rd-muted: #64748b;
+    --rd-border: rgba(226, 232, 240, 0.92);
+
+    --rd-primary: #4f46e5;
+    --rd-primary-2: #7c3aed;
+    --rd-primary-soft: #eef2ff;
+
+    --rd-success: #16a34a;
+    --rd-success-soft: #f0fdf4;
+
+    --rd-warning: #d97706;
+    --rd-warning-soft: #fff7ed;
+
+    --rd-danger: #dc2626;
+    --rd-danger-soft: #fef2f2;
+
+    --rd-info: #0284c7;
+    --rd-info-soft: #f0f9ff;
+
+    --rd-radius-sm: 14px;
+    --rd-radius-md: 20px;
+    --rd-radius-lg: 28px;
+
+    --rd-shadow-sm: 0 8px 18px rgba(15, 23, 42, 0.045);
+    --rd-shadow-md: 0 18px 42px rgba(15, 23, 42, 0.075);
+    --rd-shadow-lg: 0 28px 70px rgba(15, 23, 42, 0.12);
+
     min-height: 100vh;
-    padding-bottom: 2rem;
-    font-size: 0.95rem;
+    padding: 26px 0 54px;
+    color: var(--rd-text);
+    background:
+        radial-gradient(circle at top left, rgba(79, 70, 229, 0.11), transparent 30%),
+        radial-gradient(circle at top right, rgba(14, 165, 233, 0.09), transparent 28%),
+        linear-gradient(180deg, #f8fafc 0%, var(--rd-bg) 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
 }
 
-/* Áp đặt chuẩn text, không cho trình duyệt can thiệp xấu */
-.admin-rev-scope h1, .admin-rev-scope h2, .admin-rev-scope h3, .admin-rev-scope p {
+.report-detail-page *,
+.report-detail-page *::before,
+.report-detail-page *::after {
+    box-sizing: border-box;
+}
+
+.report-detail-page h1,
+.report-detail-page h2,
+.report-detail-page h3,
+.report-detail-page h4,
+.report-detail-page h5,
+.report-detail-page h6,
+.report-detail-page p {
+    margin-top: 0;
+}
+
+.rd-container {
+    width: min(1780px, calc(100% - 32px));
+    margin: 0 auto;
+}
+
+/* =========================================================
+   HERO / HEADER
+========================================================= */
+.rd-hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.78);
+    border-radius: 32px;
+    background:
+        linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(124, 58, 237, 0.90)),
+        linear-gradient(135deg, #4f46e5, #7c3aed);
+    box-shadow: var(--rd-shadow-lg);
+    padding: 30px;
+    color: #ffffff;
+    margin-bottom: 24px;
+}
+
+.rd-hero::before,
+.rd-hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+}
+
+.rd-hero::before {
+    width: 340px;
+    height: 340px;
+    right: -120px;
+    top: -170px;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.rd-hero::after {
+    width: 180px;
+    height: 180px;
+    left: 35%;
+    bottom: -120px;
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.rd-hero-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 22px;
+}
+
+.rd-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 0.91rem;
+    font-weight: 650;
+}
+
+.rd-breadcrumb a {
+    color: #ffffff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.rd-breadcrumb a:hover {
+    opacity: 0.9;
+    transform: translateX(-2px);
+}
+
+.rd-title {
     margin: 0;
-    line-height: 1.5;
+    color: #ffffff;
+    font-size: clamp(1.55rem, 2.1vw, 2.25rem);
+    font-weight: 850;
+    letter-spacing: -0.035em;
+    line-height: 1.12;
 }
 
-/* Header mỏng gọn */
-.ar-page-header {
-    background: var(--ar-card-bg);
-    border-bottom: 1px solid var(--ar-border);
-    padding: 1rem 1.5rem;
-    margin-bottom: 1.5rem; /* Cắt ngắn khoảng cách tổng với trang */
-    box-shadow: var(--ar-shadow-sm);
+.rd-subtitle {
+    margin: 12px 0 0;
+    max-width: 760px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.98rem;
+    font-weight: 500;
 }
 
-/* 
-========================================
-THIẾT KẾ CÁC CARD LIÊN KẾT NHANH SÍT NHAU 
-========================================
-*/
-.ar-stack {
+.rd-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* =========================================================
+   COMMON COMPONENTS
+========================================================= */
+.rd-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(410px, 0.85fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.rd-stack {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem; /* Các ô nội dung được đưa sát lại gần nhau, tạo tính mạch lạc */
+    gap: 22px;
 }
 
-.ar-card {
-    background: var(--ar-card-bg);
-    border: 1px solid var(--ar-border);
-    border-radius: 12px;
-    box-shadow: var(--ar-shadow-sm);
+.rd-card {
+    position: relative;
     overflow: hidden;
+    border: 1px solid var(--rd-border);
+    border-radius: var(--rd-radius-lg);
+    background: var(--rd-surface);
+    box-shadow: var(--rd-shadow-md);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    animation: rdFadeUp 0.42s ease both;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.ar-card-header {
+.rd-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--rd-shadow-lg);
+    border-color: rgba(79, 70, 229, 0.22);
+}
+
+.rd-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--ar-border);
-    background: var(--ar-card-bg);
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--rd-border);
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.86), rgba(255, 255, 255, 0.78));
 }
 
-.ar-card-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--ar-text-dark);
+.rd-card-title {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 12px;
+    margin: 0;
+    color: var(--rd-text);
+    font-size: 1.04rem;
+    font-weight: 800;
+    letter-spacing: -0.015em;
 }
 
-.ar-card-icon {
-    display: inline-flex;
-    padding: 8px;
-    border-radius: 8px;
-    background: var(--ar-divider);
-    color: var(--ar-text-base);
-    font-size: 1rem;
-}
-
-.ar-card-body {
-    padding: 1.5rem; /* Dày và dẹp, tạo viền lùi vào thụt chữ thông minh */
-}
-
-/* 
-========================================
-TYPOGRAPHY THỤT ĐẦU DÒNG CHUẨN XÁC 
-========================================
-*/
-/* Lòng báo cáo không cho đụng sát 2 mép */
-.ar-reading-box {
-    background-color: var(--ar-divider);
-    border-radius: 8px;
-    padding: 1.25rem 1.5rem; /* Text Thụt sâu tạo khối không khí */
-    font-size: 1rem;
-    line-height: 1.7;
-    color: var(--ar-text-dark);
-    white-space: pre-wrap;
-    border-left: 3px solid var(--ar-primary);
-}
-
-/* Giao diện User Info nhỏ */
-.ar-user-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-}
-.ar-avatar-mock {
+.rd-card-icon {
     width: 44px;
     height: 44px;
-    border-radius: 10px;
-    background: #e0f2fe;
-    color: #0369a1;
-    display: flex;
+    border-radius: 16px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    flex: 0 0 auto;
+    color: var(--rd-primary);
+    background: var(--rd-primary-soft);
+    box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.08);
 }
 
-/* 
-========================================
-HÌNH ẢNH GRID TỶ LỆ HOÀN HẢO CHỐNG VỠ 
-========================================
-*/
-.ar-image-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 0.75rem;
-    margin-top: 1.25rem;
+.rd-card-body {
+    padding: 24px;
 }
-.ar-img-box {
+
+.rd-muted {
+    color: var(--rd-muted);
+}
+
+.rd-text-soft {
+    color: var(--rd-text-soft);
+}
+
+.rd-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 34px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.rd-pill-neutral {
+    background: #f8fafc;
+    color: var(--rd-text-soft);
+    border: 1px solid var(--rd-border);
+}
+
+.rd-pill-info {
+    background: var(--rd-info-soft);
+    color: var(--rd-info);
+    border: 1px solid rgba(2, 132, 199, 0.16);
+}
+
+.rd-pill-pending {
+    background: var(--rd-warning-soft);
+    color: var(--rd-warning);
+    border: 1px solid rgba(217, 119, 6, 0.18);
+}
+
+.rd-pill-approved,
+.rd-pill-resolved {
+    background: var(--rd-success-soft);
+    color: var(--rd-success);
+    border: 1px solid rgba(22, 163, 74, 0.18);
+}
+
+.rd-pill-rejected {
+    background: var(--rd-danger-soft);
+    color: var(--rd-danger);
+    border: 1px solid rgba(220, 38, 38, 0.18);
+}
+
+.rd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 46px;
+    padding: 0 16px;
+    border-radius: 15px;
+    border: 1px solid transparent;
+    font-size: 0.92rem;
+    font-weight: 780;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+}
+
+.rd-btn:hover {
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.rd-btn:active {
+    transform: translateY(0);
+}
+
+.rd-btn-glass {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.rd-btn-glass:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.20);
+}
+
+.rd-btn-light {
+    color: var(--rd-text-soft);
+    background: #ffffff;
+    border-color: var(--rd-border);
+    box-shadow: var(--rd-shadow-sm);
+}
+
+.rd-btn-light:hover {
+    color: var(--rd-text);
+    background: #f8fafc;
+}
+
+.rd-btn-ignore {
+    color: #334155;
+    background: #f8fafc;
+    border-color: var(--rd-border);
+}
+
+.rd-btn-ignore:hover {
+    color: var(--rd-text);
+    background: #eef2f7;
+}
+
+.rd-btn-warning {
+    color: #92400e;
+    background: linear-gradient(135deg, #fff7ed, #fffbeb);
+    border-color: rgba(217, 119, 6, 0.22);
+}
+
+.rd-btn-warning:hover {
+    box-shadow: 0 12px 24px rgba(217, 119, 6, 0.13);
+}
+
+.rd-btn-danger {
+    color: #ffffff;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 12px 24px rgba(220, 38, 38, 0.18);
+}
+
+.rd-btn-danger:hover {
+    color: #ffffff;
+    box-shadow: 0 16px 30px rgba(220, 38, 38, 0.25);
+}
+
+.rd-btn-primary {
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--rd-primary), var(--rd-primary-2));
+    box-shadow: 0 14px 28px rgba(79, 70, 229, 0.20);
+}
+
+.rd-btn-primary:hover {
+    color: #ffffff;
+    box-shadow: 0 18px 34px rgba(79, 70, 229, 0.28);
+}
+
+.rd-btn-block {
     width: 100%;
-    aspect-ratio: 16/10;
-    overflow: hidden;
-    border-radius: 8px;
-    border: 1px solid var(--ar-border);
 }
-.ar-img-box img {
+
+/* =========================================================
+   ALERTS
+========================================================= */
+.rd-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px 16px;
+    margin-bottom: 18px;
+    border-radius: 18px;
+    border: 1px solid var(--rd-border);
+    background: #ffffff;
+    box-shadow: var(--rd-shadow-sm);
+    animation: rdFadeUp 0.35s ease both;
+}
+
+.rd-alert-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    background: var(--rd-info-soft);
+    color: var(--rd-info);
+}
+
+.rd-alert-content {
+    flex: 1;
+    min-width: 0;
+    color: var(--rd-text-soft);
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   TARGET CONTENT
+========================================================= */
+.rd-author-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.rd-author-main {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.rd-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    color: var(--rd-primary);
+    background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9), transparent 30%),
+        linear-gradient(135deg, #e0e7ff, #dbeafe);
+    box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.12);
+    font-size: 1.28rem;
+}
+
+.rd-author-name {
+    margin: 0 0 2px;
+    color: var(--rd-text);
+    font-size: 1.08rem;
+    font-weight: 850;
+    overflow-wrap: anywhere;
+}
+
+.rd-author-meta {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+    color: var(--rd-muted);
+    font-size: 0.86rem;
+    font-weight: 620;
+}
+
+.rd-content-box {
+    position: relative;
+    overflow: hidden;
+    padding: 20px 22px;
+    border-radius: 22px;
+    border: 1px solid rgba(79, 70, 229, 0.11);
+    background:
+        linear-gradient(180deg, rgba(248, 250, 252, 0.94), rgba(255, 255, 255, 0.92));
+    color: var(--rd-text-soft);
+    font-size: 1rem;
+    line-height: 1.82;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+.rd-content-box::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 18px;
+    bottom: 18px;
+    width: 4px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--rd-primary), var(--rd-primary-2));
+}
+
+.rd-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 210px;
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--rd-muted);
+}
+
+.rd-empty-state i {
+    width: 66px;
+    height: 66px;
+    border-radius: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    color: var(--rd-danger);
+    background: var(--rd-danger-soft);
+    font-size: 1.8rem;
+}
+
+.rd-empty-state h5 {
+    margin: 0 0 6px;
+    color: var(--rd-text);
+    font-weight: 850;
+}
+
+.rd-image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 13px;
+    margin-top: 18px;
+}
+
+.rd-image-link {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    border-radius: 20px;
+    border: 1px solid var(--rd-border);
+    background: #f8fafc;
+    box-shadow: var(--rd-shadow-sm);
+}
+
+.rd-image-link img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.25s ease;
+    display: block;
+    transition: transform 0.35s ease, filter 0.35s ease;
 }
-.ar-img-box img:hover { transform: scale(1.03); }
 
-/* 
-========================================
-BẢNG GRID NGĂN NẮP (COMPACT TABLE)
-========================================
-*/
-.ar-table { width: 100%; border-collapse: collapse; margin: 0; }
-.ar-table th {
-    background: var(--ar-bg-main);
-    color: var(--ar-text-base);
-    font-weight: 600;
-    font-size: 0.8rem;
+.rd-image-link::after {
+    content: "Xem ảnh";
+    position: absolute;
+    inset: auto 12px 12px auto;
+    padding: 7px 10px;
+    border-radius: 999px;
+    color: #ffffff;
+    background: rgba(15, 23, 42, 0.62);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    font-size: 0.78rem;
+    font-weight: 750;
+}
+
+.rd-image-link:hover img {
+    transform: scale(1.055);
+    filter: saturate(1.06);
+}
+
+.rd-image-link:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* =========================================================
+   CONTEXT SECTION
+========================================================= */
+.rd-context-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rd-comment-item,
+.rd-parent-post {
+    border: 1px solid var(--rd-border);
+    border-radius: 20px;
+    background: #ffffff;
+    padding: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.rd-comment-item:hover,
+.rd-parent-post:hover {
+    transform: translateX(3px);
+    border-color: rgba(79, 70, 229, 0.18);
+    box-shadow: var(--rd-shadow-sm);
+}
+
+.rd-comment-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.rd-comment-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    color: var(--rd-text);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.rd-comment-content {
+    color: var(--rd-text-soft);
+    line-height: 1.72;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+/* =========================================================
+   DUPLICATE REPORTS TABLE
+========================================================= */
+.rd-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.rd-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.rd-table th {
+    padding: 14px 18px;
+    background: #f8fafc;
+    color: var(--rd-muted);
+    border-bottom: 1px solid var(--rd-border);
+    font-size: 0.76rem;
+    font-weight: 850;
+    letter-spacing: 0.045em;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 12px 20px;
-    border-bottom: 2px solid var(--ar-border);
     white-space: nowrap;
 }
-.ar-table td {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--ar-border);
+
+.rd-table td {
+    padding: 16px 18px;
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
+    color: var(--rd-text-soft);
 }
-.ar-table tr:last-child td { border-bottom: none; }
-.ar-table tr:hover { background: #fafafa; }
 
-/* 
-========================================
-TAG VÀ NHÃN - TINH GỌN, TRUNG TÍNH 
-========================================
-*/
-.ar-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.25rem 0.6rem;
-    border-radius: 6px;
-    font-size: 0.78rem;
-    font-weight: 600;
+.rd-table tbody tr {
+    transition: background 0.18s ease;
 }
-.ar-pill-neutral { background: var(--ar-divider); color: var(--ar-text-dark); border: 1px solid var(--ar-border); }
-.ar-pill-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
 
-/*
-========================================
-CẤU TRÚC NÚT (CHỐNG TRÀN CHỮ, CHUẨN GRID) 
-========================================
-*/
-.ar-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0 1rem;
-    min-height: 42px; /* Chuẩn touch-friendly */
-    font-weight: 600;
-    font-size: 0.9rem;
-    border-radius: 8px;
-    border: none;
-    transition: all 0.2s;
-    cursor: pointer;
-    text-decoration: none;
-    line-height: 1.2;
-    /* Quy tắc bắt buộc chống bể / trôi văn bản ra khỏi khung nút */
-    white-space: normal; 
-    word-break: break-word;
-    text-align: center;
+.rd-table tbody tr:hover {
+    background: rgba(79, 70, 229, 0.025);
 }
-.ar-btn:active { transform: translateY(1px); }
 
-.ar-btn-light { background: #ffffff; border: 1px solid var(--ar-border); color: var(--ar-text-dark); }
-.ar-btn-light:hover { background: var(--ar-bg-main); border-color: #cbd5e1; }
+.rd-table tbody tr:last-child td {
+    border-bottom: 0;
+}
 
-.ar-btn-ignore { background: var(--ar-divider); color: var(--ar-text-base); border: 1px solid var(--ar-border); }
-.ar-btn-ignore:hover { background: #e2e8f0; }
+.rd-truncate {
+    max-width: 260px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-.ar-btn-warn { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-.ar-btn-warn:hover { background: #fef3c7; border-color: #fcd34d; }
-
-.ar-btn-danger { background: #ef4444; color: #ffffff; }
-.ar-btn-danger:hover { background: #dc2626; }
-
-/* Sticky Cột điều khiển bên phải */
-.ar-sticky {
+/* =========================================================
+   SIDEBAR
+========================================================= */
+.rd-sidebar {
     position: sticky;
-    top: 1.5rem;
+    top: 22px;
 }
 
-.ar-timeline-box {
+.rd-status-panel {
+    padding: 22px;
+    background:
+        linear-gradient(180deg, rgba(248, 250, 252, 0.94), rgba(255, 255, 255, 0.94));
+}
+
+.rd-status-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.rd-status-title {
+    margin: 0;
+    color: var(--rd-text);
+    font-size: 1.04rem;
+    font-weight: 850;
+    letter-spacing: -0.015em;
+}
+
+.rd-summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.rd-summary-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.rd-summary-item:last-child {
+    border-bottom: 0;
+}
+
+.rd-summary-label {
+    color: var(--rd-muted);
+    font-size: 0.78rem;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.045em;
+}
+
+.rd-summary-value {
+    color: var(--rd-text);
+    font-weight: 800;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.rd-reason-box {
+    padding: 15px;
+    border-radius: 18px;
+    border: 1px solid var(--rd-border);
     background: #ffffff;
-    border: 1px solid var(--ar-border);
-    border-radius: 8px;
-    padding: 1.25rem;
-    font-size: 0.9rem;
+    color: var(--rd-text-soft);
+    line-height: 1.7;
+    overflow-wrap: anywhere;
 }
 
-.ar-input {
+.rd-closed-note,
+.rd-review-note {
+    display: flex;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 18px;
+    margin-bottom: 16px;
+    line-height: 1.55;
+}
+
+.rd-closed-note {
+    color: #166534;
+    background: var(--rd-success-soft);
+    border: 1px solid rgba(22, 163, 74, 0.16);
+}
+
+.rd-review-note {
+    color: var(--rd-muted);
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    text-align: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.rd-form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--rd-text);
+    font-size: 0.84rem;
+    font-weight: 850;
+}
+
+.rd-textarea {
     width: 100%;
-    border: 1px solid var(--ar-border);
-    border-radius: 8px;
-    padding: 0.75rem 1rem; /* Text lọt lòng rõ ràng khi người dùng click nhập liệu */
-    font-size: 0.95rem;
+    min-height: 112px;
+    padding: 13px 15px;
+    border: 1px solid var(--rd-border);
+    border-radius: 18px;
+    background: #ffffff;
+    color: var(--rd-text);
     resize: vertical;
     outline: none;
-    transition: border 0.2s;
+    line-height: 1.65;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.ar-input:focus { border-color: var(--ar-primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+.rd-textarea:focus {
+    border-color: rgba(79, 70, 229, 0.5);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.10);
+}
+
+.rd-action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid #eef2f7;
+}
+
+/* =========================================================
+   LIGHTBOX
+========================================================= */
+.rd-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(2, 6, 23, 0.78);
+    backdrop-filter: blur(8px);
+}
+
+.rd-lightbox.is-open {
+    display: flex;
+}
+
+.rd-lightbox img {
+    max-width: min(1120px, 96vw);
+    max-height: 86vh;
+    border-radius: 24px;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
+}
+
+.rd-lightbox-close {
+    position: absolute;
+    right: 24px;
+    top: 20px;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 999px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.16);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.rd-lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: rotate(90deg);
+}
+
+/* =========================================================
+   ANIMATION / RESPONSIVE
+========================================================= */
+@keyframes rdFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.rd-reveal {
+    opacity: 0;
+    transform: translateY(12px);
+}
+
+.rd-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+@media (max-width: 1200px) {
+    .rd-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rd-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .report-detail-page {
+        padding-top: 16px;
+    }
+
+    .rd-container {
+        width: min(100% - 22px, 1780px);
+    }
+
+    .rd-hero {
+        padding: 22px;
+        border-radius: 24px;
+    }
+
+    .rd-hero-inner,
+    .rd-author-row,
+    .rd-status-top {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .rd-hero-actions {
+        justify-content: flex-start;
+    }
+
+    .rd-card-header,
+    .rd-card-body,
+    .rd-status-panel {
+        padding: 18px;
+    }
+
+    .rd-table th,
+    .rd-table td {
+        padding: 13px 14px;
+    }
+
+    .rd-btn {
+        width: 100%;
+        white-space: normal;
+    }
+
+    .rd-image-grid {
+        grid-template-columns: 1fr;
+    }
+}
 </style>
 
-<div class="admin-rev-scope">
-    <!-- Navbar Nhỏ Thanh điều hướng -->
-    <div class="ar-page-header d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb m-0 fs-6">
-                <li class="breadcrumb-item">
-                    <a href="{% url 'custom_admin:report_list' %}" class="text-decoration-none fw-bold" style="color: var(--ar-primary);">Hệ thống Xử lý Khiếu nại</a>
-                </li>
-                <li class="breadcrumb-item active fw-medium text-secondary" aria-current="page">Hồ sơ Report #{{ report.id }}</li>
-            </ol>
-        </nav>
-        <button onclick="history.back()" class="ar-btn ar-btn-light shadow-sm">
-            <i class="bi bi-arrow-return-left"></i> Quay lại
-        </button>
-    </div>
+{% with target_type=report.target_type|lower report_status=report.status|lower %}
+<div class="report-detail-page">
+    <div class="rd-container">
 
-    <!-- MAIN GRID CONTAINER -->
-    <div class="container-fluid px-xl-5 px-3">
-        
-        <!-- Alerts Thông báo Server trả về (Mảnh và bo sát) -->
+        <section class="rd-hero">
+            <div class="rd-hero-inner">
+                <div>
+                    <div class="rd-breadcrumb">
+                        <a href="{% url 'custom_admin:report_list' %}">
+                            <i class="bi bi-arrow-left-short"></i>
+                            Danh sách báo cáo
+                        </a>
+                        <span>/</span>
+                        <span>Report #{{ report.id }}</span>
+                    </div>
+
+                    <h1 class="rd-title">Chi tiết báo cáo nội dung</h1>
+                    <p class="rd-subtitle">
+                        Kiểm tra nội dung bị báo cáo, xem bối cảnh liên quan và đưa ra quyết định xử lý phù hợp.
+                    </p>
+                </div>
+
+                <div class="rd-hero-actions">
+                    <span class="rd-pill {% if report_status == 'pending' %}rd-pill-pending{% elif report_status == 'approved' or report_status == 'resolved' %}rd-pill-approved{% elif report_status == 'rejected' %}rd-pill-rejected{% else %}rd-pill-neutral{% endif %}">
+                        <i class="bi {% if report_status == 'pending' %}bi-hourglass-split{% elif report_status == 'rejected' %}bi-x-circle{% else %}bi-check2-circle{% endif %}"></i>
+                        {{ report.status|default:"unknown" }}
+                    </span>
+
+                    <span class="rd-pill rd-pill-info">
+                        <i class="bi {% if target_type == 'post' %}bi-card-text{% elif target_type == 'comment' %}bi-chat-left-text{% else %}bi-record-circle{% endif %}"></i>
+                        {{ report.target_type }} #{{ report.target_id }}
+                    </span>
+
+                    <button type="button" onclick="history.back()" class="rd-btn rd-btn-glass">
+                        <i class="bi bi-arrow-return-left"></i>
+                        Quay lại
+                    </button>
+                </div>
+            </div>
+        </section>
+
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show ar-card border-0 mb-3 d-flex align-items-center gap-2 p-3" role="alert" style="background:#f0fdf4; color:#166534; border: 1px solid #bbf7d0!important;">
-                    <i class="bi bi-info-circle-fill text-success fs-5"></i>
-                    <div class="fw-semibold small">{{ message }}</div>
-                    <button type="button" class="btn-close ms-auto ar-btn-light ar-btn px-2 py-1" data-bs-dismiss="alert" style="min-height:28px;"><i class="bi bi-x-lg"></i></button>
+                <div class="rd-alert" role="alert">
+                    <span class="rd-alert-icon">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </span>
+                    <div class="rd-alert-content">{{ message }}</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         {% endif %}
 
-        <!-- CHIA CỘT COMPACT -->
-        <div class="row g-4">
-            
-            <!-- ====== [ CỘT TRÁI - CHI TIẾT TỘI PHẠM ] ====== -->
-            <div class="col-xl-8 col-lg-7">
-                <div class="ar-stack">
-                    
-                    <!-- BOX 1: Mục tiêu vi phạm (Kéo sát mép viền trong gọn gàng) -->
-                    <div class="ar-card">
-                        <div class="ar-card-header">
-                            <div class="ar-card-title">
-                                <span class="ar-card-icon"><i class="bi bi-aspect-ratio"></i></span>
-                                Vật thể khiếu nại gốc
-                            </div>
-                            <span class="ar-pill ar-pill-neutral fw-monospace text-muted">ID Thực thể: #{{ report.target_id }}</span>
-                        </div>
-                        
-                        <div class="ar-card-body">
-                            {% if target_content %}
-                                <!-- Header nội dung lùi vừa phải -->
-                                <div class="ar-user-header">
-                                    <div class="ar-avatar-mock">
-                                        <i class="bi {% if report.target_type == 'POST' %}bi-card-heading{% else %}bi-chat-left-dots{% endif %}"></i>
+        <div class="rd-grid">
+            <main class="rd-stack">
+
+                <section class="rd-card rd-reveal">
+                    <div class="rd-card-header">
+                        <h2 class="rd-card-title">
+                            <span class="rd-card-icon"><i class="bi bi-search-heart"></i></span>
+                            Nội dung bị báo cáo
+                        </h2>
+                        <span class="rd-pill rd-pill-neutral">
+                            <i class="bi bi-hash"></i>
+                            Target ID {{ report.target_id }}
+                        </span>
+                    </div>
+
+                    <div class="rd-card-body">
+                        {% if target_content %}
+                            <div class="rd-author-row">
+                                <div class="rd-author-main">
+                                    <div class="rd-avatar">
+                                        <i class="bi {% if target_type == 'post' %}bi-file-earmark-post{% else %}bi-chat-dots{% endif %}"></i>
                                     </div>
                                     <div>
-                                        <div class="fw-bold" style="font-size:1.1rem;">
-                                            {% if report.target_type == 'POST' %}{{ target_content.author.username }}{% else %}{{ target_content.user.username }}{% endif %}
+                                        <h3 class="rd-author-name">
+                                            {% if target_type == 'post' %}
+                                                {{ target_content.author.username }}
+                                            {% else %}
+                                                {{ target_content.user.username }}
+                                            {% endif %}
+                                        </h3>
+                                        <div class="rd-author-meta">
+                                            <span><i class="bi bi-calendar-event me-1"></i>{{ target_content.created_at|date:"d/m/Y H:i" }}</span>
+                                            {% if target_content.updated_at %}
+                                                <span>•</span>
+                                                <span>Cập nhật {{ target_content.updated_at|date:"d/m/Y H:i" }}</span>
+                                            {% endif %}
                                         </div>
-                                        <div class="text-secondary" style="font-size:0.85rem;">
-                                            Ngày cập nhật hệ thống: {{ target_content.created_at|date:"d/m/Y - H:i" }}
-                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Box Reading (Chữ lùi tịt vô trong, có biên bảo vệ) -->
-                                <div class="ar-reading-box shadow-sm">
-                                    {{ target_content.content }}
-                                </div>
-
-                                <!-- Box Image -->
-                                {% if target_content.images.all %}
-                                    <div class="ar-image-grid">
-                                        {% for img in target_content.images.all %}
-                                            <a href="{{ img.image.url }}" target="_blank" class="ar-img-box">
-                                                <img src="{{ img.image.url }}" alt="Hình ảnh tài nguyên lỗi">
-                                            </a>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            {% else %}
-                                <!-- Fallback Error Gọn nhẹ tinh giản -->
-                                <div class="text-center p-4">
-                                    <div class="mb-3"><i class="bi bi-x-octagon text-danger fs-2 opacity-50"></i></div>
-                                    <p class="fw-bold m-0 text-dark">Dữ liệu đối tượng trống</p>
-                                    <p class="text-muted small m-0 mt-1">Bài đăng hoặc thực thể đã bị gỡ vĩnh viễn không khôi phục.</p>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- BOX 2: Bình luận phân cấp -->
-                    <div class="ar-card">
-                        <div class="ar-card-header border-bottom-0 pb-0 pt-4">
-                            <div class="ar-card-title border-bottom pb-3 mb-0 w-100">
-                                <span class="ar-card-icon" style="background:#e0e7ff; color:#4f46e5;"><i class="bi bi-node-plus"></i></span>
-                                Lớp bối cảnh lân cận
+                                <span class="rd-pill rd-pill-neutral">
+                                    {% if target_content.is_deleted %}
+                                        <i class="bi bi-trash3"></i> Đã xóa mềm
+                                    {% else %}
+                                        <i class="bi bi-eye"></i> Đang hiển thị
+                                    {% endif %}
+                                </span>
                             </div>
-                        </div>
-                        <div class="ar-card-body pt-3">
-                            {% if report.target_type == 'COMMENT' %}
-                                <!-- Context Parent của cmt là bài post -->
-                                <div class="ar-reading-box bg-white border" style="border-left-color: #cbd5e1;">
-                                    <div class="d-flex align-items-center gap-2 mb-2">
-                                        <i class="bi bi-person-fill text-secondary"></i>
-                                        <strong class="text-dark">{{ related_context.author.username }}</strong>
-                                        <span class="ar-pill ar-pill-neutral bg-light text-muted" style="font-size: 0.65rem;">Gốc Parent Bài viết</span>
-                                    </div>
-                                    <p class="text-secondary mb-0 m-0 ps-4">{{ related_context.content }}</p>
-                                </div>
-                            {% else %}
-                                <!-- Context cmt nếu thực thể là Post -->
-                                {% if related_context %}
-                                    <div class="d-flex flex-column gap-2">
-                                        {% for comment in related_context %}
-                                            <div class="p-3 border rounded-3 bg-white d-flex flex-column gap-1">
-                                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                                    <strong class="text-dark small"><i class="bi bi-chat-right-text text-muted me-2"></i>{{ comment.user.username }}</strong>
-                                                    <span class="text-muted text-nowrap" style="font-size: 0.75rem;">{{ comment.created_at|date:"d/m/y H:i" }}</span>
-                                                </div>
-                                                <div class="text-secondary small lh-base ps-2">{{ comment.content }}</div>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    <div class="text-center p-3 text-muted">
-                                        <i class="bi bi-slash-circle mb-2 d-block fs-4 opacity-50"></i> Khu vực im lặng. Không có luồng dữ liệu lân cận.
-                                    </div>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-                    </div>
 
-                    <!-- BOX 3: Khiếu nại đúp (Gọn gàng nhất) -->
-                    <div class="ar-card mb-4 mb-xl-0">
-                        <div class="ar-card-header d-flex flex-wrap gap-2">
-                            <div class="ar-card-title">
-                                <span class="ar-card-icon" style="background:#fee2e2; color:#ef4444;"><i class="bi bi-bug"></i></span>
-                                Nhật ký khiếu nại trùng khớp
+                            <div class="rd-content-box">
+                                {{ target_content.content|default:"Nội dung trống." }}
                             </div>
-                            <span class="ar-pill ar-pill-danger fw-bold"><i class="bi bi-stack"></i> x{{ similar_reports.count }}</span>
-                        </div>
-                        <div class="table-responsive p-0 m-0">
-                            <table class="ar-table text-start w-100">
-                                <thead>
-                                    <tr>
-                                        <th>Sender</th>
-                                        <th>Bộ lọc Lỗi</th>
-                                        <th>Kèm Mô Tả</th>
-                                        <th class="text-end">Mốc T.Gian</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for s in similar_reports %}
-                                    <tr>
-                                        <td class="fw-bold">
-                                            {% if user_is_admin %}<span class="text-primary">{{ s.reporter.username }}</span>{% else %}<span class="text-secondary"><i class="bi bi-incognito text-muted"></i> Ẩn User</span>{% endif %}
-                                        </td>
-                                        <td><span class="ar-pill ar-pill-danger">{{ s.reason.name|default:"Hạng Khác" }}</span></td>
-                                        <td class="text-secondary" style="max-width:220px; text-overflow:ellipsis; overflow:hidden;"><small>{{ s.custom_reason|default:"-" }}</small></td>
-                                        <td class="text-end text-secondary small">{{ s.created_at|date:"d/m/Y" }}<br><small>{{ s.created_at|date:"H:i:s" }}</small></td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="4" class="text-center py-4 text-muted border-0">
-                                            Không có bản ghi nhân đôi tương đương. Sạch trùng lặp.
-                                        </td>
-                                    </tr>
+
+                            {% if target_content.images.all %}
+                                <div class="rd-image-grid">
+                                    {% for img in target_content.images.all %}
+                                        <a href="{{ img.image.url }}" class="rd-image-link" data-rd-lightbox>
+                                            <img src="{{ img.image.url }}" alt="Ảnh đính kèm của nội dung bị báo cáo">
+                                        </a>
                                     {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-
-            <!-- ====== [ CỘT PHẢI - BẢNG ĐIỀU CHỈNH / KIỂM SOÁT ] ====== -->
-            <div class="col-xl-4 col-lg-5">
-                <div class="ar-sticky">
-                    <div class="ar-card">
-                        <div class="p-3 text-center border-bottom bg-light">
-                            <div class="text-uppercase fw-bold text-muted" style="font-size:0.75rem; letter-spacing:0.8px;">
-                                {% if report.status == 'pending' %}
-                                    <i class="bi bi-activity text-primary me-1"></i> Trạng thái chờ điều tiết
-                                {% else %}
-                                    <i class="bi bi-lock-fill text-success me-1"></i> Hồ sơ báo cáo kết thúc
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="ar-card-body p-4">
-                            
-                            <!-- Bắn Alert nếu đã khoá án -->
-                            {% if report.status != 'pending' %}
-                                <div class="bg-light rounded p-3 mb-4 d-flex gap-3 border" style="border-left: 4px solid #10b981!important;">
-                                    <i class="bi bi-shield-check text-success fs-3"></i>
-                                    <div class="fw-medium text-dark small lh-base m-0">Luồng báo cáo này đã được tiếp nhận và đóng trạng thái hệ thống hoàn toàn.</div>
                                 </div>
                             {% endif %}
-
-                            <!-- Summary Hồ Sơ Đang Xét -->
-                            <div class="ar-timeline-box shadow-sm bg-light mb-4 p-3 border">
-                                <ul class="list-unstyled m-0 d-flex flex-column gap-3">
-                                    <li class="d-flex justify-content-between align-items-center border-bottom pb-2">
-                                        <span class="text-muted fw-semibold" style="font-size: 0.8rem;">CHỦ BÁO CÁO</span>
-                                        <strong class="text-dark small">{% if user_is_admin %}{{ report.reporter.username }}{% else %}[ID Mờ Khách]{% endif %}</strong>
-                                    </li>
-                                    <li class="d-flex flex-column gap-2 pb-1 border-bottom">
-                                        <div class="d-flex justify-content-between">
-                                            <span class="text-muted fw-semibold" style="font-size: 0.8rem;">GÁN LOẠI TỘI HÌNH</span>
-                                            <span class="ar-pill ar-pill-danger ms-auto" style="font-size:0.7rem;">{{ report.reason.name|default:"Hành vi bất cập" }}</span>
-                                        </div>
-                                    </li>
-                                    <li class="d-flex flex-column mt-1">
-                                        <span class="text-muted fw-semibold mb-2" style="font-size: 0.8rem;"><i class="bi bi-quote"></i> TRÌNH BÀY TỰ DO BỞI NGƯỜI DÙNG</span>
-                                        <div class="bg-white border rounded p-3 text-secondary lh-base fst-italic" style="font-size:0.85rem; box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.01);">
-                                            {{ report.custom_reason|default:"Khách hàng không thực hiện văn bản giải trình nào vào vùng điền tự do." }}
-                                        </div>
-                                    </li>
-                                </ul>
+                        {% else %}
+                            <div class="rd-empty-state">
+                                <i class="bi bi-exclamation-octagon"></i>
+                                <h5>Không tìm thấy nội dung gốc</h5>
+                                <p>Nội dung có thể đã bị xóa hoặc không còn tồn tại trong hệ thống.</p>
                             </div>
+                        {% endif %}
+                    </div>
+                </section>
 
-                            <!-- BOX Lệnh (Grid Button để tự cân không tràn viền) -->
-                            {% if user_is_admin %}
-                                
-                                {% if report.status != 'pending' %}
-                                    <button type="button" id="ar-modify-trigger" class="ar-btn ar-btn-light w-100 mb-3 text-secondary border">
-                                        <i class="bi bi-pen"></i> Tác động đổi kết quả Log File
-                                    </button>
-                                {% endif %}
+                <section class="rd-card rd-reveal">
+                    <div class="rd-card-header">
+                        <h2 class="rd-card-title">
+                            <span class="rd-card-icon"><i class="bi bi-diagram-3"></i></span>
+                            Bối cảnh liên quan
+                        </h2>
+                        <span class="rd-pill rd-pill-neutral">
+                            <i class="bi bi-layers"></i>
+                            Context
+                        </span>
+                    </div>
 
-                                <div id="ar-admin-forms" style="{% if report.status != 'pending' %}display: none;{% endif %}">
-                                    <form id="ar-master-form" action="{% url 'custom_admin:report_action' report.id %}" method="POST" class="m-0">
-                                        {% csrf_token %}
-                                        
-                                        {% if report.status != 'pending' %}
-                                            <input type="hidden" name="confirm_change" value="yes">
-                                        {% endif %}
-
-                                        <div class="mb-3">
-                                            <label class="form-label text-dark fw-bold mb-1" style="font-size: 0.85rem;">Phê chú Cấu thành Quyết định hệ thống <span class="text-danger">*</span></label>
-                                            <textarea name="reason" class="ar-input" rows="3" placeholder="Sử dụng nghiệp vụ biên bản nội bộ để ra lệnh tiếp theo tại mục ghi chú. Cần có dữ liệu!" required>{{ report.moderation_logs.first.reason|default:"" }}</textarea>
+                    <div class="rd-card-body">
+                        {% if target_type == 'comment' %}
+                            {% if related_context %}
+                                <div class="rd-parent-post">
+                                    <div class="rd-comment-head">
+                                        <div class="rd-comment-user">
+                                            <i class="bi bi-file-earmark-post text-primary"></i>
+                                            {{ related_context.author.username }}
                                         </div>
-
-                                        <!-- d-grid gap-2 thay đổi nút gọn ràng ko tràn chữ khi res > shrink -->
-                                        <div class="d-flex flex-column gap-2 mt-4 pt-3 border-top border-light">
-                                            
-                                            <!-- ROW FLEX THÔNG MINH CHO CÁC NÚT AN TOÀN -->
-                                            <button type="submit" name="action" value="IGNORE" class="ar-btn ar-btn-ignore w-100 flex-grow-1 shadow-sm">
-                                                <i class="bi bi-skip-end-fill"></i> Từ chối khiếu kiện, Giữ Dữ liệu
-                                            </button>
-
-                                            <!-- KHỐI DƯỚI GỒM LỆNH XANH ĐỎ CHUẨN GRID CHIA ĐÔI HOẶC FULL CÂN ĐỐI -->
-                                            <div class="d-grid gap-2 w-100">
-                                                <button type="submit" name="action" value="DELETE_CONTENT" class="ar-btn ar-btn-warn shadow-sm">
-                                                    <i class="bi bi-exclamation-triangle"></i> Gỡ Nội Dung Gốc
-                                                </button>
-                                                
-                                                <button type="submit" name="action" value="BAN_USER" class="ar-btn ar-btn-danger shadow-sm">
-                                                    <i class="bi bi-sign-stop-fill"></i> Treo nick vĩnh viễn (Banned)
-                                                </button>
-                                            </div>
-
-                                        </div>
-                                    </form>
+                                        <span class="rd-pill rd-pill-neutral">Bài viết gốc</span>
+                                    </div>
+                                    <div class="rd-comment-content">{{ related_context.content|default:"Bài viết không có nội dung văn bản." }}</div>
                                 </div>
                             {% else %}
-                                <div class="bg-white border rounded p-3 text-center text-secondary mb-0 border-dashed" style="font-size: 0.85rem;">
-                                    <i class="bi bi-shield-slash fs-4 d-block mb-1 text-muted"></i> Bạn đang đóng tư cách "Review View". Chỉ quyền rà soát kiểm thử xem log - Không cấp can thiệp điều chế server.
+                                <div class="rd-empty-state">
+                                    <i class="bi bi-inbox"></i>
+                                    <h5>Không có bài viết liên quan</h5>
+                                    <p>Không tìm thấy bài viết chứa bình luận này.</p>
                                 </div>
                             {% endif %}
-                            
-                        </div>
+                        {% else %}
+                            {% if related_context %}
+                                <div class="rd-context-list">
+                                    {% for comment in related_context %}
+                                        <article class="rd-comment-item">
+                                            <div class="rd-comment-head">
+                                                <div class="rd-comment-user">
+                                                    <i class="bi bi-person-circle text-primary"></i>
+                                                    {{ comment.user.username }}
+                                                </div>
+                                                <span class="rd-muted small text-nowrap">{{ comment.created_at|date:"d/m/Y H:i" }}</span>
+                                            </div>
+                                            <div class="rd-comment-content">{{ comment.content|default:"Bình luận không có nội dung văn bản." }}</div>
+                                        </article>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="rd-empty-state">
+                                    <i class="bi bi-chat-square-text"></i>
+                                    <h5>Chưa có bối cảnh bổ sung</h5>
+                                    <p>Nội dung này chưa có bình luận gần đây để đối chiếu.</p>
+                                </div>
+                            {% endif %}
+                        {% endif %}
                     </div>
-                </div>
-            </div>
+                </section>
 
-        </div> <!-- END ROW G-4 CĂN SÁT LẠI -->
+                <section class="rd-card rd-reveal">
+                    <div class="rd-card-header">
+                        <h2 class="rd-card-title">
+                            <span class="rd-card-icon"><i class="bi bi-flag"></i></span>
+                            Báo cáo cùng mục tiêu
+                        </h2>
+                        <span class="rd-pill {% if similar_reports.count %}rd-pill-pending{% else %}rd-pill-neutral{% endif %}">
+                            <i class="bi bi-stack"></i>
+                            {{ similar_reports.count }} báo cáo khác
+                        </span>
+                    </div>
+
+                    <div class="rd-table-wrap">
+                        <table class="rd-table">
+                            <thead>
+                                <tr>
+                                    <th>Người báo cáo</th>
+                                    <th>Lý do</th>
+                                    <th>Mô tả thêm</th>
+                                    <th class="text-end">Thời gian</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in similar_reports %}
+                                    <tr>
+                                        <td>
+                                            {% if user_is_admin %}
+                                                <strong class="text-primary">{{ s.reporter.username }}</strong>
+                                            {% else %}
+                                                <span class="rd-muted"><i class="bi bi-incognito me-1"></i>Ẩn danh</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="rd-pill rd-pill-neutral">{{ s.reason.name|default:"Khác" }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="rd-truncate" title="{{ s.custom_reason|default:'-' }}">
+                                                {{ s.custom_reason|default:"-" }}
+                                            </div>
+                                        </td>
+                                        <td class="text-end rd-muted text-nowrap">
+                                            {{ s.created_at|date:"d/m/Y" }}<br>
+                                            <small>{{ s.created_at|date:"H:i" }}</small>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5 rd-muted">
+                                            <i class="bi bi-check2-circle me-1"></i>
+                                            Không có báo cáo trùng mục tiêu.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+
+            <aside class="rd-sidebar">
+                <section class="rd-card rd-reveal">
+                    <div class="rd-status-panel">
+                        <div class="rd-status-top">
+                            <div>
+                                <h2 class="rd-status-title">Bảng xử lý</h2>
+                                <div class="rd-muted small mt-1">Thông tin báo cáo và thao tác quản trị</div>
+                            </div>
+                            <span class="rd-pill {% if report_status == 'pending' %}rd-pill-pending{% elif report_status == 'rejected' %}rd-pill-rejected{% else %}rd-pill-approved{% endif %}">
+                                {{ report.status }}
+                            </span>
+                        </div>
+
+                        {% if report.status != 'pending' %}
+                            <div class="rd-closed-note">
+                                <i class="bi bi-shield-check fs-4"></i>
+                                <div>
+                                    <strong>Đã xử lý báo cáo.</strong><br>
+                                    <span>Admin vẫn có thể mở lại khu vực thao tác nếu cần thay đổi quyết định.</span>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="rd-summary-list">
+                            <div class="rd-summary-item">
+                                <span class="rd-summary-label">Người báo cáo</span>
+                                <span class="rd-summary-value">
+                                    {% if user_is_admin %}{{ report.reporter.username }}{% else %}Ẩn danh{% endif %}
+                                </span>
+                            </div>
+
+                            <div class="rd-summary-item">
+                                <span class="rd-summary-label">Loại nội dung</span>
+                                <span class="rd-summary-value">{{ report.target_type }}</span>
+                            </div>
+
+                            <div class="rd-summary-item">
+                                <span class="rd-summary-label">Lý do</span>
+                                <span class="rd-summary-value">{{ report.reason.name|default:"Khác" }}</span>
+                            </div>
+
+                            <div class="rd-summary-item">
+                                <span class="rd-summary-label">Ngày tạo</span>
+                                <span class="rd-summary-value">{{ report.created_at|date:"d/m/Y H:i" }}</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="rd-summary-label mb-2">Mô tả từ người dùng</div>
+                            <div class="rd-reason-box">
+                                {{ report.custom_reason|default:"Người dùng không nhập mô tả bổ sung." }}
+                            </div>
+                        </div>
+
+                        {% if user_is_admin %}
+                            {% if report.status != 'pending' %}
+                                <button type="button" id="rd-modify-trigger" class="rd-btn rd-btn-light rd-btn-block mb-3">
+                                    <i class="bi bi-pencil-square"></i>
+                                    Mở lại thao tác xử lý
+                                </button>
+                            {% endif %}
+
+                            <div id="rd-admin-forms" {% if report.status != 'pending' %}style="display: none;"{% endif %}>
+                                <form id="rd-master-form" action="{% url 'custom_admin:report_action' report.id %}" method="POST" class="m-0">
+                                    {% csrf_token %}
+
+                                    {% if report.status != 'pending' %}
+                                        <input type="hidden" name="confirm_change" value="yes">
+                                    {% endif %}
+
+                                    <label class="rd-form-label" for="rd-reason">
+                                        Ghi chú xử lý <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea id="rd-reason" name="reason" class="rd-textarea" rows="4" placeholder="Nhập lý do xử lý để lưu lại lịch sử moderation..." required>{{ report.moderation_logs.first.reason|default:"" }}</textarea>
+
+                                    <div class="rd-action-group">
+                                        <button type="submit" name="action" value="IGNORE" class="rd-btn rd-btn-ignore rd-btn-block" data-confirm="Bạn chắc chắn muốn bỏ qua báo cáo này và giữ nguyên nội dung?">
+                                            <i class="bi bi-check2-circle"></i>
+                                            Bỏ qua báo cáo
+                                        </button>
+
+                                        <button type="submit" name="action" value="DELETE_CONTENT" class="rd-btn rd-btn-warning rd-btn-block" data-confirm="Bạn chắc chắn muốn gỡ nội dung bị báo cáo?">
+                                            <i class="bi bi-eye-slash"></i>
+                                            Gỡ nội dung
+                                        </button>
+
+                                        <button type="submit" name="action" value="BAN_USER" class="rd-btn rd-btn-danger rd-btn-block" data-confirm="Bạn chắc chắn muốn gỡ nội dung và khóa tài khoản liên quan?">
+                                            <i class="bi bi-person-fill-lock"></i>
+                                            Gỡ nội dung & khóa tài khoản
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        {% else %}
+                            <div class="rd-review-note">
+                                <i class="bi bi-shield-lock fs-3"></i>
+                                <div>
+                                    Bạn chỉ có quyền xem báo cáo. Các thao tác xử lý chỉ dành cho tài khoản quản trị.
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </section>
+            </aside>
+        </div>
     </div>
 </div>
 
-<script>
-// Xử lý nếp mở khối điều phối nếu Record vốn dĩ đã End Process (Hoặc không hiển thị Toggle Trigger Button do ở mode PENDING)
-const triggerAdmin = document.getElementById('ar-modify-trigger');
-const formWrapper = document.getElementById('ar-admin-forms');
+<div class="rd-lightbox" id="rd-lightbox" aria-hidden="true">
+    <button type="button" class="rd-lightbox-close" id="rd-lightbox-close" aria-label="Đóng ảnh">
+        <i class="bi bi-x-lg"></i>
+    </button>
+    <img src="" alt="Ảnh xem lớn" id="rd-lightbox-img">
+</div>
+{% endwith %}
 
-if (triggerAdmin && formWrapper) {
-    triggerAdmin.addEventListener('click', () => {
-        const isHidden = (formWrapper.style.display === 'none' || !formWrapper.style.display);
-        if(isHidden){
-            formWrapper.style.display = 'block';
-            triggerAdmin.innerHTML = '<i class="bi bi-slash-circle me-1"></i> Khoá lại bảng can thiệp gốc';
-            triggerAdmin.classList.add('bg-light');
-            triggerAdmin.classList.replace('ar-btn-light', 'ar-btn-ignore');
-            triggerAdmin.classList.replace('text-secondary', 'text-danger');
-        } else {
-            formWrapper.style.display = 'none';
-            triggerAdmin.innerHTML = '<i class="bi bi-pen"></i> Tác động đổi kết quả Log File';
-            triggerAdmin.classList.remove('bg-light');
-            triggerAdmin.classList.replace('ar-btn-ignore', 'ar-btn-light');
-            triggerAdmin.classList.replace('text-danger', 'text-secondary');
-        }
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modifyTrigger = document.getElementById('rd-modify-trigger');
+    const adminForms = document.getElementById('rd-admin-forms');
+
+    if (modifyTrigger && adminForms) {
+        modifyTrigger.addEventListener('click', function () {
+            const isHidden = adminForms.style.display === 'none' || !adminForms.style.display;
+            adminForms.style.display = isHidden ? 'block' : 'none';
+            modifyTrigger.innerHTML = isHidden
+                ? '<i class="bi bi-x-circle"></i> Ẩn thao tác xử lý'
+                : '<i class="bi bi-pencil-square"></i> Mở lại thao tác xử lý';
+            modifyTrigger.classList.toggle('rd-btn-primary', isHidden);
+            modifyTrigger.classList.toggle('rd-btn-light', !isHidden);
+        });
+    }
+
+    document.querySelectorAll('[data-confirm]').forEach(function (button) {
+        button.addEventListener('click', function (event) {
+            const message = button.getAttribute('data-confirm');
+            if (message && !window.confirm(message)) {
+                event.preventDefault();
+            }
+        });
     });
-}
+
+    const lightbox = document.getElementById('rd-lightbox');
+    const lightboxImg = document.getElementById('rd-lightbox-img');
+    const closeLightbox = document.getElementById('rd-lightbox-close');
+
+    document.querySelectorAll('[data-rd-lightbox]').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            if (!lightbox || !lightboxImg) return;
+            lightboxImg.src = link.getAttribute('href');
+            lightbox.classList.add('is-open');
+            lightbox.setAttribute('aria-hidden', 'false');
+        });
+    });
+
+    function closePreview() {
+        if (!lightbox || !lightboxImg) return;
+        lightbox.classList.remove('is-open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        lightboxImg.src = '';
+    }
+
+    if (closeLightbox) closeLightbox.addEventListener('click', closePreview);
+    if (lightbox) {
+        lightbox.addEventListener('click', function (event) {
+            if (event.target === lightbox) closePreview();
+        });
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closePreview();
+    });
+
+    const revealItems = document.querySelectorAll('.rd-reveal');
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        revealItems.forEach(function (item, index) {
+            item.style.transitionDelay = `${Math.min(index * 70, 240)}ms`;
+            observer.observe(item);
+        });
+    } else {
+        revealItems.forEach(function (item) {
+            item.classList.add('is-visible');
+        });
+    }
+});
 </script>
 
 {% endblock %}
