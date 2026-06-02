@@ -136,6 +136,7 @@
     }
 
     .group-action-link,
+    .group-action-button,
     .group-action-disabled,
     .group-status-badge {
         display: inline-flex;
@@ -159,6 +160,18 @@
     .group-action-leave {
         background: rgba(237, 73, 86, 0.12);
         color: #ed4956;
+    }
+
+.group-action-cancel {
+        border: 0;
+        background: rgba(245, 158, 11, 0.14);
+        color: #b45309;
+        cursor: pointer;
+    }
+
+    .group-inline-form {
+        margin: 0;
+        display: inline-flex;
     }
 
     .group-action-disabled {
@@ -293,9 +306,17 @@
                                 <i class="fa-solid fa-right-from-bracket"></i> Leave
                             </a>
                         {% elif group.viewer_membership_status == "pending" %}
-                            <span class="group-action-disabled">
-                                <i class="fa-solid fa-hourglass-half"></i> Waiting approval
-                            </span>
+                            <form
+                                method="POST"
+                                action="{% url 'groups:cancel_join_request' group.pk %}"
+                                class="group-inline-form"
+                                onsubmit="return confirm('Hủy yêu cầu tham gia nhóm này?');"
+                            >
+                                {% csrf_token %}
+                                <button type="submit" class="group-action-button group-action-cancel">
+                                    <i class="fa-solid fa-xmark"></i> Cancel request
+                                </button>
+                            </form>
                         {% elif group.viewer_membership_status == "banned" %}
                             <span class="group-action-disabled">
                                 <i class="fa-solid fa-ban"></i> Cannot join

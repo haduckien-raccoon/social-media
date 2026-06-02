@@ -409,7 +409,8 @@
 
 #             if membership.status == "rejected":
 #                 membership.status = "pending"
-#                 membership.save()
+#                 membership.save(update_fields=["status", "updated_at"])
+#                 sync_group_member_to_neo4j_on_commit(membership)
 #                 create_notification(
 #                     actor=user,
 #                     recipient=group.owner,
@@ -775,22 +776,91 @@
 # def is_group_admin_or_owner(user, group):
 #     return GroupMember.objects.filter(group=group, user=user, role__in=[GroupRole.OWNER, GroupRole.ADMIN], status="approved").exists()
 
-# def get_group_list(user, query=None):
-#     # 1. Nếu có tìm kiếm -> Lọc và trả về kết quả ngay lập tức
-#     if query:
-#         return Group.objects.filter(name__icontains=query)
+# def attach_viewer_membership_state(groups, user):
+#     """
+#     Gắn trạng thái membership của user hiện tại vào từng group để template render đúng UI.
 
-#     # 2. Nếu không tìm kiếm -> Tìm group của user
-#     user_groups = Group.objects.filter(
-#         Q(owner=user) | Q(members__user=user, members__status="approved")
-#     ).distinct()
-    
-#     # Nếu user có group -> Trả về danh sách group của user
-#     if user_groups.exists():
-#         return user_groups
-        
-#     # 3. Fallback: Nếu không rơi vào 2 trường hợp trên -> Trả về 20 group đầu tiên
-#     return Group.objects.all()[:20]
+#     Các field được gắn thêm cho từng group:
+#     - viewer_is_owner: user hiện tại là chủ nhóm
+#     - viewer_membership: record GroupMember nếu tồn tại
+#     - viewer_membership_status: pending / approved / rejected / banned / None
+#     - viewer_membership_role: owner / admin / member / None
+#     """
+#     groups = list(groups)
+
+#     for group in groups:
+#         group.viewer_is_owner = False
+#         group.viewer_membership = None
+#         group.viewer_membership_status = None
+#         group.viewer_membership_role = None
+
+#     if not getattr(user, "is_authenticated", False) or not groups:
+#         return groups
+
+#     group_ids = [group.id for group in groups]
+#     memberships = (
+#         GroupMember.objects
+#         .filter(user=user, group_id__in=group_ids)
+#         .only("id", "group_id", "status", "role")
+#     )
+#     membership_map = {membership.group_id: membership for membership in memberships}
+
+#     for group in groups:
+#         group.viewer_is_owner = group.owner_id == user.id
+#         membership = membership_map.get(group.id)
+
+#         # Owner luôn được xem là owner, kể cả dữ liệu cũ thiếu GroupMember owner.
+#         if group.viewer_is_owner:
+#             group.viewer_membership = membership
+#             group.viewer_membership_status = "approved"
+#             group.viewer_membership_role = GroupRole.OWNER
+#             continue
+
+#         if membership:
+#             group.viewer_membership = membership
+#             group.viewer_membership_status = membership.status
+#             group.viewer_membership_role = membership.role if membership.status == "approved" else None
+
+#     return groups
+
+
+# def get_group_list(user, query=None):
+#     """
+#     Lấy danh sách group và đồng bộ trạng thái UI theo GroupMember trong database.
+
+#     Trạng thái hỗ trợ theo model:
+#     - owner      -> My group
+#     - approved   -> Leave / Member
+#     - pending    -> Pending
+#     - rejected   -> Rejected + có thể gửi lại yêu cầu
+#     - banned     -> Banned
+#     - None       -> Join
+#     """
+#     normalized_query = (query or "").strip()
+#     base_qs = (
+#         Group.objects
+#         .filter(is_activate=True)
+#         .select_related("owner")
+#     )
+
+#     if normalized_query:
+#         groups = base_qs.filter(
+#             name__icontains=normalized_query
+#         ).distinct().order_by("-created_at")
+#         return attach_viewer_membership_state(groups, user)
+
+#     if getattr(user, "is_authenticated", False):
+#         user_groups = base_qs.filter(
+#             Q(owner=user) |
+#             Q(members__user=user, members__status__in=["approved", "pending"])
+#         ).distinct().order_by("-updated_at")
+
+#         user_groups = attach_viewer_membership_state(user_groups, user)
+#         if user_groups:
+#             return user_groups
+
+#     groups = base_qs.order_by("-created_at")[:20]
+#     return attach_viewer_membership_state(groups, user)
 
 # def people_can_tag_in_group_post(user, group):
 #     """Kiểm tra xem user có thể tag ai trong bài viết nhóm không (dựa trên thành viên cùng nhóm)"""
@@ -1338,6 +1408,36 @@ class GroupMemberService:
         if membership.role == GroupRole.OWNER:
             raise PermissionDenied("Group owner cannot leave the group. Please transfer ownership or delete the group.")
         
+        user_id = membership.user_id
+        group_id = membership.group_id
+        membership.delete()
+        delete_group_member_from_neo4j_on_commit(user_id, group_id)
+
+    @staticmethod
+    def cancel_join_request(user, group):
+        """
+        Cho phép chính người gửi hủy yêu cầu tham gia nhóm khi status đang là pending.
+
+        Sau khi hủy:
+        - Xóa record GroupMember pending trong MySQL.
+        - Xóa quan hệ REQUESTED_JOIN_GROUP / MEMBER_OF / BANNED_FROM_GROUP bị dư trong Neo4j.
+        - UI sẽ trở lại trạng thái Join ở lần render tiếp theo.
+        """
+        if not getattr(user, "is_authenticated", False):
+            raise PermissionDenied("You must be logged in to cancel a join request.")
+
+        if group.owner_id == user.id:
+            raise PermissionDenied("Group owner does not have a pending join request.")
+
+        membership = GroupMember.objects.filter(
+            user=user,
+            group=group,
+            status="pending",
+        ).first()
+
+        if not membership:
+            raise PermissionDenied("You do not have a pending request for this group.")
+
         user_id = membership.user_id
         group_id = membership.group_id
         membership.delete()

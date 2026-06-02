@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from apps.accounts.services import create_user_profile
 from apps.groups.neo4j_sync import mark_group_deleted_in_neo4j_on_commit, sync_group_to_neo4j_on_commit
+from django.views.decorators.http import require_POST
 
 class GroupForm(forms.ModelForm):
     class Meta:
@@ -375,3 +376,13 @@ def handle_report_action(request, group_id):
         else: messages.error(request, msg)
         
     return redirect('groups:manage_group', group_id=group.id)
+
+@require_POST
+def cancel_join_request(request, group_id):
+    group = get_object_or_404(Group, id=group_id, is_activate=True)
+    try:
+        GroupMemberService.cancel_join_request(request.user, group)
+        messages.success(request, "Your join request has been cancelled.")
+    except PermissionDenied as e:
+        messages.error(request, str(e))
+    return redirect("groups:group_list")
